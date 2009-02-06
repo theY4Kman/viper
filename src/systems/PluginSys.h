@@ -22,7 +22,7 @@
 #define _INCLUDE_VIPER_PLUGINSYS_H_
 
 #include <Python.h>
-#include <sm_trie_tpl.h>
+#include "sm_trie.h"
 #include <sh_list.h>
 #include "viper_globals.h"
 #include <convar.h>
@@ -34,6 +34,7 @@ class CPluginFunction : public IViperPluginFunction
 public: //IViperPluginFunction
     virtual PyObject *Execute(PyObject *args, PyObject *keywds=NULL);
     virtual IViperPlugin *GetOwnerPlugin();
+    virtual PyObject *GetFunction();
 public:
     static CPluginFunction *CreatePluginFunction(PyFunction *func,
                                                  IViperPlugin *pl);
@@ -94,7 +95,6 @@ public:
         return m_sFolder;
     }
     
-    /// Returns the plugin's status
     virtual ViperPluginStatus GetStatus()
     {
         return m_status;
@@ -110,7 +110,6 @@ public:
         return m_info.name;
     }
     
-    /// Returns the info of the plugin
     virtual const viper_plugininfo_t *GetPublicInfo()
     {
         return &m_info;
@@ -141,7 +140,7 @@ private:
     /** The Python dictionary used to execute this plug-in */
     PyObject *m_pPluginDict;
     
-    KTrie<void *> m_pProps;
+    Trie *m_pProps;
 };
 
 class CPluginManager : public IViperPluginManager
@@ -181,7 +180,7 @@ private:
                              ViperPluginType type, char error[], size_t maxlength);
     
 private:
-    KTrie<CPlugin *> m_trie;
+    Trie *m_trie;
     SourceHook::List<CPlugin *> m_list;
     
     SourceHook::List<IViperPluginListener *> m_Listeners;

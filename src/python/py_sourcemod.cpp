@@ -47,10 +47,12 @@ sourcemod__get_sourcemod_path(PyObject *self, PyObject *args)
 
 static PyMethodDef sourcemod__methods[] = {
     {"get_game_path", sourcemod__get_game_path, METH_NOARGS,
+        "get_game_path() -> str\n\n"
         "Returns the full path to the game directory.\n"
         "@rtype: string\n"
         "@return: Returns the path to the game directory"},
     {"get_sourcemod_path", sourcemod__get_sourcemod_path, METH_NOARGS,
+        "get_sourcemod_path() -> str\n\n"
         "Returns the full path to SourceMod.\n"
         "@rtype: string\n"
         "@return: Returns the path to SourceMod"},
@@ -80,6 +82,7 @@ sourcemod__server_out__write(PyObject *self, PyObject *args)
 
 static PyMethodDef sourcemod__server_out__methods[] = {
     {"write", sourcemod__server_out__write, METH_STATIC|METH_VARARGS,
+        "write(msg)\n\n"
         "Prints a message to the server console.\n"
         "@type  msg: string\n"
         "@param msg: The message to print."},

@@ -56,14 +56,17 @@ InitializePython(void)
     
     /* Change the path Python looks at for its core modules */
     char libpath[PLATFORM_MAX_PATH];
-    g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath), "extensions/viper/lib/");
+    g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
+        "extensions/viper/lib/");
     
     /* Initialize the python interpreter */
     Py_Initialize();
     
     PySys_SetPath(libpath);
     
-    PyEval_InitThreads();
+    /* This will be removed until threads are determined to be useful. */  
+    /* PyEval_InitThreads(); */
+    
     g_pGlobalThreadState = PyThreadState_Get();
 }
 
@@ -74,7 +77,8 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     char libpath[PLATFORM_MAX_PATH];
     /* Sets the DLL search path in Windows */
     
-    g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath), "extensions/viper/lib/plat-win/");
+    g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
+        "extensions/viper/lib/plat-win/");
     SetDllDirectory(libpath);
     
     HMODULE python25_DLL = NULL;
@@ -111,7 +115,8 @@ ViperExtension::SDK_OnAllLoaded()
 }
 
 bool
-ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
+                                  bool late)
 {
     GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
     GET_V_IFACE_CURRENT(GetEngineFactory, g_pRandom, IUniformRandomStream,

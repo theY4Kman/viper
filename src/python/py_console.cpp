@@ -40,6 +40,7 @@ console__ConCommandReply__reply(PyObject *self, PyObject *args)
 
 static PyMethodDef console__ConCommandReply__methods[] = {
     {"reply", console__ConCommandReply__reply, METH_VARARGS,
+        "reply(message)\n\n"
         "Replies to the client whom executed the ConCommand in the way they\n"
         "executed the ConCommand (console or chat).\n"
         "@type  message: string\n"
@@ -174,6 +175,7 @@ console__server_command(PyObject *self, PyObject *args)
 static PyMethodDef console__methods[] = {
 #if NOT_IMPLEMENTED_YET
     {"create_convar", (PyCFunction)console__create_convar, METH_VARARGS|METH_KEYWORDS,
+        "create_convar(name, value[, description[, flags]]) -> ConVar object\n\n"
         "Creates a new console variable.\n"
         "@type  name: string\n"
         "@param name: Name of the ConVar\n"
@@ -187,10 +189,12 @@ static PyMethodDef console__methods[] = {
         "   Use FCVAR constants, such as FCVAR_CHEAT, etc."},
 #endif
 	{"print_to_server", console__print_to_server, METH_VARARGS,
+	    "print_to_server(message)\n\n"
 	    "Sends a message to the server console.\n"
 	    "@type  message: string\n"
 	    "@param message: The message to print"},
     {"reg_concmd", (PyCFunction)console__reg_concmd, METH_VARARGS|METH_KEYWORDS,
+        "reg_concmd(name, callback[, description[, flags]]) -> bool\n\n"
         "Registers a new console command or hooks an existing one.\n"
         "@type  name: string\n"
         "@param name: Name of the ConCommand\n"
@@ -203,6 +207,7 @@ static PyMethodDef console__methods[] = {
         "@param flags: (Optional) Flags that change how a ConCommand is handled.\n"
         "   Use FCVAR constants, such as FCVAR_CHEAT, etc."},
 	{"server_command", console__server_command, METH_VARARGS,
+	    "server_command(command)\n\n"
 	    "Executes a command as if it were on the server console\n"
 	    "@type  command: string\n"
 	    "@param command: Command to execute"},

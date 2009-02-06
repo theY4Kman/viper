@@ -33,8 +33,6 @@ CForward::~CForward()
 PyObject *
 CForward::Execute(int *result, PyObject *args)
 {
-    PyEval_ReleaseLock();
-    
     if (PyTuple_Size(args) != m_iTypesCnt)
         return NULL;
     
@@ -47,8 +45,6 @@ CForward::Execute(int *result, PyObject *args)
             return NULL;
         }
     }
-    
-    PyEval_AcquireLock();
     
     PyThreadState *current = PyThreadState_Get();
     
@@ -75,11 +71,9 @@ CForward::Execute(int *result, PyObject *args)
                 cur_result = m_callback(py_result, func);
             else if (PyInt_Check(py_result))
             {
-                PyEval_ReleaseLock();
                 PyThreadState_Swap(func->GetOwnerPlugin()->GetThreadState());
                 cur_result = PyInt_AsLong(py_result);
                 PyThreadState_Swap(current);
-                PyEval_AcquireLock();
             }
             else
                 continue;
@@ -154,9 +148,19 @@ done:
 bool
 CForward::RemoveFunction(IViperPluginFunction *func)
 {
-    m_functions.remove(func);
+    SourceHook::List<IViperPluginFunction *>::iterator iter;
     
-    return true;
+    for (iter=m_functions.begin(); iter!=m_functions.end(); iter++)
+    {
+        if ((*iter)->GetOwnerPlugin() == func->GetOwnerPlugin() &&
+            (*iter)->GetFunction() == func->GetFunction())
+        {
+            m_functions.erase(iter);
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 bool
@@ -175,15 +179,10 @@ CForward::RemoveFunctionsOfPlugin(IViperPlugin *plugin)
     return true;
 }
 
-bool
+void
 CForward::AddFunction(IViperPluginFunction *func)
-{
-    if (m_functions.find(func) != m_functions.end())
-        return false;
-    
+{   
     m_functions.push_back(func);
-    
-    return true;
 }
 
 unsigned int
@@ -235,8 +234,15 @@ CForward::CreateForward(char const *name, ViperExecType et, PyObject *types,
 //=======================================
 // CForwardManager
 //=======================================
+CForwardManager::CForwardManager()
+{
+    m_Forwards = sm_trie_create();
+}
+
 CForwardManager::~CForwardManager()
 {
+    sm_trie_destroy(m_Forwards);
+    
     SourceHook::CStack<CForward *>::iterator iter;
     for (iter=m_FreeForwards.begin(); iter!=m_FreeForwards.end(); iter++)
     {
@@ -262,7 +268,7 @@ CForwardManager::ForwardFree(CForward *fwd)
     m_ForwardsList.remove(fwd);
     
     if (IS_STR_FILLED(fwd->GetForwardName()))
-        m_Forwards.remove(fwd->GetForwardName());
+        sm_trie_delete(m_Forwards, fwd->GetForwardName());
 }
 
 CForward *
@@ -297,7 +303,7 @@ CForwardManager::CreateForward(char const *name, ViperExecType et,
     m_ForwardsList.push_back(fwd);
     
     if (IS_STR_FILLED(name))
-        m_Forwards.insert(name, fwd);
+        sm_trie_insert(m_Forwards, name, fwd);
     
     return fwd;
 }
@@ -308,11 +314,11 @@ CForwardManager::FindForward(char const *name)
     if (!IS_STR_FILLED(name))
         return NULL;
     
-    CForward **fwd = m_Forwards.retrieve(name);
-    if (fwd == NULL)
+    CForward *fwd;
+    if (!sm_trie_retrieve(m_Forwards, name, (void **)&fwd))
         return NULL;
     else
-        return *fwd;
+        return fwd;
 }
 
 void

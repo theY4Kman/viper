@@ -163,6 +163,11 @@ public:
      * @brief Returns the plugin whom owns the function
      */
     virtual IViperPlugin *GetOwnerPlugin() =0;
+    
+    /**
+     * @brief Returns the Python function
+     */
+    virtual PyObject *GetFunction() =0;
 };
 
 /**

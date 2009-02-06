@@ -38,6 +38,41 @@ typedef struct {
 } forwards__Forward;
 
 static PyObject *
+forwards__Forward__add_function(forwards__Forward *self, PyObject *args)
+{
+    PyObject *func = NULL;
+    if (!PyArg_ParseTuple(args, "O", &func))
+        return NULL;
+    
+    if (!PyCallable_Check(func))
+    {
+        PyErr_SetString(g_pViperException, "The function passed was not callable");
+        return NULL;
+    }
+    
+    PyObject *thread_dict = PyThreadState_GetDict();
+    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin");
+    
+    IViperPlugin *pPlugin;
+    if (pyPlugin == NULL
+        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL)
+    {
+        PyErr_SetString(g_pViperException, "The current thread state has no "
+            "plug-in associated");
+        return NULL;
+    }
+    
+    Py_INCREF(func);
+    
+    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(func,
+        pPlugin);
+    
+    self->fwd->AddFunction(pFunc);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 forwards__Forward__fire(forwards__Forward *self, PyObject *args)
 {
     int result;
@@ -53,6 +88,45 @@ forwards__Forward__fire(forwards__Forward *self, PyObject *args)
     }
 }
 
+static PyObject *
+forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
+{
+    PyObject *func = NULL;
+    if (!PyArg_ParseTuple(args, "O", &func))
+        return NULL;
+    
+    if (!PyCallable_Check(func))
+    {
+        PyErr_SetString(g_pViperException, "The function passed was not callable");
+        return NULL;
+    }
+    
+    PyObject *thread_dict = PyThreadState_GetDict();
+    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin");
+    
+    IViperPlugin *pPlugin;
+    if (pyPlugin == NULL
+        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL)
+    {
+        PyErr_SetString(g_pViperException, "The current thread state has no "
+            "plug-in associated");
+        return NULL;
+    }
+    
+    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(func,
+        pPlugin);
+       
+    bool removed = self->fwd->RemoveFunction(pFunc);
+    
+    if (removed)
+    {
+        Py_DECREF(func);
+        Py_RETURN_TRUE;
+    }
+    
+    Py_RETURN_FALSE;
+}
+
 static PyMemberDef forwards__Forward__members[] = {
     {"name", T_STRING, offsetof(forwards__Forward, fwd_name), READONLY,
         "The name of the forward."},
@@ -60,10 +134,26 @@ static PyMemberDef forwards__Forward__members[] = {
 };
 
 static PyMethodDef forwards__Forward__methods[] = {
+    {"add_function", (PyCFunction)forwards__Forward__add_function, METH_VARARGS,
+        "add_function(func)\n\n"
+        "Adds a function the the forward's function list.\n"
+        "@type  func: callable\n"
+        "@param func: The function to add to the list. The function should be able\n"
+        "   to handle all the arguments of the forward, though that is NOT checked\n"
+        "   automatically."},
     {"fire", (PyCFunction)forwards__Forward__fire, METH_VARARGS,
+        "fire([arg1[, ... ]]) -> int\n\n"
         "Fires the forward, passing all arguments passed to fire() to the callbacks\n"
         "@rtype: int\n"
         "@return: Depends on the ExecType of the forward."},
+    {"remove_function", (PyCFunction)forwards__Forward__remove_function, METH_VARARGS,
+        "remove_function(func) -> bool\n\n"
+        "Removes the first instance of the function from the function list.\n"
+        "@type  func: callable\n"
+        "@param func: The function to remove\n"
+        "@rtype: bool\n"
+        "@return: True if the function was found and removed, False if the function\n"
+        "   was not in the function list."},
     {NULL, NULL, 0, NULL},
 };
 
@@ -181,6 +271,7 @@ forwards__create(PyObject *self, PyObject *args)
 
 static PyMethodDef forwards__methods[] = {
     {"register", forwards__register, METH_VARARGS,
+        "register(forward, callback) -> bool\n\n"
         "Registers a callback for the specified global forward.\n"
         "@type  forward: string\n"
         "@param forward: The name of the global forward\n"
@@ -190,6 +281,7 @@ static PyMethodDef forwards__methods[] = {
         "@return: True if successful, false if the specified forward could not be found,\n"
         "   or the forward name passed is blank."},
     {"create", forwards__create, METH_VARARGS,
+        "create(name, callback, et) -> Forward object\n\n"
         "Creates a new forward.\n"
         "@note: Pass a blank forward name to create an anonymous forward.\n"
         "@type  name: string\n"

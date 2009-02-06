@@ -26,7 +26,7 @@
 #include "PluginSys.h"
 #include <sh_list.h>
 #include <sh_stack.h>
-#include <sm_trie_tpl.h>
+#include "sm_trie.h"
 
 class CForward : public IViperForward
 {
@@ -38,7 +38,7 @@ public: //IViperForward
     virtual char const *GetForwardName();
     virtual bool RemoveFunction(IViperPluginFunction *func);
     virtual bool RemoveFunctionsOfPlugin(IViperPlugin *plugin);
-    virtual bool AddFunction(IViperPluginFunction *func);
+    virtual void AddFunction(IViperPluginFunction *func);
     virtual ViperExecType GetExecType();
     virtual PyObject *GetParamTypes();
 public:
@@ -63,6 +63,7 @@ class CForwardManager :
 {
     friend class CForward;
 public:
+    CForwardManager();
     ~CForwardManager();
 
 public: //ViperGlobalClass
@@ -92,7 +93,7 @@ protected:
 private:
     SourceHook::CStack<CForward *> m_FreeForwards;
     SourceHook::List<CForward *> m_ForwardsList;
-    KTrie<CForward *> m_Forwards;
+    Trie *m_Forwards;
 };
 
 extern CForwardManager g_Forwards;

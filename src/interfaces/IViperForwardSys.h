@@ -64,7 +64,7 @@ public:
     /**
      * @brief Adds a function to the forward
      */
-    virtual bool AddFunction(IViperPluginFunction *func) =0;
+    virtual void AddFunction(IViperPluginFunction *func) =0;
     
     /**
      * @brief Removes a function from the forward

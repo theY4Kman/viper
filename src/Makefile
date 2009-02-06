@@ -21,7 +21,7 @@ USEMETA = true
 
 OBJECTS = sdk/smsdk_ext.cpp extension.cpp systems/PluginSys.cpp viper.cpp console.cpp \
 		  python/py_console.cpp python/py_sourcemod.cpp systems/ConCmdManager.cpp\
-		  systems/ForwardSys.cpp python/py_forwards.cpp
+		  systems/ForwardSys.cpp python/py_forwards.cpp sm_trie.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -141,9 +141,10 @@ clean: check
 	rm -rf $(BIN_DIR)/$(BINARY)
 
 install:
-	ifeq "$(ENGINE)" "orangebox"
-	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.2.ep2/
-	endif
-	ifeq "$(ENGINE)" "original"
-	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.1.ep1/
-	endif
+	if [ "$(ENGINE)" = "orangebox" ]; then \
+	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.2.ep2/; \
+	fi
+	if [ "$(ENGINE)" = "original" ]; then \
+	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.1.ep1/; \
+	fi
+

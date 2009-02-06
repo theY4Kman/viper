@@ -25,7 +25,7 @@
 PyObject *
 CPluginFunction::Execute(PyObject *args, PyObject *keywds)
 {
-    PyEval_ReleaseLock();
+    PyThreadState *_save = PyThreadState_Get();
     PyThreadState_Swap(m_pPlugin->GetThreadState());
     
     if (!PyCallable_Check(m_pFunc))
@@ -33,8 +33,7 @@ CPluginFunction::Execute(PyObject *args, PyObject *keywds)
     
     PyObject *result = PyObject_Call(m_pFunc, args, keywds);
     
-    PyThreadState_Swap(NULL);
-    PyEval_AcquireLock();
+    PyThreadState_Swap(_save);
     
     return result;
 }
@@ -45,12 +44,18 @@ CPluginFunction::GetOwnerPlugin()
     return m_pPlugin;
 }
 
+PyObject *
+CPluginFunction::GetFunction()
+{
+    return m_pFunc;
+}
+
 CPluginFunction *
 CPluginFunction::CreatePluginFunction(PyFunction *func, IViperPlugin *pl)
 {
     CPluginFunction *plfunc = NULL;
     
-    PyEval_ReleaseLock();
+    PyThreadState *_save = PyThreadState_Get();
     PyThreadState_Swap(pl->GetThreadState());
     
     if (!PyCallable_Check(func))
@@ -61,8 +66,7 @@ CPluginFunction::CreatePluginFunction(PyFunction *func, IViperPlugin *pl)
     plfunc->m_pPlugin = pl;
     
 end:
-    PyThreadState_Swap(NULL);
-    PyEval_AcquireLock();
+    PyThreadState_Swap(_save);
     
     return plfunc;
 }
@@ -73,31 +77,34 @@ CPlugin::CPlugin(char const *file)
     m_psError = NULL;
     m_psErrorType = NULL;
     m_pErrorTraceback = NULL;
+    
+    m_pProps = sm_trie_create();
 
     snprintf(m_sPath, sizeof(m_sPath), "%s", file);
 }
 
 CPlugin::~CPlugin()
 {
-    PyEval_ReleaseLock();
+    sm_trie_destroy(m_pProps);
+    
     if (m_psErrorType)
     {
         delete [] m_psErrorType;
         m_psErrorType = NULL;
     }
-
+    
     if (m_psError)
     {
         delete [] m_psError;
         m_psError = NULL;
     }
-
+    
     if (m_pErrorTraceback)
     {
         Py_XDECREF(m_pErrorTraceback);
         m_pErrorTraceback = NULL;
     }
-
+    
     /* Destroy the plug-in's sub-interpreter and switch back to main */
     if (m_pThreadState != NULL)
     {
@@ -113,7 +120,6 @@ CPlugin::~CPlugin()
         }
     }
     
-    PyEval_AcquireLock();
 }
 
 CPlugin *
@@ -134,8 +140,6 @@ CPlugin::CreatePlugin(char const *path, char* error, size_t maxlength)
 void
 CPlugin::RunPlugin()
 {
-    PyEval_ReleaseLock();
-    
     m_sFolder = ParseNiceName(m_sPath);
     
     m_info.name = m_sFolder;
@@ -222,7 +226,6 @@ CPlugin::RunPlugin()
         UpdateInfo();
     }
     
-    PyEval_AcquireLock();
     PyThreadState_Swap(NULL);
 }
 
@@ -246,38 +249,43 @@ CPlugin::UpdateInfo()
 }
 
 bool
-CPlugin::SetProperty(char const *prop, void* value)
+CPlugin::SetProperty(char const *prop, void *value)
 {
-    return m_pProps.insert(prop, value);
+    return sm_trie_insert(m_pProps, prop, value);
 }
 
 bool
-CPlugin::GetProperty(char const *prop, void** ptr, bool remove)
+CPlugin::GetProperty(char const *prop, void **ptr, bool remove)
 {
-    void **temp = m_pProps.retrieve( prop );
+    void *temp;
 
-    if (temp == NULL)
+    if (!sm_trie_retrieve(m_pProps, prop, (void **)&temp))
         return false;
     
-    *ptr = *temp;
+    *ptr = temp;
 
     if (remove)
     {
-        m_pProps.remove(prop);
+        sm_trie_delete(m_pProps, prop);
         return true;
     }
 
     return true;
 }
 
-/*** PLUGIN MANAGER ***/
+/*********************
+ * PLUGIN MANAGER
+ *********************/
 CPluginManager::CPluginManager()
 {
+    m_trie = sm_trie_create();
     m_LoadingLocked = false;
 }
 
 CPluginManager::~CPluginManager()
 {
+    sm_trie_destroy(m_trie);
+    
     SourceHook::List<CPlugin *>::iterator iter;
     for (iter=m_list.begin(); iter!=m_list.end(); iter++)
     {
@@ -390,21 +398,17 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path, bool debug,
 
     CPlugin *pPlugin;
     char const *folder = ParseNiceName(path);
-    CPlugin **_pPlugin = m_trie.retrieve(folder);
 
-    if (_pPlugin != NULL && *_pPlugin != NULL)
+    if (sm_trie_retrieve(m_trie, folder, (void **)&pPlugin))
     {
-        if ((*_pPlugin)->GetStatus() == ViperPlugin_BadLoad)
-            UnloadPlugin(*_pPlugin);
+        if (pPlugin->GetStatus() == ViperPlugin_BadLoad)
+            UnloadPlugin(pPlugin);
         else
         {
-            if (_plugin)
-                *_plugin = *_pPlugin;
+            *_plugin = pPlugin;
             
             return ViperLoadRes_AlreadyLoaded;
         }
-
-        pPlugin = *_pPlugin;
     }
     
 
@@ -414,7 +418,7 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path, bool debug,
 
     pPlugin->m_type = ViperPluginType_MapUpdated;
 
-    m_trie.insert(folder, pPlugin);
+    sm_trie_insert(m_trie, folder, pPlugin);
     m_list.push_back(pPlugin);
 
     pPlugin->RunPlugin();
@@ -462,7 +466,7 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
         (*iter)->OnPluginUnloaded(plugin);
     }
 	
-	m_trie.remove(plugin->GetFolder());
+	sm_trie_delete(m_trie, plugin->GetFolder());
 	m_list.remove(plugin);
 
 	delete plugin;
@@ -473,12 +477,12 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
 CPlugin *
 CPluginManager::GetPluginByPath(char const *path)
 {
-	CPlugin **pPlugin = m_trie.retrieve(ParseNiceName(path));
+	CPlugin *pPlugin;
 
-	if (pPlugin == NULL)
+	if (!sm_trie_retrieve(m_trie, ParseNiceName(path), (void **)&pPlugin))
 		return NULL;
 
-	return *pPlugin;
+	return pPlugin;
 }
 
 CPlugin *
@@ -502,24 +506,20 @@ CPluginManager::FindPluginByConsoleArg(char const *arg)
 	char *end;
 	CPlugin *pl;
 	
+	/* By order first */
 	id = strtol(arg, &end, 10);
-
 	if (*end == '\0')
 	{
 		pl = GetPluginByOrder(id);
 		if (pl != NULL)
 			return pl;
 	}
-
-	CPlugin **_pl = m_trie.retrieve(arg);
-
-	if (_pl != NULL)
-	{
-		pl = (*_pl);
-		if (pl != NULL)
-			return pl;
-	}
-
+    
+    /* Then folder name */
+    if (sm_trie_retrieve(m_trie, arg, (void **)&pl))
+        return pl;
+    
+    /* Finally by plug-in name */
 	SourceHook::List<CPlugin *>::iterator iter;
 	for(iter = m_list.begin(); iter != m_list.end(); iter++)
 	{
@@ -680,7 +680,7 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
     {
         if (argc < 5)
         {
-            g_pMenu->ConsolePrint("[SM] Usage: sm plugins info <#|name>");
+            g_pMenu->ConsolePrint("[Viper] Usage: sm py plugins info <#|name>");
             return;
         }
 
@@ -721,7 +721,6 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                     pl->m_psError);
                 
                 PyThreadState_Swap(pl->GetThreadState());
-                PyEval_ReleaseLock();
                 
                 PyObject *tb_strings = NULL;
                 PyObject *format_tb = NULL;
@@ -757,7 +756,6 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                 Py_XDECREF(format_tb);
                 Py_XDECREF(tb_strings);
                 
-                PyEval_AcquireLock();
                 PyThreadState_Swap(NULL);
                 return;
             }
@@ -803,7 +801,7 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
     {
         if (argc < 5)
         {
-            g_pMenu->ConsolePrint("[SM] Usage: sm plugins info <#|name>");
+            g_pMenu->ConsolePrint("[Viper] Usage: sm py plugins info <#|name>");
             return;
         }
 
