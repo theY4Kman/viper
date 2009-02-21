@@ -72,6 +72,10 @@ sourcemod__server_out__write(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &arg))
         return NULL;
     
+    /* This is a total hack! Unless the argument passed is a newline, we append
+     * a space to the message, so that `print >> stdout, "hi", "there"` looks
+     * the same as `print "hi", "there"`
+     */
     if (*arg != '\n')
         g_SMAPI->ConPrintf("%s ", arg);
     else

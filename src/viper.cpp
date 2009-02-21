@@ -22,6 +22,8 @@
 #include "viper_globals.h"
 #include "PluginSys.h"
 
+SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
+
 SourceMod::IRootConsole *g_pMenu = NULL;
 SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch = NULL;
 
@@ -39,6 +41,8 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
 void
 BaseViper::StartViper()
 {
+    SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &BaseViper::GameFrame, false);
+    
     /* Notify! */
 	ViperGlobalClass *pBase = ViperGlobalClass::head;
 	while (pBase)
@@ -62,12 +66,27 @@ BaseViper::StartViper()
 		pBase->OnViperAllInitialized_Post();
 		pBase = pBase->m_pGlobalClassNext;
 	}
+	
+	/* Setup the game frame hook */
+	m_GameFrame = g_Forwards.CreateForward("GameFrame", ET_Ignore,
+	    PyTuple_New(0), NULL);
     
     /* Loads the plugins */
     char plugins_path[PLATFORM_MAX_PATH];
     g_pSM->BuildPath(SourceMod::Path_SM, plugins_path, sizeof(plugins_path),
         "plugins");
     g_VPlugins.LoadPluginsFromDir(plugins_path);
+}
+
+void
+BaseViper::OnViperUnload()
+{
+	ViperGlobalClass *pBase = ViperGlobalClass::head;
+	while (pBase)
+	{
+		pBase->OnViperShutdown();
+		pBase = pBase->m_pGlobalClassNext;
+	}
 }
 
 /* Oh, I just love copying code directly from SourceMod
@@ -99,6 +118,12 @@ void
 BaseViper::PopCommandStack()
 {
 	m_CommandStack.pop();
+}
+
+void
+BaseViper::GameFrame(bool simulating)
+{
+    m_GameFrame->Execute(NULL, PyTuple_New(0));
 }
 
 BaseViper g_Viper;

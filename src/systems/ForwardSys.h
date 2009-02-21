@@ -21,6 +21,7 @@
 #ifndef _INCLUDE_VIPER_FORWARDSYS_H_
 #define _INCLUDE_VIPER_FORWARDSYS_H_
 
+#include "viper_globals.h"
 #include <IViperForwardSys.h>
 #include <IViperPluginSys.h>
 #include "PluginSys.h"
@@ -59,7 +60,7 @@ protected:
 class CForwardManager :
     public ViperGlobalClass,
     public IViperForwardManager,
-    public IViperPluginListener
+    public IViperPluginsListener
 {
     friend class CForward;
 public:
@@ -76,7 +77,7 @@ public: //IViperForwardManager
     virtual IViperForward *FindForward(char const *name);
     virtual void ReleaseForward(IViperForward *forward);
 
-public: //IViperPluginListener
+public: //IViperPluginsListener
     virtual void OnPluginUnloaded(IViperPlugin *plugin);
 
 protected:

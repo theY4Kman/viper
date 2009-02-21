@@ -28,8 +28,8 @@
  */
 
 #include <Python.h>
-#include "sdk/smsdk_ext.h"
 #include "viper_globals.h"
+#include "sdk/smsdk_ext.h"
 #include <compat_wrappers.h>
 #include "PluginSys.h"
 #include "console.h"

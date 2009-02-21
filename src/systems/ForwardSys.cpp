@@ -255,7 +255,7 @@ CForwardManager::~CForwardManager()
 void
 CForwardManager::OnViperAllInitialized()
 {
-    g_VPlugins.AddPluginListener(this);
+    g_VPlugins.AddPluginsListener(this);
 }
 
 void

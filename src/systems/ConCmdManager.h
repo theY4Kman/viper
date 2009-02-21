@@ -67,10 +67,11 @@ typedef SourceHook::List<ConCommand*> ConCmdList;
 class CConCmdManager :
     public SourceMod::IRootConsoleCommand,
     public ViperGlobalClass,
-    public IViperPluginListener{#ifdef ORANGEBOX_BUILD    friend void CommandCallback(const CCommand &command);#else    friend void CommandCallback();#endifpublic: // IRootConsoleCommand    void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
+    public IViperPluginsListener{#ifdef ORANGEBOX_BUILD    friend void CommandCallback(const CCommand &command);#else    friend void CommandCallback();#endifpublic: // IRootConsoleCommand    void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
 public: // ViperGlobalClass
     virtual void OnViperAllInitialized();
-public: // IViperPluginListener
+    virtual void OnViperShutdown();
+public: // IViperPluginsListener
     virtual void OnPluginUnloaded(IViperPlugin *plugin);public:    bool AddCommand(IViperPlugin *pPlugin, PyFunction *callback, CmdType type,
         char const *name, char const *description, int flags);    /**     * Adds a ConCommand to the ConCmdManager's trie     */    void AddToCmdList(ConCmdInfo *pInfo);
             void SetCommandClient(int client);    void RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_safe);    void RemoveConCmds(SourceHook::List<CmdHook *> &cmdlist, IViperPlugin *pl);

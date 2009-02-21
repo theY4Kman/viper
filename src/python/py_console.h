@@ -18,6 +18,12 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _INCLUDE_VIPER_PY_CONSOLE_H_
+#define _INCLUDE_VIPER_PY_CONSOLE_H_
+
+#include <convar.h>
+#include <IViperForwardSys.h>
+
 extern PyTypeObject console__ConCommandReplyType;
 
 typedef struct {
@@ -31,3 +37,18 @@ typedef struct {
     /* The client whom called the ConCommand */
     int client;
 } console__ConCommandReply;
+
+extern PyTypeObject console__ConVarType;
+
+typedef struct {
+    PyObject_HEAD
+    
+    char const *name;
+    char const *value;
+    
+    ConVar *pVar;
+    IViperForward *cvarChangeHooks; /**< Forward associated with cvar */
+    bool byViper;                   /**< Whether or not the cvar was created by a Viper plugin */
+} console__ConVar;
+
+#endif // _INCLUDE_VIPER_PY_CONSOLE_H_

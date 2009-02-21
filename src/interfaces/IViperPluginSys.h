@@ -173,7 +173,7 @@ public:
 /**
  * @brief Listens for plugin-oriented events.
  */
-class IViperPluginListener
+class IViperPluginsListener
 {
 public:
     /**
@@ -220,7 +220,7 @@ public:
      * @brief Adds a listener to the list
      * The listener will be notified when plugins load, unload, etc
      */
-    virtual bool AddPluginListener(IViperPluginListener *listener) =0;
+    virtual bool AddPluginsListener(IViperPluginsListener *listener) =0;
 };
 
 #endif /* _INCLUDE_VIPER_IVIPERPLUGINSYS_H_ */

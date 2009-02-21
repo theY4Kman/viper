@@ -157,21 +157,36 @@ CPlugin::RunPlugin()
         return;
     }
     
+    PyThreadState_Swap(m_pThreadState);
+    
     PyObject *thread_dict = PyThreadState_GetDict();
     PyDict_SetItemString(thread_dict, "viper_cplugin", PyCObject_FromVoidPtr(
         (void*)this, NULL));
     
-    PyThreadState_Swap(m_pThreadState);
-    
     /* Clear sys.path and add the plug-in's folder */
-    char *plfolder = (char*)malloc(strlen(m_sPath));
+    char *path_string = (char*)malloc(PLATFORM_MAX_PATH);
     unsigned int len = strrchr(m_sPath, '/') - m_sPath;
-    strncpy(plfolder, m_sPath, len);
-    plfolder[len] = '\0';
+    strncpy(path_string, m_sPath, len);
+    path_string[len] = '\0';
     
-    PyObject *newpath = PyList_New(1);
-    PyList_SetItem(newpath, 0, PyString_FromString(plfolder));
-    delete [] plfolder;
+    PyObject *newpath = PyList_New(3);
+    PyList_SetItem(newpath, 0, PyString_FromString(path_string));
+    
+    g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH, "extensions/viper/lib");
+    StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
+    PyList_SetItem(newpath, 1, PyString_FromString(path_string));
+    
+#ifdef WIN32
+    g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH,
+        "extensions/viper/lib/plat-win");
+#else
+    g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH,
+        "extensions/viper/lib/plat-linux2");
+#endif
+    StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
+    PyList_SetItem(newpath, 2, PyString_FromString(path_string));
+    
+    delete [] path_string;
     
     PyObject *sys = PyImport_AddModule("sys");
     PyObject_SetAttrString(sys, "path", newpath);
@@ -225,8 +240,6 @@ CPlugin::RunPlugin()
         m_status = ViperPlugin_Running;
         UpdateInfo();
     }
-    
-    PyThreadState_Swap(NULL);
 }
 
 void
@@ -285,20 +298,20 @@ CPluginManager::CPluginManager()
 CPluginManager::~CPluginManager()
 {
     sm_trie_destroy(m_trie);
-    
+}
+
+void
+CPluginManager::OnViperShutdown()
+{
     SourceHook::List<CPlugin *>::iterator iter;
     for (iter=m_list.begin(); iter!=m_list.end(); iter++)
     {
-        SourceHook::List<IViperPluginListener *>::iterator listen;
-        for (listen=m_Listeners.begin(); listen!=m_Listeners.end(); listen++)
-        {
-            (*listen)->OnPluginCreated((*iter));
-        }
+        UnloadPlugin((*iter));
     }
 }
 
 bool
-CPluginManager::AddPluginListener(IViperPluginListener *listener)
+CPluginManager::AddPluginsListener(IViperPluginsListener *listener)
 {
     if (listener == NULL)
         return false;
@@ -380,7 +393,7 @@ CPluginManager::LoadPlugin(char const *path, bool debug, ViperPluginType type,
 		return NULL;
 	}
 	
-    SourceHook::List<IViperPluginListener *>::iterator iter;
+    SourceHook::List<IViperPluginsListener *>::iterator iter;
     for (iter=m_Listeners.begin(); iter!=m_Listeners.end(); iter++)
     {
         (*iter)->OnPluginLoaded(pl);
@@ -460,7 +473,7 @@ bool CPluginManager::ReloadPlugin(CPlugin *plugin)
 bool
 CPluginManager::UnloadPlugin(CPlugin *plugin)
 {
-    SourceHook::List<IViperPluginListener *>::iterator iter;
+    SourceHook::List<IViperPluginsListener *>::iterator iter;
     for (iter=m_Listeners.begin(); iter!=m_Listeners.end(); iter++)
     {
         (*iter)->OnPluginUnloaded(plugin);

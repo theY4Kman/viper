@@ -20,7 +20,17 @@
 
 #include "console.h"
 #include "systems/ConCmdManager.h"
+#include "systems/ConVarManager.h"
 #include "systems/PluginSys.h"
+
+ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
+#ifdef ORANGEBOX_BUILD
+    FCVAR_NOTIFY|FCVAR_REPLICATED,
+#else
+    FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_REPLICATED,
+#endif
+    "The version of Viper installed.");
+
 
 void
 ViperConsole::OnViperStartup(bool late)
@@ -40,8 +50,7 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 	}
 	else if (strcmp(cmd, "cvars") == 0)
 	{
-	    // TODO
-		//g_VVars.OnRootConsoleCommand(cmd, command);
+		g_ConVarManager.OnRootConsoleCommand(cmd, command);
 		return;
 	}
 	else if (strcmp(cmd, "cmds") == 0)
@@ -56,7 +65,7 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 		g_pMenu->ConsolePrint(" Development would not have been possible without:");
 		g_pMenu->ConsolePrint("  David \"BAILOPAN\" Anderson, for immense amounts of help");
 		g_pMenu->ConsolePrint("  Matt \"pRED\" Woodrow, for lots of help and support");
-		g_pMenu->ConsolePrint("  Mattie, for invaluable help");
+		g_pMenu->ConsolePrint("  Mattie Casper, for invaluable help");
 		g_pMenu->ConsolePrint("  CShadowRun, for the motivation");
 		g_pMenu->ConsolePrint("  Tsunami, for always being there");
 		g_pMenu->ConsolePrint(" A special shoutout to Viper from GameConnect: this is named after him");
@@ -66,14 +75,18 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 	}
 	else if (strcmp(cmd, "version") == 0)
 	{
-		// Get the full Python version string, then cut it to only the version number (eg, 2.5.1)
-		char *py_ver = (char*)Py_GetVersion();
+		/* Get the full Python version string, then cut it to only the
+		 * version number (eg, 2.5.1)
+		 */
+		char *py_ver = sm_strdup(Py_GetVersion());
 		*strchr(py_ver, ' ') = '\0';
 
 		g_pMenu->ConsolePrint(" Viper Version Information:");
 		g_pMenu->ConsolePrint("    Viper Version: %s", SMEXT_CONF_VERSION);
 		g_pMenu->ConsolePrint("    Python Version: %s", py_ver);
 		g_pMenu->ConsolePrint("    http://y4kstudios.com/viper/");
+		
+		delete [] py_ver;
 		return;
 	}
 

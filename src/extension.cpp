@@ -68,6 +68,11 @@ InitializePython(void)
     /* PyEval_InitThreads(); */
     
     g_pGlobalThreadState = PyThreadState_Get();
+    
+    /* Remove the Python SIGINT handler */
+    PyObject *signal = PyImport_ImportModule("signal");
+    PyObject_CallMethod(signal, "signal", "OO", PyObject_GetAttrString(signal, "SIGINT"),
+        PyObject_GetAttrString(signal, "SIG_DFL"));
 }
 
 bool
@@ -104,6 +109,8 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
 void
 ViperExtension::SDK_OnUnload()
 {
+    g_Viper.OnViperUnload();
+    
     PyThreadState_Swap(g_pGlobalThreadState);
     Py_Finalize();
 }

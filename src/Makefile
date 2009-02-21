@@ -20,8 +20,9 @@ PROJECT = viper
 USEMETA = true
 
 OBJECTS = sdk/smsdk_ext.cpp extension.cpp systems/PluginSys.cpp viper.cpp console.cpp \
-		  python/py_console.cpp python/py_sourcemod.cpp systems/ConCmdManager.cpp\
-		  systems/ForwardSys.cpp python/py_forwards.cpp sm_trie.cpp
+		  python/py_console.cpp python/py_sourcemod.cpp systems/ConCmdManager.cpp \
+		  systems/ForwardSys.cpp python/py_forwards.cpp sm_trie.cpp \
+		  systems/ConVarManager.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -138,6 +139,8 @@ default: all
 clean: check
 	rm -rf $(BIN_DIR)/*.o
 	rm -rf $(BIN_DIR)/sdk/*.o
+	rm -rf $(BIN_DIR)/systems/*.o
+	rm -rf $(BIN_DIR)/python/*.o
 	rm -rf $(BIN_DIR)/$(BINARY)
 
 install:

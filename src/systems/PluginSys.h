@@ -22,9 +22,9 @@
 #define _INCLUDE_VIPER_PLUGINSYS_H_
 
 #include <Python.h>
+#include "viper_globals.h"
 #include "sm_trie.h"
 #include <sh_list.h>
-#include "viper_globals.h"
 #include <convar.h>
 #include <compat_wrappers.h>
 #include <IViperPluginSys.h>
@@ -36,12 +36,12 @@ public: //IViperPluginFunction
     virtual IViperPlugin *GetOwnerPlugin();
     virtual PyObject *GetFunction();
 public:
-    static CPluginFunction *CreatePluginFunction(PyFunction *func,
+    static CPluginFunction *CreatePluginFunction(PyObject *func,
                                                  IViperPlugin *pl);
 
 protected:
     IViperPlugin *m_pPlugin;
-    PyFunction *m_pFunc;
+    PyObject *m_pFunc;
 };
 
 /**
@@ -143,7 +143,7 @@ private:
     Trie *m_pProps;
 };
 
-class CPluginManager : public IViperPluginManager
+class CPluginManager : public IViperPluginManager, public ViperGlobalClass
 {
     friend class CPlugin;
 
@@ -151,8 +151,11 @@ public:
     CPluginManager();
     ~CPluginManager();
 
+public: // ViperGlobalClass
+    virtual void OnViperShutdown();
+
 public: // IViperPluginManager
-    virtual bool AddPluginListener(IViperPluginListener *listener);
+    virtual bool AddPluginsListener(IViperPluginsListener *listener);
     
     /**
      * Loads all the plugin-ins from a directory
@@ -183,7 +186,7 @@ private:
     Trie *m_trie;
     SourceHook::List<CPlugin *> m_list;
     
-    SourceHook::List<IViperPluginListener *> m_Listeners;
+    SourceHook::List<IViperPluginsListener *> m_Listeners;
     
     bool m_LoadingLocked;
 };

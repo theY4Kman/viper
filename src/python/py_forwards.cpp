@@ -50,17 +50,7 @@ forwards__Forward__add_function(forwards__Forward *self, PyObject *args)
         return NULL;
     }
     
-    PyObject *thread_dict = PyThreadState_GetDict();
-    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin");
-    
-    IViperPlugin *pPlugin;
-    if (pyPlugin == NULL
-        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL)
-    {
-        PyErr_SetString(g_pViperException, "The current thread state has no "
-            "plug-in associated");
-        return NULL;
-    }
+    GET_THREAD_PLUGIN();
     
     Py_INCREF(func);
     
@@ -101,17 +91,7 @@ forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
         return NULL;
     }
     
-    PyObject *thread_dict = PyThreadState_GetDict();
-    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin");
-    
-    IViperPlugin *pPlugin;
-    if (pyPlugin == NULL
-        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL)
-    {
-        PyErr_SetString(g_pViperException, "The current thread state has no "
-            "plug-in associated");
-        return NULL;
-    }
+    GET_THREAD_PLUGIN();
     
     IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(func,
         pPlugin);
@@ -121,6 +101,7 @@ forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
     if (removed)
     {
         Py_DECREF(func);
+        delete pFunc;
         Py_RETURN_TRUE;
     }
     
@@ -216,17 +197,7 @@ forwards__register(PyObject *self, PyObject *args)
     if (fwd == NULL)
         Py_RETURN_FALSE;
     
-    PyObject *thread_dict = PyThreadState_GetDict();
-    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin");
-    
-    IViperPlugin *pPlugin;
-    if (pyPlugin == NULL
-        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL)
-    {
-        PyErr_SetString(g_pViperException, "The current thread state has no "
-            "plug-in associated");
-        return NULL;
-    }
+    GET_THREAD_PLUGIN();
     
     Py_INCREF(callback);
     

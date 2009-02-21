@@ -78,7 +78,20 @@ AddToPlCmdList(CmdList *pList, const PlCmdInfo &info)
 void
 CConCmdManager::OnViperAllInitialized()
 {
-    g_VPlugins.AddPluginListener((IViperPluginListener*)this);
+    g_VPlugins.AddPluginsListener((IViperPluginsListener*)this);
+}
+
+void
+CConCmdManager::OnViperShutdown()
+{
+    SourceHook::List<ConCmdInfo *>::iterator iter;
+    for (iter=m_CmdList.begin(); iter!=m_CmdList.end(); iter++)
+    {
+        if ((*iter) == NULL)
+            continue;
+        
+        RemoveConCmd((*iter), (*iter)->pCmd->GetName(), true);
+    }
 }
 
 void
@@ -86,37 +99,37 @@ CConCmdManager::OnPluginUnloaded(IViperPlugin *plugin)
 {
     CmdList *pList;
     SourceHook::List<ConCmdInfo *> removed;
-    if (plugin->GetProperty("CommandList", (void **)&pList, true) && pList != NULL)
+    
+    if (plugin->GetProperty("CommandList", (void **)&pList, true) &&
+        pList != NULL)
+        return;
+    
+    CmdList::iterator iter;
+    for (iter=pList->begin(); iter!=pList->end(); iter++)
     {
-        CmdList::iterator iter;
-        for (iter = pList->begin();
-            iter != pList->end();
-            iter++)
-        {
-            PlCmdInfo &cmd = (*iter);
-            ConCmdInfo *pInfo = cmd.pInfo;
-            
-            /* Has this chain already been fully cleaned/removed? */
-            if (removed.find(pInfo) != removed.end())
-                continue;
-            
-            /* Remove any hooks from us on this command */
-            RemoveConCmds(pInfo->srvhooks, plugin);
-            RemoveConCmds(pInfo->conhooks, plugin);
-            
-            /* See if there are still hooks */
-            if (pInfo->srvhooks.size())
-                continue;
-            if (pInfo->conhooks.size())
-                continue;
-            
-            /* Remove the command, it should be safe now */
-            RemoveConCmd(pInfo, pInfo->pCmd->GetName(), true);
-            removed.push_back(pInfo);
-        }
+        PlCmdInfo &cmd = (*iter);
+        ConCmdInfo *pInfo = cmd.pInfo;
         
-        delete pList;
+        /* Has this chain already been fully cleaned/removed? */
+        if (removed.find(pInfo) != removed.end())
+            continue;
+        
+        /* Remove any hooks from us on this command */
+        RemoveConCmds(pInfo->srvhooks, plugin);
+        RemoveConCmds(pInfo->conhooks, plugin);
+        
+        /* See if there are still hooks */
+        if (pInfo->srvhooks.size())
+            continue;
+        if (pInfo->conhooks.size())
+            continue;
+        
+        /* Remove the command, it should be safe now */
+        RemoveConCmd(pInfo, pInfo->pCmd->GetName(), true);
+        removed.push_back(pInfo);
     }
+    
+    delete pList;
 }
 
 void
@@ -241,7 +254,6 @@ CConCmdManager::RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_s
     
     if(pInfo->pCmd != NULL)
     {
-        META_CONPRINTF("%s: %p\n", pInfo->pCmd->GetName(), pInfo->pCmd);
         if(pInfo->byViper)
         {
             /* Unlink from SourceMM */
@@ -252,7 +264,9 @@ CConCmdManager::RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_s
             char *new_name = const_cast<char *>(pInfo->pCmd->GetName());
             delete [] new_help;
             delete [] new_name;
+            
             delete pInfo->pCmd;
+            pInfo->pCmd = NULL;
         }
         /* Remove the external hook */
         else if(is_read_safe)
@@ -265,6 +279,8 @@ CConCmdManager::RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_s
     m_CmdList.remove(pInfo);
     
     delete pInfo;
+    
+    ConCommand::FindCommand("ljsdgalsjdgakhsdg");
 }
 
 void

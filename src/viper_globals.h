@@ -19,7 +19,7 @@
  */
 
 /**
- * @file defs.h
+ * @file viper_globals.h
  * @brief Contains utility functions and various definitions required in many files
  */
 
@@ -28,7 +28,7 @@
 
 #include <Python.h>
 #include "sdk/smsdk_ext.h"
-#include "viper.h"
+//#include "viper.h"
 #include <random.h>
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
@@ -68,6 +68,20 @@ extern PyObject *g_pViperException;
 #ifndef PyModule_AddIntMacro
 #define PyModule_AddIntMacro(module, constant) PyModule_AddIntConstant(module, #constant, constant)
 #endif
+
+/* Retrieve the plug-in of the current thread state. */
+#define GET_THREAD_PLUGIN() IViperPlugin *pPlugin; { \
+    PyObject *thread_dict = PyThreadState_GetDict(); \
+    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin"); \
+    \
+    if (pyPlugin == NULL \
+        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL) \
+    { \
+        PyErr_SetString(g_pViperException, "The current thread state has no " \
+            "plug-in associated"); \
+        return NULL; \
+    } \
+}
 
 typedef PyObject PyFunction;
 

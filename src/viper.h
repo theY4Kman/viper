@@ -24,6 +24,8 @@
 #include "IViper.h"
 #include <sh_list.h>
 #include <sh_stack.h>
+#include "ForwardSys.h"
+#include <IViperForwardSys.h>
 
 struct CachedCommandInfo
 {
@@ -47,12 +49,24 @@ public:
     bool OnViperLoad(char *error, size_t maxlength, bool late);
     
     /**
+     * @brief   Called when the extension is unloaded
+     */
+    void OnViperUnload();
+    
+    /**
      * @brief   Called after Viper has been initialized and begins running it
      */
     void StartViper();
     
+    /**
+     * @brief   Called on each game frame
+     */
+    void GameFrame(bool simulating);
+    
 private:
 	SourceHook::CStack<CachedCommandInfo> m_CommandStack;
+	
+	IViperForward *m_GameFrame;
 };
 
 extern BaseViper g_Viper;
