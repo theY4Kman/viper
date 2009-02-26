@@ -18,25 +18,20 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file python/init.h
- * @brief Holds the declarations of the Python module initialization functions
- */
+#ifndef _INCLUDE_PYTHON_EVENTS_H_
+#define _INCLUDE_PYTHON_EVENTS_H_
 
-#ifndef _INCLUDE_VIPER_PYTHON_INIT_H_
-#define _INCLUDE_VIPER_PYTHON_INIT_H_
+#include <Python.h>
+#include <igameevents.h>
 
-/**
- * Initializes the standard Viper library module, `sourcemod`,
- * as well as initializes and adds sub-modules, such as `console` and `clients`
- */
-void initsourcemod(void);
+extern PyTypeObject events__EventType;
 
-/** Initializes the `console` module and returns it. */
-PyObject *initconsole(void);
-PyObject *initfiles(void);
-PyObject *initforwards(void);
-PyObject *initevents(void);
+typedef struct {
+    PyObject_HEAD
+    
+    IGameEvent *event;
+    bool bDontBroadcast;
+} events__Event;
 
-#endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
+#endif // _INCLUDE_PYTHON_EVENTS_H_
 

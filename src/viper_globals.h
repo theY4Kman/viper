@@ -32,6 +32,7 @@
 #include <random.h>
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
+#include <igameevents.h>
 
 /* Interface declaration */
 extern IUniformRandomStream *g_pRandom;
@@ -39,6 +40,7 @@ extern SourceMod::IRootConsole *g_pMenu;
 extern ICvar *icvar;
 extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
 extern IServerPluginHelpers *g_pServerPluginHelpers;
+extern IGameEventManager2 *gameevents;
 
 #ifdef ORANGEBOX_BUILD
 extern ICvar *g_pCVar;
@@ -98,7 +100,7 @@ extern int StrReplace(char *str, char const *from, char const *to, int maxlen);
 /**
  * @brief Retrieves the name of the deepest folder in a path
  */
-extern char const *ParseNiceName(char const *path);
+extern char const *GetLastFolderOfPath(char const *path);
 
 /* From sm_stringutils.cpp */
 extern unsigned int strncopy(char *dest, char const *src, size_t count);

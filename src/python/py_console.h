@@ -44,7 +44,6 @@ typedef struct {
     PyObject_HEAD
     
     char const *name;
-    char const *value;
     
     ConVar *pVar;
     IViperForward *cvarChangeHooks; /**< Forward associated with cvar */

@@ -79,6 +79,12 @@ forwards__Forward__fire(forwards__Forward *self, PyObject *args)
 }
 
 static PyObject *
+forwards__Forward__get_function_count(forwards__Forward *self)
+{
+    return PyInt_FromLong(self->fwd->GetFunctionCount());
+}
+
+static PyObject *
 forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
 {
     PyObject *func = NULL;
@@ -108,6 +114,21 @@ forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
     Py_RETURN_FALSE;
 }
 
+static Py_ssize_t
+forwards__Forward__len__(forwards__Forward *self)
+{
+    return self->fwd->GetFunctionCount();
+}
+
+static PyObject *
+forwards__Forward__str__(forwards__Forward *self)
+{
+    if (!IS_STR_FILLED(self->fwd_name))
+        return PyString_FromFormat("<anonymous Forward: %p>", self);
+    else
+        return PyString_FromFormat("<Forward \"%s\": %p>", self->fwd_name, self);
+}
+
 static PyMemberDef forwards__Forward__members[] = {
     {"name", T_STRING, offsetof(forwards__Forward, fwd_name), READONLY,
         "The name of the forward."},
@@ -127,6 +148,10 @@ static PyMethodDef forwards__Forward__methods[] = {
         "Fires the forward, passing all arguments passed to fire() to the callbacks\n"
         "@rtype: int\n"
         "@return: Depends on the ExecType of the forward."},
+    {"get_function_count", (PyCFunction)forwards__Forward__get_function_count, METH_NOARGS,
+        "Returns the number of callbacks registered on this forward\n"
+        "@rtype: int\n"
+        "@return: Length of the callbacks list"},
     {"remove_function", (PyCFunction)forwards__Forward__remove_function, METH_VARARGS,
         "remove_function(func) -> bool\n\n"
         "Removes the first instance of the function from the function list.\n"
@@ -138,11 +163,24 @@ static PyMethodDef forwards__Forward__methods[] = {
     {NULL, NULL, 0, NULL},
 };
 
+static PySequenceMethods forwards__ForwardSequenceType = {
+	(lenfunc)forwards__Forward__len__, /*sq_length*/
+	0,                          /*sq_concat*/
+	0,                          /*sq_repeat*/
+	0,                          /*sq_item*/
+	0,                          /*sq_slice*/
+	0,                          /*sq_ass_item*/
+	0,                          /*sq_ass_slice*/
+	0,                          /*sq_contains*/
+	0,                          /*sq_inplace_concat*/
+	0,                          /*sq_inplace_repeat*/
+};
+
 PyTypeObject forwards__ForwardType = {
     PyObject_HEAD_INIT(NULL)
     0,                          /*ob_size*/
     "sourcemod.forwards.Forward",/*tp_name*/
-    sizeof(forwards__Forward),/*tp_basicsize*/
+    sizeof(forwards__Forward),  /*tp_basicsize*/
     0,                          /*tp_itemsize*/
     0,                          /*tp_dealloc*/
     0,                          /*tp_print*/
@@ -151,11 +189,11 @@ PyTypeObject forwards__ForwardType = {
     0,                          /*tp_compare*/
     0,                          /*tp_repr*/
     0,                          /*tp_as_number*/
-    0,                          /*tp_as_sequence*/
+    &forwards__ForwardSequenceType,/*tp_as_sequence*/
     0,                          /*tp_as_mapping*/
     0,                          /*tp_hash */
     0,                          /*tp_call*/
-    0,                          /*tp_str*/
+    (reprfunc)forwards__Forward__str__,/*tp_str*/
     0,                          /*tp_getattro*/
     0,                          /*tp_setattro*/
     0,                          /*tp_as_buffer*/
@@ -231,6 +269,7 @@ forwards__create(PyObject *self, PyObject *args)
     // TODO: callback
     IViperForward *fwd = g_Forwards.CreateForward(name, et, types, NULL);
     
+    /* Create a new Python Forward object */
     forwards__Forward *py_fwd = PyObject_GC_New(forwards__Forward,
         &forwards__ForwardType);
     

@@ -161,8 +161,8 @@ public: // IViperPluginManager
      * Loads all the plugin-ins from a directory
      */
     void LoadPluginsFromDir(char const *dir);
-    CPlugin *LoadPlugin(char const *path, bool debug, ViperPluginType type,
-                        char error[], size_t maxlength, bool *wasloaded);
+    CPlugin *LoadPlugin(char const *path, ViperPluginType type, char error[],
+                        size_t maxlength, bool *wasloaded);
     bool UnloadPlugin(CPlugin *plugin);
     bool ReloadPlugin(CPlugin *plugin);
     
@@ -179,7 +179,7 @@ public: // IRootConsoleCommand
     void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
     
 private:
-    ViperLoadRes _LoadPlugin(CPlugin **_plugin, char const *path, bool debug,
+    ViperLoadRes _LoadPlugin(CPlugin **_plugin, char const *path,
                              ViperPluginType type, char error[], size_t maxlength);
     
 private:

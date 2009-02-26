@@ -22,7 +22,7 @@ USEMETA = true
 OBJECTS = sdk/smsdk_ext.cpp extension.cpp systems/PluginSys.cpp viper.cpp console.cpp \
 		  python/py_console.cpp python/py_sourcemod.cpp systems/ConCmdManager.cpp \
 		  systems/ForwardSys.cpp python/py_forwards.cpp sm_trie.cpp \
-		  systems/ConVarManager.cpp
+		  systems/ConVarManager.cpp systems/EventManager.cpp python/py_events.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -62,7 +62,7 @@ ifeq "$(USEMETA)" "true"
 
 	INCLUDE += -I. -I.. -Isdk -I$(HL2PUB) -I$(HL2PUB)/engine -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1 \
 		-I$(HL2PUB)/vstdlib \
-		-I$(METAMOD) -I$(METAMOD)/sourcehook -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn 
+		-I$(METAMOD) -I$(METAMOD)/sourcehook -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
 else
 	INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
 endif

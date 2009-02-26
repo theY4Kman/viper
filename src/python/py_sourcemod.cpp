@@ -152,6 +152,7 @@ initsourcemod(void)
     
     PyModule_AddModuleMacro(console);
     PyModule_AddModuleMacro(forwards);
+    PyModule_AddModuleMacro(events);
     
     /* Redirect stdout to the server console */
     if (PyType_Ready((PyTypeObject*)&sourcemod__server_outType) < 0)

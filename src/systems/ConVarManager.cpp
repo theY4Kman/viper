@@ -22,6 +22,17 @@
 #include "PluginSys.h"
 #include "ForwardSys.h"
 
+/* TODO: Update Engine defines to be more like SourceMod's? */
+#ifndef ORANGEBOX_BUILD
+#define CallGlobalChangeCallbacks  CallGlobalChangeCallback
+#endif
+
+#ifdef ORANGEBOX_BUILD
+SH_DECL_HOOK3_void(ICvar, CallGlobalChangeCallbacks, SH_NOATTRIB, false, ConVar *, const char *, float);
+#else
+SH_DECL_HOOK2_void(ICvar, CallGlobalChangeCallbacks, SH_NOATTRIB, false, ConVar *, const char *);
+#endif
+
 ViperConVarManager::ViperConVarManager()
 {
     m_ConVarCache = sm_trie_create();
@@ -30,6 +41,50 @@ ViperConVarManager::ViperConVarManager()
 ViperConVarManager::~ViperConVarManager()
 {
     sm_trie_destroy(m_ConVarCache);
+}
+
+void
+ViperConVarManager::OnViperStartup(bool late)
+{
+    /* I don't know why, but Python chokes when I use console__ConVarType */
+    m_HookParams = PyTuple_Pack(3, &console__ConVarType, &PyString_Type,
+                                &PyString_Type);
+}
+
+void
+ViperConVarManager::OnViperAllInitialized()
+{
+    SH_ADD_HOOK_MEMFUNC(ICvar, CallGlobalChangeCallbacks, icvar, this,
+        &ViperConVarManager::OnConVarChanged, false);
+}
+
+void
+ViperConVarManager::OnViperShutdown()
+{
+    SourceHook::List<console__ConVar *>::iterator iter = m_ConVars.begin();
+    while (iter != m_ConVars.end())
+    {
+        console__ConVar *handle = (*iter);
+        
+        iter = m_ConVars.erase(iter);
+        
+        if (handle->cvarChangeHooks != NULL)
+            g_Forwards.ReleaseForward(handle->cvarChangeHooks);
+        if (handle->byViper)
+        {
+            META_UNREGCVAR(handle->pVar);
+            delete [] handle->pVar->GetName();
+            delete [] handle->pVar->GetHelpText();
+            delete [] handle->pVar->GetDefault();
+            delete handle->pVar;
+        }
+        
+        delete handle;
+    }
+    
+    sm_trie_clear(m_ConVarCache);
+    
+    Py_XDECREF(m_HookParams);
 }
 
 void
@@ -89,6 +144,7 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
         
         handle = PyObject_GC_New(console__ConVar, &console__ConVarType);
         handle->byViper = false;
+        handle->name = cvar->GetName();
         handle->cvarChangeHooks = NULL;
         handle->pVar = cvar;
         
@@ -115,6 +171,7 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
         sm_strdup(desc), hasMin, min, hasMax, max);
     META_REGCVAR(cvar);
     handle->pVar = cvar;
+    handle->name = cvar->GetName();
     
     AddConVarToPluginList(pl, cvar);
     sm_trie_insert(m_ConVarCache, name, handle);
@@ -174,10 +231,7 @@ ViperConVarManager::HookConVarChange(ConVar *pVar, IViperPluginFunction *pFunc)
     /* Create the forward if it does not exist already */
     if (pForward == NULL)
     {
-        PyObject *types = PyTuple_Pack(3, (PyObject*)&console__ConVarType,
-            PyString_Type, PyString_Type);
-        
-        pForward = g_Forwards.CreateForward("", ET_Ignore, types, NULL);
+        pForward = g_Forwards.CreateForward("", ET_Ignore, m_HookParams, NULL);
         handle->cvarChangeHooks = pForward;
     }
     
@@ -212,7 +266,36 @@ ViperConVarManager::UnhookConVarChange(ConVar *pVar, IViperPluginFunction *pFunc
         handle->cvarChangeHooks = NULL;
     }
     
+    Py_XDECREF(m_HookParams);
+    
     return;
+}
+
+void
+#ifdef ORANGEBOX_BUILD
+ViperConVarManager::OnConVarChanged(ConVar *pConVar, char const *oldValue,
+                                    float flOldValue)
+#else
+ViperConVarManager::OnConVarChanged(ConVar *pConVar, char const *oldValue)
+#endif
+{
+    /* If the values are the same, exit early in order to not trigger callbacks */
+    if (strcmp(pConVar->GetString(), oldValue) == 0)
+        return;
+    
+    console__ConVar *handle;
+    
+    /* Find the convar in the lookup trie */
+    if (!sm_trie_retrieve(m_ConVarCache, pConVar->GetName(), (void**)&handle))
+        return;
+    
+    IViperForward *pForward = handle->cvarChangeHooks;
+    if (pForward != NULL)
+    {
+        PyObject *args = Py_BuildValue("(Oss)", handle, oldValue,
+            handle->pVar->GetString());
+        pForward->Execute(NULL, args);
+    }
 }
 
 ViperConVarManager g_ConVarManager;

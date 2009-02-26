@@ -300,7 +300,7 @@ SMM_API void *PL_EXPOSURE(const char *name, int *code)
 bool SDKExtension::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
-
+    
 #ifndef METAMOD_PLAPI_VERSION
 	GET_V_IFACE_ANY(serverFactory, gamedll, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_CURRENT(engineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);

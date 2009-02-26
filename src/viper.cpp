@@ -182,7 +182,7 @@ int StrReplace(char *str, char const *from, char const *to, int maxlen)
 	return RC;
 }
 
-char const *ParseNiceName(char const *path)
+char const *GetLastFolderOfPath(char const *path)
 {
 	char const *lastslash = strrchr(path, '/')-1;
 	

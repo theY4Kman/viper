@@ -39,6 +39,10 @@ class ViperConVarManager :
 public:
     ViperConVarManager();
     ~ViperConVarManager();
+public: // ViperGlobalClass
+    virtual void OnViperStartup(bool late);
+    virtual void OnViperAllInitialized();
+    virtual void OnViperShutdown();
 public: // IViperPluginsListener
     virtual void OnPluginUnloaded(IViperPlugin *plugin);
 public: // IRootConsoleCommand
@@ -68,7 +72,14 @@ public:
     
 private:
     static void AddConVarToPluginList(IViperPlugin *pl, ConVar *cvar);
+    
+#ifdef ORANGEBOX_BUILD
+    void OnConVarChanged(ConVar *pConVar, char const *oldValue, float flOldValue);
+#else
+    void OnConVarChanged(ConVar *pConVar, char const *oldValue);
+#endif
 private:
+    PyObject *m_HookParams;
     Trie *m_ConVarCache;
     SourceHook::List<console__ConVar *> m_ConVars;
 };

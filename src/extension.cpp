@@ -37,6 +37,7 @@ ICvar *g_pCVar = NULL;
 #endif
 IServerPluginHelpers *g_pServerPluginHelpers = NULL;
 IUniformRandomStream *g_pRandom = NULL;
+IGameEventManager2 *gameevents = NULL;
 
 #ifdef WIN32
 PyObject *Py_None = NULL;
@@ -48,19 +49,16 @@ PyThreadState *g_pGlobalThreadState = NULL;
 
 void
 InitializePython(void)
-{
-    /* This will cause Python to load, but not import, the module "sourcemod"
-     * for every plugin that gets loaded.
-     */
-    PyImport_AppendInittab("sourcemod", initsourcemod);
-    
+{   
     /* Change the path Python looks at for its core modules */
     char libpath[PLATFORM_MAX_PATH];
     g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
         "extensions/viper/lib/");
     
-    /* Initialize the python interpreter */
-    Py_Initialize();
+    /* Initialize the python interpreter, passing 0 to skip registration of
+     * Python's default signal handlers (like SIGINT)
+     */
+    Py_InitializeEx(0);
     
     PySys_SetPath(libpath);
     
@@ -68,11 +66,6 @@ InitializePython(void)
     /* PyEval_InitThreads(); */
     
     g_pGlobalThreadState = PyThreadState_Get();
-    
-    /* Remove the Python SIGINT handler */
-    PyObject *signal = PyImport_ImportModule("signal");
-    PyObject_CallMethod(signal, "signal", "OO", PyObject_GetAttrString(signal, "SIGINT"),
-        PyObject_GetAttrString(signal, "SIG_DFL"));
 }
 
 bool
@@ -90,7 +83,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     if (!(python25_DLL = GetModuleHandle(_T("python25.dll"))))
         return false;
     
-    Py_None = (PyObject*)GetProcAddress(g_python25_DLL, "Py_None");
+    Py_None = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_NoneStruct");
     _Py_TrueStruct = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_TrueStruct");
     _Py_ZeroStruct = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_ZeroStruct");
 #else
@@ -112,6 +105,7 @@ ViperExtension::SDK_OnUnload()
     g_Viper.OnViperUnload();
     
     PyThreadState_Swap(g_pGlobalThreadState);
+    
     Py_Finalize();
 }
 
@@ -130,7 +124,9 @@ ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
         VENGINE_SERVER_RANDOM_INTERFACE_VERSION);
     GET_V_IFACE_CURRENT(GetEngineFactory, g_pServerPluginHelpers,
         IServerPluginHelpers, INTERFACEVERSION_ISERVERPLUGINHELPERS);
-
+    GET_V_IFACE_CURRENT(GetEngineFactory, gameevents, IGameEventManager2,
+        INTERFACEVERSION_GAMEEVENTSMANAGER2);
+    
 #ifdef ORANGEBOX_BUILD
     g_pCVar = icvar;
 #endif

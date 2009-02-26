@@ -21,6 +21,7 @@
 #include <Python.h>
 #include "PluginSys.h"
 #include "ConCmdManager.h"
+#include "python/init.h"
 
 PyObject *
 CPluginFunction::Execute(PyObject *args, PyObject *keywds)
@@ -140,7 +141,7 @@ CPlugin::CreatePlugin(char const *path, char* error, size_t maxlength)
 void
 CPlugin::RunPlugin()
 {
-    m_sFolder = ParseNiceName(m_sPath);
+    m_sFolder = GetLastFolderOfPath(m_sPath);
     
     m_info.name = m_sFolder;
     m_info.author = "";
@@ -148,6 +149,7 @@ CPlugin::RunPlugin()
     m_info.version = "";
     m_info.url = "";
     
+    /* Create a completeley new environment (sub-interpreter) */
     m_pThreadState = Py_NewInterpreter();
     if (m_pThreadState == NULL)
     {
@@ -159,11 +161,17 @@ CPlugin::RunPlugin()
     
     PyThreadState_Swap(m_pThreadState);
     
+    /* Initialize the sourcemod Python module. */
+    initsourcemod();
+    
+    /* Save a pointer to this plug-in for use in Python functions that need to
+     * know the caller's owner.
+     */
     PyObject *thread_dict = PyThreadState_GetDict();
     PyDict_SetItemString(thread_dict, "viper_cplugin", PyCObject_FromVoidPtr(
         (void*)this, NULL));
     
-    /* Clear sys.path and add the plug-in's folder */
+    /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
     char *path_string = (char*)malloc(PLATFORM_MAX_PATH);
     unsigned int len = strrchr(m_sPath, '/') - m_sPath;
     strncpy(path_string, m_sPath, len);
@@ -173,6 +181,7 @@ CPlugin::RunPlugin()
     PyList_SetItem(newpath, 0, PyString_FromString(path_string));
     
     g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH, "extensions/viper/lib");
+    /* Let's keep the folder separators consistent */
     StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
     PyList_SetItem(newpath, 1, PyString_FromString(path_string));
     
@@ -194,11 +203,12 @@ CPlugin::RunPlugin()
     /* Create the plug-in's globals dict */
     m_pPluginDict = PyModule_GetDict(PyImport_ImportModule("__main__"));
     
+    /* Run the plug-in file */
     FILE *fp = fopen(m_sPath, "r");
     PyRun_File(fp, m_sPath, Py_file_input, m_pPluginDict, m_pPluginDict);
     fclose(fp);
     
-    /* Save the critical error, then print it out to the user */
+    /* Save the error if one has occurred, and print it out to the server */
     if (PyErr_Occurred())
     {
         PyObject *errobj,
@@ -350,7 +360,7 @@ CPluginManager::LoadPluginsFromDir(char const *dir)
 
             if (libsys->PathExists(pyinit))
             {
-                g_VPlugins.LoadPlugin((char const *)pyinit, false,
+                g_VPlugins.LoadPlugin((char const *)pyinit,
                     ViperPluginType_MapOnly, error, sizeof(error), NULL);
             }
         }
@@ -362,13 +372,13 @@ CPluginManager::LoadPluginsFromDir(char const *dir)
 }
 
 CPlugin *
-CPluginManager::LoadPlugin(char const *path, bool debug, ViperPluginType type,
+CPluginManager::LoadPlugin(char const *path, ViperPluginType type,
     char error[], size_t maxlength, bool *wasloaded)
 {
 	CPlugin *pl;
 	ViperLoadRes res;
 
-	if ((res = _LoadPlugin(&pl, path, debug, type, error, maxlength)) == ViperLoadRes_Failure)
+	if ((res = _LoadPlugin(&pl, path, type, error, maxlength)) == ViperLoadRes_Failure)
 	{
 		if(pl == NULL)
 			return NULL;
@@ -403,23 +413,20 @@ CPluginManager::LoadPlugin(char const *path, bool debug, ViperPluginType type,
 }
 
 ViperLoadRes
-CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path, bool debug,
+CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path,
     ViperPluginType type, char error[], size_t maxlength)
 {
     if (m_LoadingLocked)
         return ViperLoadRes_NeverLoad;
 
     CPlugin *pPlugin;
-    char const *folder = ParseNiceName(path);
-
-    if (sm_trie_retrieve(m_trie, folder, (void **)&pPlugin))
+    if (sm_trie_retrieve(m_trie, path, (void **)&pPlugin))
     {
         if (pPlugin->GetStatus() == ViperPlugin_BadLoad)
             UnloadPlugin(pPlugin);
         else
         {
             *_plugin = pPlugin;
-            
             return ViperLoadRes_AlreadyLoaded;
         }
     }
@@ -431,7 +438,7 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path, bool debug,
 
     pPlugin->m_type = ViperPluginType_MapUpdated;
 
-    sm_trie_insert(m_trie, folder, pPlugin);
+    sm_trie_insert(m_trie, path, pPlugin);
     m_list.push_back(pPlugin);
 
     pPlugin->RunPlugin();
@@ -461,7 +468,7 @@ bool CPluginManager::ReloadPlugin(CPlugin *plugin)
 		return false;
 
 	CPlugin *newpl;
-	if ((newpl = LoadPlugin(filename, false, ptype, NULL, 0, &wasloaded)) == NULL)
+	if ((newpl = LoadPlugin(filename, ptype, NULL, 0, &wasloaded)) == NULL)
 		return false;
 	
 	if (newpl->GetStatus() == ViperPlugin_Error)
@@ -479,10 +486,12 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
         (*iter)->OnPluginUnloaded(plugin);
     }
 	
-	sm_trie_delete(m_trie, plugin->GetFolder());
+	sm_trie_delete(m_trie, plugin->GetPath());
 	m_list.remove(plugin);
-
+    
+    PyThreadState *_save = PyThreadState_Get();
 	delete plugin;
+	PyThreadState_Swap(_save);
 
 	return true;
 }
@@ -492,7 +501,7 @@ CPluginManager::GetPluginByPath(char const *path)
 {
 	CPlugin *pPlugin;
 
-	if (!sm_trie_retrieve(m_trie, ParseNiceName(path), (void **)&pPlugin))
+	if (!sm_trie_retrieve(m_trie, path, (void **)&pPlugin))
 		return NULL;
 
 	return pPlugin;
@@ -614,10 +623,10 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
         }
         
         char error[256];
-        bool wasloaded;
+        bool wasloaded = false;
         CPlugin *pPlugin;
 
-        if ((pPlugin = LoadPlugin(pl, false, ViperPluginType_MapOnly, error,
+        if ((pPlugin = LoadPlugin(pl, ViperPluginType_MapOnly, error,
             sizeof(error), &wasloaded)) == NULL)
         {
             g_pMenu->ConsolePrint("[Viper] Could not load plugin \"%s\": %s",
@@ -628,6 +637,13 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
         if (wasloaded)
         {
             g_pMenu->ConsolePrint("[Viper] Plugin \"%s\" is already loaded",
+                pPlugin->GetName());
+            return;
+        }
+        
+        if (pPlugin->GetStatus() == ViperPlugin_Error)
+        {
+            g_pMenu->ConsolePrint("[Viper] Plugin \"%s\" loaded erroneously.",
                 pPlugin->GetName());
             return;
         }
@@ -733,6 +749,7 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                 g_pMenu->ConsolePrint("  Error: %s %s", pl->m_psErrorType,
                     pl->m_psError);
                 
+                PyThreadState *_save = PyThreadState_Get();
                 PyThreadState_Swap(pl->GetThreadState());
                 
                 PyObject *tb_strings = NULL;
@@ -758,7 +775,12 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                 /* Start at frame #1, because frame #0 will always be the
                  * execfile() frame: File "<string>", line 1, in <module>
                  */
-                for (i = 1; i < size; i++)
+                if (size >= 1)
+                    i = 1;
+                else
+                    i = 0;
+                
+                for (; i < size; i++)
                 {
                     g_pMenu->ConsolePrint("  %s", PyString_AsString(
                         PyList_GetItem(tb_strings, i)));
@@ -769,7 +791,7 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                 Py_XDECREF(format_tb);
                 Py_XDECREF(tb_strings);
                 
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 return;
             }
             else

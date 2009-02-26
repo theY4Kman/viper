@@ -100,8 +100,8 @@ CConCmdManager::OnPluginUnloaded(IViperPlugin *plugin)
     CmdList *pList;
     SourceHook::List<ConCmdInfo *> removed;
     
-    if (plugin->GetProperty("CommandList", (void **)&pList, true) &&
-        pList != NULL)
+    if (!plugin->GetProperty("CommandList", (void **)&pList, true) ||
+        pList == NULL)
         return;
     
     CmdList::iterator iter;
@@ -279,8 +279,6 @@ CConCmdManager::RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_s
     m_CmdList.remove(pInfo);
     
     delete pInfo;
-    
-    ConCommand::FindCommand("ljsdgalsjdgakhsdg");
 }
 
 void
@@ -385,7 +383,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
     SourceHook::List<CmdHook *>::iterator iter;
     CmdHook *pHook;
     
-    PyEval_ReleaseLock();
+    PyThreadState *_save = PyThreadState_Get();
     
     /* Build the sourcemod.console.ConCommand object */
     int args = command.ArgC();
@@ -428,7 +426,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             if(pyres == NULL)
             {
                 PyErr_Print();
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 continue;
             }
             
@@ -436,8 +434,8 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             {
                 Py_XDECREF(pyres);
 
-                g_pSM->LogMessage(myself, "[%s] Console command callback should return an action constant",
-                    pHook->pl->GetName());
+                g_pSM->LogMessage(myself, "[%s] Console command callback should"
+                    " return an action constant", pHook->pl->GetName());
 
                 PyThreadState_Swap(NULL);
                 continue;
@@ -450,7 +448,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
                 result = tempres;
             if(result == Pl_Stop)
             {
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 break;
             }
         }
@@ -509,7 +507,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             if(pyres == NULL)
             {
                 PyErr_Print();
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 continue;
             }
             
@@ -520,7 +518,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
                 g_pSM->LogMessage(myself, "[%s] Console command callback should return an action constant",
                     pHook->pl->GetName());
 
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 continue;
             }
             
@@ -531,7 +529,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
                 result = tempres;
             if(result == Pl_Stop)
             {
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 break;
             }
         }
@@ -541,12 +539,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
     {
         if (!pInfo->byViper)
             RETURN_META(MRES_SUPERCEDE);
-        
-        PyEval_AcquireLock();
-        return;
     }
-    
-    PyEval_AcquireLock();
 }
 
 CConCmdManager g_VCmds;

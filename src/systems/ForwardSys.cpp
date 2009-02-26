@@ -264,6 +264,9 @@ CForwardManager::ForwardFree(CForward *fwd)
     if (fwd == NULL)
         return;
     
+    /* The param types tuple is no longer being used */
+    Py_XDECREF(fwd->GetParamTypes());
+    
     m_FreeForwards.push(fwd);
     m_ForwardsList.remove(fwd);
     
