@@ -437,17 +437,21 @@ PyObject *
 initconsole(void)
 {
     if (PyType_Ready(&console__ConCommandReplyType) < 0)
-    {
-        META_CONPRINT("Type bad!\n");
         return NULL;
-    }
     if (PyType_Ready(&console__ConVarType) < 0)
         return NULL;
     
     PyObject *console = Py_InitModule3("console", console__methods,
         "Contains functions and objects pertaining to console interaction.");
     
+    /* PyModule_AddObject steals a reference, but it is not taken care of in
+     * Python's core. Thus, to fix this, we have to INCREF it ourselves.
+     * It will solve the problem, but leak memory :(
+     */
+    Py_INCREF((PyObject*)&console__ConCommandReplyType);
     PyModule_AddObject(console, "ConCommandReply", (PyObject*)&console__ConCommandReplyType);
+    
+    Py_INCREF((PyObject*)&console__ConVarType);
     PyModule_AddObject(console, "ConVar", (PyObject*)&console__ConVarType);
     
     PyModule_AddIntConstant(console, "Plugin_Continue", Pl_Continue);

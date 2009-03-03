@@ -49,23 +49,21 @@ PyThreadState *g_pGlobalThreadState = NULL;
 
 void
 InitializePython(void)
-{   
-    /* Change the path Python looks at for its core modules */
-    char libpath[PLATFORM_MAX_PATH];
-    g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
-        "extensions/viper/lib/");
-    
+{
     /* Initialize the python interpreter, passing 0 to skip registration of
      * Python's default signal handlers (like SIGINT)
      */
     Py_InitializeEx(0);
     
-    PySys_SetPath(libpath);
-    
     /* This will be removed until threads are determined to be useful. */  
     /* PyEval_InitThreads(); */
     
     g_pGlobalThreadState = PyThreadState_Get();
+    
+    /* Call initsourcemod so that it is loaded into the main thread state.
+     * This allows ES users to access the sourcemod module.
+     */
+    initsourcemod();
 }
 
 bool
@@ -90,7 +88,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     /* We must load in the binary to allow access to it.
      * Thanks to your-name-here for that bit of info!
      */
-    if (dlopen("libpython2.5.so", RTLD_NOW) == NULL)
+    if (dlopen("libpython2.5.so.1.0", RTLD_NOW) == NULL)
         return false;
 #endif
     
@@ -105,6 +103,10 @@ ViperExtension::SDK_OnUnload()
     g_Viper.OnViperUnload();
     
     PyThreadState_Swap(g_pGlobalThreadState);
+    
+    /* Reset sys.stdout */
+    PyObject *sourcemod = PyImport_AddModule("sourcemod");
+    PySys_SetObject("stdout", PyObject_GetAttrString(sourcemod, "stdout"));
     
     Py_Finalize();
 }

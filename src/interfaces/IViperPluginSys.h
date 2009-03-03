@@ -111,9 +111,14 @@ public:
     virtual char const *GetName() =0;
     
     /**
-     * @brief Retrieves the Python Thread State of this plugin's sub-interpreter
+     * @brief Retrieves the first Python thread state created for this plugin's sub-interpreter
      */
     virtual PyThreadState *GetThreadState() =0;
+    
+    /**
+     * @brief Retrieves the Python interpreter state of this plugin's sub-interpreter
+     */
+    virtual PyInterpreterState *GetInterpState() =0;
     
     /**
      * @brief Returns the plugin's status

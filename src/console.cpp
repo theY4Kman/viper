@@ -35,6 +35,8 @@ ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
 void
 ViperConsole::OnViperStartup(bool late)
 {
+    CONVAR_REGISTER(this);
+    
 	g_pMenu->AddRootConsoleCommand("py", "Viper (Python) menu", this);
 }
 
@@ -96,6 +98,14 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 	g_pMenu->DrawGenericOption("cvars", "View convars created by a plugin");
 	g_pMenu->DrawGenericOption("plugins", "Manage plugins");
 	g_pMenu->DrawGenericOption("version", "Display version information");
+}
+
+bool
+ViperConsole::RegisterConCommandBase(ConCommandBase *pCommand)
+{
+    META_REGCVAR(pCommand);
+    
+    return true;
 }
 
 ViperConsole g_VConsole;

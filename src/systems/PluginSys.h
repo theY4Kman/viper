@@ -90,6 +90,11 @@ public:
         return m_pThreadState;
     }
     
+    virtual PyInterpreterState *GetInterpState()
+    {
+        return m_pInterpState;
+    }
+    
     virtual char const *GetFolder()
     {
         return m_sFolder;
@@ -135,8 +140,10 @@ private:
     char const *m_psErrorType;
     PyObject *m_pErrorTraceback;
     
-    /** The Python thread state of this plugin's sub-interpreter */
+    /** The first Python thread state of this plugin's sub-interpreter */
     PyThreadState *m_pThreadState;
+    /** The Python interp state of this plugin's sub-interpreter */
+    PyInterpreterState *m_pInterpState;
     /** The Python dictionary used to execute this plug-in */
     PyObject *m_pPluginDict;
     
@@ -166,6 +173,8 @@ public: // IViperPluginManager
     bool UnloadPlugin(CPlugin *plugin);
     bool ReloadPlugin(CPlugin *plugin);
     
+    /// Returns a plugin by its interpreter state
+    CPlugin *GetPluginOfInterpreterState(PyInterpreterState *interp);
     /// Returns a plugin from its path
     CPlugin *GetPluginByPath(char const * path);
     /// Returns a plugin from an id
@@ -174,6 +183,7 @@ public: // IViperPluginManager
     CPlugin *FindPluginByConsoleArg(char const *arg);
     /// Returns the number of plugins loaded
     int GetPluginCount();
+    
     
 public: // IRootConsoleCommand
     void OnRootConsoleCommand(char const *cmdname, const CCommand &command);

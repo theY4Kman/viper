@@ -37,6 +37,7 @@ PyObject *initconsole(void);
 PyObject *initfiles(void);
 PyObject *initforwards(void);
 PyObject *initevents(void);
+PyObject *initclients(void);
 
 #endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
 

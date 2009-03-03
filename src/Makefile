@@ -1,6 +1,6 @@
 # Viper Makefile
 #   Copyright (C) 2007-2009 Zach Kanzler
-#   Copyright (C) 2004-20089 SourceMod Development Team
+#   Copyright (C) 2004-2009 SourceMod Development Team
 # Makefile written by David "BAILOPAN" Anderson
 
 SMSDK = ../../sourcemod-1.1
@@ -22,7 +22,8 @@ USEMETA = true
 OBJECTS = sdk/smsdk_ext.cpp extension.cpp systems/PluginSys.cpp viper.cpp console.cpp \
 		  python/py_console.cpp python/py_sourcemod.cpp systems/ConCmdManager.cpp \
 		  systems/ForwardSys.cpp python/py_forwards.cpp sm_trie.cpp \
-		  systems/ConVarManager.cpp systems/EventManager.cpp python/py_events.cpp
+		  systems/ConVarManager.cpp systems/EventManager.cpp python/py_events.cpp \
+		  python/py_clients.cpp systems/PlayerManager.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -32,7 +33,7 @@ C_OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe -fno-strict-aliasing
 C_DEBUG_FLAGS = -D_DEBUG -DDEBUG -g -ggdb3
 C_GCC4_FLAGS = -fvisibility=hidden
 CPP_GCC4_FLAGS = -fvisibility-inlines-hidden
-CPP = g++-4.1
+CPP = gcc-4.1
 
 override ENGSET = false
 ifeq "$(ENGINE)" "original"
@@ -67,7 +68,7 @@ else
 	INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
 endif
 
-LINK += -m32 -lm -ldl -Wl,--rpath,\$$ORIGIN/../viper/lib/plat-linux2 -lpython2.5
+LINK += -m32 -lm -ldl -Wl,--rpath,\$$ORIGIN/../viper/lib/plat-linux2 libpython2.5.so
 
 INCLUDE += -Iinterfaces -Isystems -I$(PYTHON) -I$(PYTHON)/Include
 
@@ -120,6 +121,7 @@ all: check
 		ln -sf $(SRCDS)/bin/vstdlib_i486.so vstdlib_i486.so; \
 		ln -sf $(SRCDS)/bin/tier0_i486.so tier0_i486.so; \
 	fi
+	ln -sf build/addons/sourcemod/extensions/viper/lib/plat-linux2/libpython2.5.so.1.0 libpython2.5.so
 	$(MAKE) -f Makefile extension
 
 check:

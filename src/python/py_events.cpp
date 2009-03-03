@@ -96,6 +96,62 @@ events__Event__has_field(events__Event *self, PyObject *args)
 }
 
 static PyObject *
+events__Event__set_bool(events__Event *self, PyObject *args)
+{
+    char const *field;
+    bool value;
+    
+    if (!PyArg_ParseTuple(args, "sb", &field, &value))
+        return NULL;
+    
+    self->event->SetBool(field, value);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+events__Event__set_float(events__Event *self, PyObject *args)
+{
+    char const *field;
+    float value;
+    
+    if (!PyArg_ParseTuple(args, "sf", &field, &value))
+        return NULL;
+    
+    self->event->SetFloat(field, value);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+events__Event__set_int(events__Event *self, PyObject *args)
+{
+    char const *field;
+    int value;
+    
+    if (!PyArg_ParseTuple(args, "si", &field, &value))
+        return NULL;
+    
+    self->event->SetInt(field, value);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+events__Event__set_string(events__Event *self, PyObject *args)
+{
+    char const *field;
+    char const *value;
+    
+    if (!PyArg_ParseTuple(args, "ss", &field, &value))
+        return NULL;
+    
+    self->event->SetString(field, value);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 events__Event__str__(events__Event *self)
 {
     return PyString_FromFormat("<Event \"%s\">", self->event->GetName());
@@ -108,7 +164,7 @@ events__Event__nameget(events__Event *self)
 }
 
 static PyMemberDef events__Event__members[] = {
-    {"dont_broadcast", T_UBYTE, offsetof(events__Event, bDontBroadcast), 0,
+    {"dont_broadcast", T_UBYTE, offsetof(events__Event, bDontBroadcast), READONLY,
         "Whether or not this event will be broadcast to players."},
     {NULL},
 };
@@ -172,6 +228,34 @@ static PyMethodDef events__Event__methods[] = {
         "@param field: The field to check for existence\n"
         "@rtype: bool\n"
         "@return: True if the field exists, False if not."},
+    {"set_bool", (PyCFunction)events__Event__set_bool, METH_VARARGS,
+        "set_bool(field, value)\n\n"
+        "Sets a boolean value in a game event.\n"
+        "@type  field: str\n"
+        "@param field: The field to set\n"
+        "@type  value: bool\n"
+        "@param value: The boolean value to set."},
+    {"set_float", (PyCFunction)events__Event__set_float, METH_VARARGS,
+        "set_float(field, value)\n\n"
+        "Sets a float value in a game event.\n"
+        "@type  field: str\n"
+        "@param field: The field to set\n"
+        "@type  value: float\n"
+        "@param value: The float value to set."},
+    {"set_int", (PyCFunction)events__Event__set_int, METH_VARARGS,
+        "set_int(field, value)\n\n"
+        "Sets an integer value in a game event.\n"
+        "@type  field: str\n"
+        "@param field: The field to set\n"
+        "@type  value: int\n"
+        "@param value: The int value to set."},
+    {"set_string", (PyCFunction)events__Event__set_string, METH_VARARGS,
+        "set_string(field, value)\n\n"
+        "Sets a string value in a game event.\n"
+        "@type  field: str\n"
+        "@param field: The field to set\n"
+        "@type  value: str\n"
+        "@param value: The string value to set."},
     {NULL, NULL, 0, NULL},
 };
 
@@ -406,6 +490,7 @@ initevents(void)
     PyObject *events = Py_InitModule3("events", events__methods,
         "Hooks and handles game events.");
     
+    Py_INCREF((PyObject*)&events__EventType);
     PyModule_AddObject(events, "Event", (PyObject*)&events__EventType);
     
     PyModule_AddIntMacro(events, EventHookMode_Pre);

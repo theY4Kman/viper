@@ -317,6 +317,7 @@ initforwards(void)
     PyObject *forwards = Py_InitModule3("forwards", forwards__methods,
         "Objects and functions that manipulate the forwards system");
     
+    Py_INCREF((PyObject*)&forwards__ForwardType);
     PyModule_AddObject(forwards, "Forward", (PyObject*)&forwards__ForwardType);
     
     PyModule_AddIntMacro(forwards, ET_Ignore);

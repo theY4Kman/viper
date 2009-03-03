@@ -260,13 +260,10 @@ CConCmdManager::RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_s
             META_UNREGCVAR(pInfo->pCmd);
             
             /* Delete the command's memory */
-            char *new_help = const_cast<char *>(pInfo->pCmd->GetHelpText());
-            char *new_name = const_cast<char *>(pInfo->pCmd->GetName());
-            delete [] new_help;
-            delete [] new_name;
+            delete [] const_cast<char *>(pInfo->pCmd->GetHelpText());
+            delete [] const_cast<char *>(pInfo->pCmd->GetName());
             
             delete pInfo->pCmd;
-            pInfo->pCmd = NULL;
         }
         /* Remove the external hook */
         else if(is_read_safe)
@@ -349,9 +346,6 @@ CConCmdManager::AddOrFindCommand(char const *name, char const *description,
             char *new_name = sm_strdup(name);
             char *new_help = sm_strdup(description);
             pCmd = new ConCommand(new_name, CommandCallback, new_help, flags);
-
-            // Register that hoe
-            META_REGCVAR(pCmd);
 
             pInfo->byViper = true;
         }

@@ -153,24 +153,27 @@ initsourcemod(void)
     PyModule_AddModuleMacro(console);
     PyModule_AddModuleMacro(forwards);
     PyModule_AddModuleMacro(events);
+    PyModule_AddModuleMacro(clients);
     
     /* Redirect stdout to the server console */
-    if (PyType_Ready((PyTypeObject*)&sourcemod__server_outType) < 0)
+    if (PyType_Ready(&sourcemod__server_outType) < 0)
         g_pSM->LogError(myself, "stdout to server console redirection failed."
             " `print` will output to stdout.");
     else
     {
         sourcemod__server_outType.tp_new = PyType_GenericNew;
         
-        PyObject *sys = PyImport_AddModule("sys");
-        PyObject *py_stdout = PyObject_GetAttrString(sys, "stdout");
+        PyObject *py_stdout = PySys_GetObject("stdout");
         
-        PyObject *server_out = sourcemod__server_outType.tp_new(&sourcemod__server_outType, NULL, NULL);
+        PyObject *server_out = sourcemod__server_outType.tp_new(
+            &sourcemod__server_outType, NULL, NULL);
         
         PyModule_AddObject(sourcemod, "stdout", py_stdout);
+        
+        Py_INCREF(server_out);
         PyModule_AddObject(sourcemod, "server_out", server_out);
         
-        PyObject_SetAttrString(sys, "stdout", server_out);
+        PySys_SetObject("stdout", server_out);
     }
 }
 

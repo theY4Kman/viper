@@ -159,17 +159,9 @@ CPlugin::RunPlugin()
         return;
     }
     
+    m_pInterpState = m_pThreadState->interp;
+    
     PyThreadState_Swap(m_pThreadState);
-    
-    /* Initialize the sourcemod Python module. */
-    initsourcemod();
-    
-    /* Save a pointer to this plug-in for use in Python functions that need to
-     * know the caller's owner.
-     */
-    PyObject *thread_dict = PyThreadState_GetDict();
-    PyDict_SetItemString(thread_dict, "viper_cplugin", PyCObject_FromVoidPtr(
-        (void*)this, NULL));
     
     /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
     char *path_string = (char*)malloc(PLATFORM_MAX_PATH);
@@ -177,13 +169,17 @@ CPlugin::RunPlugin()
     strncpy(path_string, m_sPath, len);
     path_string[len] = '\0';
     
-    PyObject *newpath = PyList_New(3);
+    PyObject *newpath = PyList_New(6);
     PyList_SetItem(newpath, 0, PyString_FromString(path_string));
     
     g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH, "extensions/viper/lib");
     /* Let's keep the folder separators consistent */
     StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
     PyList_SetItem(newpath, 1, PyString_FromString(path_string));
+    
+    PyList_SetItem(newpath, 2, PyString_FromFormat("%s/lib-tk", path_string));
+    PyList_SetItem(newpath, 3, PyString_FromFormat("%s/lib-dynload", path_string));
+    PyList_SetItem(newpath, 4, PyString_FromFormat("%s/site-packages", path_string));
     
 #ifdef WIN32
     g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH,
@@ -193,15 +189,24 @@ CPlugin::RunPlugin()
         "extensions/viper/lib/plat-linux2");
 #endif
     StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
-    PyList_SetItem(newpath, 2, PyString_FromString(path_string));
+    PyList_SetItem(newpath, 5, PyString_FromString(path_string));
     
     delete [] path_string;
     
-    PyObject *sys = PyImport_AddModule("sys");
-    PyObject_SetAttrString(sys, "path", newpath);
+    PySys_SetObject("path", newpath);
+    
+    /* Set the custom excepthook, so that the annoying "Error in sys.excepthook:"
+     * doesn't happen. The cause of it is that when an exception occurs, too
+     * much of the sys module is unloaded to handle the exception correctly.
+     */
+    PyObject *tb = PyImport_ImportModule("traceback");
+    PySys_SetObject("excepthook", PyObject_GetAttrString(tb, "print_exception"));
     
     /* Create the plug-in's globals dict */
     m_pPluginDict = PyModule_GetDict(PyImport_ImportModule("__main__"));
+    
+    /* Initialize the sourcemod Python module. */
+    initsourcemod();
     
     /* Run the plug-in file */
     FILE *fp = fopen(m_sPath, "r");
@@ -494,6 +499,19 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
 	PyThreadState_Swap(_save);
 
 	return true;
+}
+
+CPlugin *
+CPluginManager::GetPluginOfInterpreterState(PyInterpreterState *interp)
+{
+    SourceHook::List<CPlugin *>::iterator iter;
+    for (iter=m_list.begin(); iter!=m_list.end(); iter++)
+    {
+        if ((*iter)->GetInterpState() == interp)
+            return (*iter);
+    }
+    
+    return NULL;
 }
 
 CPlugin *

@@ -28,14 +28,16 @@
 
 class ViperConsole :
     public SourceMod::IRootConsoleCommand,
-    public ViperGlobalClass
+    public ViperGlobalClass,
+    public IConCommandBaseAccessor
 {
 public: // IRootConsoleCommand
 	// Called when an admin runs "sm py"
 	virtual void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
-
 public: // ViperGlobalClass
 	virtual void OnViperStartup(bool late);
+public: // IConCommandBaseAccessor
+    bool RegisterConCommandBase(ConCommandBase *pCommand);
 };
 
 #endif /* _INCLUDE_VIPER_CONSOLE_H_ */

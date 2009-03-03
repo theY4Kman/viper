@@ -67,6 +67,7 @@ private:
 	SourceHook::CStack<CachedCommandInfo> m_CommandStack;
 	
 	IViperForward *m_GameFrame;
+	PyObject *m_EmptyTuple;
 };
 
 extern BaseViper g_Viper;

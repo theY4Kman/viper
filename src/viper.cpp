@@ -33,6 +33,8 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
     g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
     SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
     
+    m_EmptyTuple = PyTuple_New(0);
+    
     StartViper();
     
     return true;
@@ -123,7 +125,7 @@ BaseViper::PopCommandStack()
 void
 BaseViper::GameFrame(bool simulating)
 {
-    m_GameFrame->Execute(NULL, PyTuple_New(0));
+    m_GameFrame->Execute(NULL, m_EmptyTuple);
 }
 
 BaseViper g_Viper;

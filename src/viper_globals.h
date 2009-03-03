@@ -73,14 +73,12 @@ extern PyObject *g_pViperException;
 
 /* Retrieve the plug-in of the current thread state. */
 #define GET_THREAD_PLUGIN() IViperPlugin *pPlugin; { \
-    PyObject *thread_dict = PyThreadState_GetDict(); \
-    PyObject *pyPlugin = PyDict_GetItemString(thread_dict, "viper_cplugin"); \
-    \
-    if (pyPlugin == NULL \
-        || (pPlugin = (IViperPlugin*)PyCObject_AsVoidPtr(pyPlugin)) == NULL) \
+    PyThreadState *tstate = PyThreadState_Get(); \
+    assert(tstate != NULL); \
+    pPlugin = g_VPlugins.GetPluginOfInterpreterState(tstate->interp); \
+    if (pPlugin == NULL) \
     { \
-        PyErr_SetString(g_pViperException, "The current thread state has no " \
-            "plug-in associated"); \
+        PyErr_SetString(g_pViperException, "Error retrieving current plug-in "); \
         return NULL; \
     } \
 }
