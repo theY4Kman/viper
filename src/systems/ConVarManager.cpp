@@ -22,12 +22,11 @@
 #include "PluginSys.h"
 #include "ForwardSys.h"
 
-/* TODO: Update Engine defines to be more like SourceMod's? */
-#ifndef ORANGEBOX_BUILD
+#if SOURCE_ENGINE < SE_ORANGEBOX
 #define CallGlobalChangeCallbacks  CallGlobalChangeCallback
 #endif
 
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 SH_DECL_HOOK3_void(ICvar, CallGlobalChangeCallbacks, SH_NOATTRIB, false, ConVar *, const char *, float);
 #else
 SH_DECL_HOOK2_void(ICvar, CallGlobalChangeCallbacks, SH_NOATTRIB, false, ConVar *, const char *);
@@ -272,7 +271,7 @@ ViperConVarManager::UnhookConVarChange(ConVar *pVar, IViperPluginFunction *pFunc
 }
 
 void
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 ViperConVarManager::OnConVarChanged(ConVar *pConVar, char const *oldValue,
                                     float flOldValue)
 #else

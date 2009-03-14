@@ -154,6 +154,12 @@ initsourcemod(void)
     PyModule_AddModuleMacro(forwards);
     PyModule_AddModuleMacro(events);
     PyModule_AddModuleMacro(clients);
+    PyModule_AddModuleMacro(entities);
+    
+    PyModule_AddObject(sourcemod, "__version__",
+        PyString_FromString(SMEXT_CONF_VERSION));
+    PyModule_AddObject(sourcemod, "__date__",
+        PyString_FromString(SMEXT_CONF_DATESTRING));
     
     /* Redirect stdout to the server console */
     if (PyType_Ready(&sourcemod__server_outType) < 0)

@@ -3,11 +3,12 @@
 #   Copyright (C) 2004-2009 SourceMod Development Team
 # Makefile written by David "BAILOPAN" Anderson
 
-SMSDK = ../../sourcemod-1.1
+SMSDK = ../../sourcemod-central
 SRCDS_BASE = ~/srcds
 HL2SDK_ORIG = ../../hl2sdk
 HL2SDK_OB = ../../hl2sdk-ob
-MMSOURCE17 = ../../sourcemm-1.7
+HL2SDK_L4D = ../../hl2sdk-l4d
+MMSOURCE17 = ../../mmsource-1.7
 
 PYTHON = /home/they4kman/apps/Python-2.5.4
 
@@ -19,11 +20,13 @@ PROJECT = viper
 
 USEMETA = true
 
-OBJECTS = sdk/smsdk_ext.cpp extension.cpp systems/PluginSys.cpp viper.cpp console.cpp \
-		  python/py_console.cpp python/py_sourcemod.cpp systems/ConCmdManager.cpp \
-		  systems/ForwardSys.cpp python/py_forwards.cpp sm_trie.cpp \
-		  systems/ConVarManager.cpp systems/EventManager.cpp python/py_events.cpp \
-		  python/py_clients.cpp systems/PlayerManager.cpp
+OBJECTS += sdk/smsdk_ext.cpp extension.cpp viper.cpp console.cpp sourcemod/sm_trie.cpp
+
+OBJECTS += systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventManager.cpp \
+           systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp
+
+OBJECTS += python/py_clients.cpp python/py_events.cpp python/py_console.cpp \
+           python/py_forwards.cpp python/py_sourcemod.cpp python/py_entities.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -38,8 +41,9 @@ CPP = gcc-4.1
 override ENGSET = false
 ifeq "$(ENGINE)" "original"
 	HL2SDK = $(HL2SDK_ORIG)
-	HL2PUB = $(HL2SDK_ORIG)/public
-	HL2LIB = $(HL2SDK_ORIG)/linux_sdk
+	HL2PUB = $(HL2SDK)/public
+	HL2LIB = $(HL2SDK)/linux_sdk
+	CFLAGS += -DSOURCE_ENGINE=1
 	METAMOD = $(MMSOURCE17)/core-legacy
 	INCLUDE += -I$(HL2SDK)/public/dlls
 	SRCDS = $(SRCDS_BASE)
@@ -47,14 +51,26 @@ ifeq "$(ENGINE)" "original"
 endif
 ifeq "$(ENGINE)" "orangebox"
 	HL2SDK = $(HL2SDK_OB)
-	HL2PUB = $(HL2SDK_OB)/public
-	HL2LIB = $(HL2SDK_OB)/lib/linux
-	CFLAGS += -DORANGEBOX_BUILD
+	HL2PUB = $(HL2SDK)/public
+	HL2LIB = $(HL2SDK)/lib/linux
+	CFLAGS += -DSOURCE_ENGINE=3
 	METAMOD = $(MMSOURCE17)/core
 	INCLUDE += -I$(HL2SDK)/public/game/server
 	SRCDS = $(SRCDS_BASE)/orangebox
 	override ENGSET = true
 endif
+ifeq "$(ENGINE)" "left4dead"
+	HL2SDK = $(HL2SDK_L4D)
+	HL2PUB = $(HL2SDK)/public
+	HL2LIB = $(HL2SDK)/lib/linux
+	CFLAGS += -DSOURCE_ENGINE=4
+	METAMOD = $(MMSOURCE17)/core
+	INCLUDE += -I$(HL2SDK)/public/game/server
+	SRCDS = $(SRCDS_BASE)/l4d
+	override ENGSET = true
+endif
+
+CFLAGS += -DSE_EPISODEONE=1 -DSE_DARKMESSIAH=2 -DSE_ORANGEBOX=3 -DSE_LEFT4DEAD=4
 
 ifeq "$(USEMETA)" "true"
 	LINK_HL2 = $(HL2LIB)/tier1_i486.a vstdlib_i486.so tier0_i486.so
@@ -70,7 +86,7 @@ endif
 
 LINK += -m32 -lm -ldl -Wl,--rpath,\$$ORIGIN/../viper/lib/plat-linux2 libpython2.5.so
 
-INCLUDE += -Iinterfaces -Isystems -I$(PYTHON) -I$(PYTHON)/Include
+INCLUDE += -Iinterfaces -Isystems -Isourcemod -I$(PYTHON) -I$(PYTHON)/Include
 
 CFLAGS += -D_LINUX -Dstricmp=strcasecmp -D_stricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp \
 	-D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -Wall -Werror -Wno-switch \
@@ -117,6 +133,7 @@ all: check
 	mkdir -p $(BIN_DIR)/sdk
 	mkdir -p $(BIN_DIR)/systems
 	mkdir -p $(BIN_DIR)/python
+	mkdir -p $(BIN_DIR)/sourcemod
 	if [ "$(USEMETA)" = "true" ]; then \
 		ln -sf $(SRCDS)/bin/vstdlib_i486.so vstdlib_i486.so; \
 		ln -sf $(SRCDS)/bin/tier0_i486.so tier0_i486.so; \
@@ -126,7 +143,7 @@ all: check
 
 check:
 	if [ "$(USEMETA)" = "true" ] && [ "$(ENGSET)" = "false" ]; then \
-		echo "You must supply ENGINE=orangebox or ENGINE=original"; \
+		echo "You must supply ENGINE=left4dead, ENGINE=orangebox, or ENGINE=original"; \
 		exit 1; \
 	fi
 
@@ -143,13 +160,15 @@ clean: check
 	rm -rf $(BIN_DIR)/sdk/*.o
 	rm -rf $(BIN_DIR)/systems/*.o
 	rm -rf $(BIN_DIR)/python/*.o
+	rm -rf $(BIN_DIR)/sourcemod/*.o
 	rm -rf $(BIN_DIR)/$(BINARY)
 
 install:
 	if [ "$(ENGINE)" = "orangebox" ]; then \
 	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.2.ep2/; \
-	fi
-	if [ "$(ENGINE)" = "original" ]; then \
+	else if [ "$(ENGINE)" = "original" ]; then \
 	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.1.ep1/; \
-	fi
+	else if [ "$(ENGINE)" = "left4dead" ]; then \
+	    cp -R $(BIN_DIR)/$(BINARY) $(SRCDS_BASE)/cstrike/addons/sourcemod/extensions/auto.2.l4d/; \
+	fi; fi; fi
 

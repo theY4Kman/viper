@@ -18,24 +18,26 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
-#include <structmember.h>
 #include "viper_globals.h"
+#include "python/py_console.h"
+#include <structmember.h>
+#include <IPlayerHelpers.h>
 #include "systems/ConCmdManager.h"
 #include "systems/ConVarManager.h"
 #include "systems/PluginSys.h"
-#include "python/py_console.h"
 #include "IViperForwardSys.h"
 
 static PyObject *
 console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
 {
-    // :TODO: Reply to the user in the way they called the concmd
     char const *message = NULL;
     if (!PyArg_ParseTuple(args, "s", &message))
         return NULL;
-
-	g_SMAPI->ConPrintf("%s\n", message);
+    
+    if (playerhelpers->GetReplyTo() == SM_REPLY_CONSOLE)
+	    g_SMAPI->ConPrintf("%s\n", message);
+	else
+	    gamehelpers->TextMsg(g_VCmds.GetCommandClient(), HUD_PRINTTALK, message);
     
     Py_RETURN_NONE;
 }
@@ -53,10 +55,10 @@ static PyMethodDef console__ConCommandReply__methods[] = {
 static PyMemberDef console__ConCommandReply__members[] = {
     {"args", T_OBJECT_EX, offsetof(console__ConCommandReply, args), READONLY,
         "The arguments passed when the ConCommand was executed"},
+    {"client", T_OBJECT, offsetof(console__ConCommandReply, client), READONLY,
+        "The Client whom executed the ConCommand"},
     {"name", T_STRING, offsetof(console__ConCommandReply, name), READONLY,
         "The name of the ConCommand executed."},
-    {"client", T_INT, offsetof(console__ConCommandReply, client), READONLY,
-        "The client whom executed the ConCommand"},
     {"argstring", T_STRING, offsetof(console__ConCommandReply, argstring), READONLY,
         "The full argument string sent to the server. This includes any quotes sent."},
     {NULL},
@@ -126,6 +128,14 @@ console__ConVar__hook_change(console__ConVar *self, PyObject *args)
 }
 
 static PyObject *
+console__ConVar__reset(console__ConVar *self)
+{
+    self->pVar->Revert();
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 console__ConVar__unhook_change(console__ConVar *self, PyObject *args)
 {
     PyObject *callback;
@@ -152,13 +162,92 @@ console__ConVar__unhook_change(console__ConVar *self, PyObject *args)
 }
 
 static PyObject *
-console__ConVar__valueget(console__ConVar *self, void *closure)
+console__ConVar__flagsget(console__ConVar *self)
+{
+    return PyInt_FromLong(self->pVar->GetFlags());
+}
+
+static int
+console__ConVar__flagsset(console__ConVar *self, PyObject *value)
+{
+    if (!PyInt_Check(value))
+    {
+        PyErr_SetString(PyExc_TypeError, "flags must be an int");
+        return -1;
+    }
+    
+    /* PyInt_AS_LONG doesn't do error checking -- we have done it already */
+    self->pVar->SetFlags(PyInt_AS_LONG(value));
+    
+    return 0;
+}
+
+static PyObject *
+console__ConVar__lower_boundget(console__ConVar *self)
+{
+    float lower_bound;
+    
+    if (self->pVar->GetMin(lower_bound))
+        return PyFloat_FromDouble(lower_bound);
+    
+    Py_RETURN_NONE;
+}
+
+static int
+console__ConVar__lower_boundset(console__ConVar *self, PyObject *value)
+{
+    /* If set to None, remove the bound */
+    if (value == Py_None)
+        self->pVar->SetMin(false);
+    
+    if (!PyFloat_Check(value))
+    {
+        PyErr_SetString(PyExc_TypeError, "lower_bound must be a float.");
+        return -1;
+    }
+    
+    self->pVar->SetMin(true, PyFloat_AsDouble(value));
+    
+    return 0;
+}
+
+static PyObject *
+console__ConVar__upper_boundget(console__ConVar *self)
+{
+    float upper_bound;
+    
+    if (self->pVar->GetMax(upper_bound))
+        return PyFloat_FromDouble(upper_bound);
+    
+    Py_RETURN_NONE;
+}
+
+static int
+console__ConVar__upper_boundset(console__ConVar *self, PyObject *value)
+{
+    /* If set to None, remove the bound */
+    if (value == Py_None)
+        self->pVar->SetMax(false);
+    
+    if (!PyFloat_Check(value))
+    {
+        PyErr_SetString(PyExc_TypeError, "upper_bound must be a float.");
+        return -1;
+    }
+    
+    self->pVar->SetMax(true, PyFloat_AsDouble(value));
+    
+    return 0;
+}
+
+static PyObject *
+console__ConVar__valueget(console__ConVar *self)
 {
     return PyString_FromString(self->pVar->GetString());
 }
 
 static int
-console__ConVar__valueset(console__ConVar *self, PyObject *value, void *closure)
+console__ConVar__valueset(console__ConVar *self, PyObject *value)
 {
     if (value == NULL)
         self->pVar->SetValue("");
@@ -178,6 +267,9 @@ static PyMethodDef console__ConVar__methods[] = {
         "    newvalue), where cvar is the ConVar object representing the ConVar\n"
         "    that was changed, newvalue is the value being assigned to the Convar\n"
         "    as a string, and oldvalue is the previous value of the ConVar as a string.\n"},
+    {"reset", (PyCFunction)console__ConVar__reset, METH_NOARGS,
+        "reset()\n\n"
+        "Resets the console variable to its default value."},
     {"unhook_change", (PyCFunction)console__ConVar__unhook_change, METH_VARARGS,
         "unhook_change(callback)\n\n"
         "Removes a ConVar change hook.\n"
@@ -195,8 +287,16 @@ static PyMemberDef console__ConVar__members[] = {
 };
 
 static PyGetSetDef console__ConVar__getsets[] = {
+    {"flags", (getter)console__ConVar__flagsget, (setter)console__ConVar__flagsset,
+        "The bitstring of FCVAR_* flags on this console variable."},
+    {"lower_bound", (getter)console__ConVar__lower_boundget,
+                    (setter)console__ConVar__lower_boundset,
+        "The upper bound of this ConVar."},
+    {"upper_bound", (getter)console__ConVar__upper_boundget,
+                    (setter)console__ConVar__upper_boundset,
+        "The upper bound of this ConVar."},
     {"value", (getter)console__ConVar__valueget, (setter)console__ConVar__valueset,
-        "The value of the ConVar.", NULL},
+        "The value of the ConVar."},
     {NULL},
 };
 

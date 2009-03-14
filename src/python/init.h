@@ -32,12 +32,13 @@
  */
 void initsourcemod(void);
 
-/** Initializes the `console` module and returns it. */
+/** Initializes the module and returns it. */
 PyObject *initconsole(void);
 PyObject *initfiles(void);
 PyObject *initforwards(void);
 PyObject *initevents(void);
 PyObject *initclients(void);
+PyObject *initentities(void);
 
 #endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
 

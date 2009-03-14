@@ -32,7 +32,7 @@ ViperExtension g_ViperExt;
 SMEXT_LINK(&g_ViperExt);
 
 ICvar *icvar   = NULL;
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE < SE_ORANGEBOX
 ICvar *g_pCVar = NULL;
 #endif
 IServerPluginHelpers *g_pServerPluginHelpers = NULL;
@@ -129,7 +129,7 @@ ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
     GET_V_IFACE_CURRENT(GetEngineFactory, gameevents, IGameEventManager2,
         INTERFACEVERSION_GAMEEVENTSMANAGER2);
     
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE < SE_ORANGEBOX
     g_pCVar = icvar;
 #endif
 

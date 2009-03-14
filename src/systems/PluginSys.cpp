@@ -34,6 +34,10 @@ CPluginFunction::Execute(PyObject *args, PyObject *keywds)
     
     PyObject *result = PyObject_Call(m_pFunc, args, keywds);
     
+    /* Damn it, sawce, stop causing errors in callbacks */
+    if (result == NULL && PyErr_Occurred())
+        PyErr_Print();
+    
     PyThreadState_Swap(_save);
     
     return result;

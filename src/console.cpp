@@ -24,7 +24,7 @@
 #include "systems/PluginSys.h"
 
 ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
     FCVAR_NOTIFY|FCVAR_REPLICATED,
 #else
     FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_REPLICATED,

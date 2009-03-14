@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -61,7 +61,7 @@
 //#define SMEXT_ENABLE_MENUS
 //#define SMEXT_ENABLE_ADTFACTORY
 //#define SMEXT_ENABLE_PLUGINSYS
-//#define SMEXT_ENABLE_ADMINSYS
+#define SMEXT_ENABLE_ADMINSYS
 //#define SMEXT_ENABLE_TEXTPARSERS
 //#define SMEXT_ENABLE_USERMSGS
 

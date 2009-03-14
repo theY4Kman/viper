@@ -23,7 +23,6 @@
 
 #include "viper_globals.h"
 #include <IRootConsoleMenu.h>
-#include <convar.h>
 #include <compat_wrappers.h>
 
 class ViperConsole :

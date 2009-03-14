@@ -22,7 +22,6 @@
 #define _INCLUDE_VIPER_CONVARMANAGER_H_
 
 #include "viper_globals.h"
-#include <convar.h>
 #include <compat_wrappers.h>
 #include <sh_list.h>
 #include <sm_trie.h>
@@ -73,7 +72,7 @@ public:
 private:
     static void AddConVarToPluginList(IViperPlugin *pl, ConVar *cvar);
     
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
     void OnConVarChanged(ConVar *pConVar, char const *oldValue, float flOldValue);
 #else
     void OnConVarChanged(ConVar *pConVar, char const *oldValue);

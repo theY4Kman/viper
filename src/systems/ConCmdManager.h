@@ -25,7 +25,6 @@
 #include <sh_list.h>
 #include "viper_globals.h"
 #include "IViperPluginSys.h"
-#include <convar.h>
 #include <compat_wrappers.h>
 
 enum CmdType
@@ -67,14 +66,15 @@ typedef SourceHook::List<ConCommand*> ConCmdList;
 class CConCmdManager :
     public SourceMod::IRootConsoleCommand,
     public ViperGlobalClass,
-    public IViperPluginsListener{#ifdef ORANGEBOX_BUILD    friend void CommandCallback(const CCommand &command);#else    friend void CommandCallback();#endifpublic: // IRootConsoleCommand    void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
+    public IViperPluginsListener{#if SOURCE_ENGINE >= SE_ORANGEBOX    friend void CommandCallback(const CCommand &command);#else    friend void CommandCallback();#endifpublic: // IRootConsoleCommand    void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
 public: // ViperGlobalClass
     virtual void OnViperAllInitialized();
     virtual void OnViperShutdown();
 public: // IViperPluginsListener
     virtual void OnPluginUnloaded(IViperPlugin *plugin);public:    bool AddCommand(IViperPlugin *pPlugin, PyFunction *callback, CmdType type,
         char const *name, char const *description, int flags);    /**     * Adds a ConCommand to the ConCmdManager's trie     */    void AddToCmdList(ConCmdInfo *pInfo);
-            void SetCommandClient(int client);    void RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_safe);    void RemoveConCmds(SourceHook::List<CmdHook *> &cmdlist, IViperPlugin *pl);
+            void SetCommandClient(int client);
+    int GetCommandClient();    void RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_safe);    void RemoveConCmds(SourceHook::List<CmdHook *> &cmdlist, IViperPlugin *pl);
 
 private:
     /** Adds a new command or finds one that already exists */    ConCmdInfo * AddOrFindCommand(char const *name, char const *description, int flags);    void InternalDispatch(const CCommand &command);private:    KTrie<ConCmdInfo*> m_pCmds;    SourceHook::List<ConCmdInfo *> m_CmdList;    int m_CmdClient;};extern CConCmdManager g_VCmds;

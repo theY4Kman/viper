@@ -27,12 +27,21 @@
 #define _INCLUDE_VIPER_GLOBALS_H_
 
 #include <Python.h>
+#if SOURCE_ENGINE == SE_LEFT4DEAD
+#include "convar_sm_l4d.h"
+#elif SOURCE_ENGINE == SE_ORANGEBOX
+#include "convar_sm_ob.h"
+#else
+#include "convar_sm.h"
+#endif
 #include "sdk/smsdk_ext.h"
-//#include "viper.h"
 #include <random.h>
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
 #include <igameevents.h>
+
+#define HUD_PRINTTALK		3
+#define HUD_PRINTCENTER		4
 
 /* Interface declaration */
 extern IUniformRandomStream *g_pRandom;
@@ -42,7 +51,7 @@ extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
 extern IServerPluginHelpers *g_pServerPluginHelpers;
 extern IGameEventManager2 *gameevents;
 
-#ifdef ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 extern ICvar *g_pCVar;
 #endif
 
@@ -61,7 +70,7 @@ extern PyObject *_Py_ZeroStruct;
 extern PyThreadState *g_pGlobalThreadState;
 extern PyObject *g_pViperException;
 
-#ifndef ORANGEBOX_BUILD
+#if SOURCE_ENGINE < SE_ORANGEBOX
 #define GetEngineFactory engineFactory
 #endif
 

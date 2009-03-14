@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -18,7 +18,11 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _INCLUDE_VIPER_PLAYERMANAGER_H_
+#define _INCLUDE_VIPER_PLAYERMANAGER_H_
+
 #include <IPlayerHelpers.h>
+#include "ForwardSys.h"
 #include "extension.h"
 #include "viper_globals.h"
 
@@ -30,15 +34,43 @@ public:
     ViperPlayerManager();
 public: // ViperGlobalClass
     virtual void OnViperStartup(bool late);
+    virtual void OnViperShutdown();
 public: // IClientListener
+    virtual bool InterceptClientConnect(int client, char *reject, int maxrejectlen);
     virtual void OnClientConnected(int client);
     virtual void OnClientPutInServer(int client);
     virtual void OnClientDisconnecting(int client);
     virtual void OnClientDisconnected(int client);
-    virtual void OnClientAuthorized(int client);
+    virtual void OnClientAuthorized(int client, char const *authstring);
+    
     virtual bool OnClientPreAdminCheck(int client);
     virtual void OnClientPostAdminCheck(int client);
+    
+    virtual void OnServerActivate(int clientMax);
+public:
+    /**
+     * @brief Returns the sourcemod.clients.Client object for that client index
+     */
+    PyObject *GetPythonClient(int client);
 
 private:
-    PyObject *m_SingleClientArgs;
+    IViperForward *m_OnClientConnect;
+    IViperForward *m_OnClientConnected;
+    IViperForward *m_OnClientPutInServer;
+    IViperForward *m_OnClientDisconnecting;
+    IViperForward *m_OnClientDisconnected;
+    IViperForward *m_OnClientAuthorized;
+    
+    IViperForward *m_OnClientPreAdminCheck;
+    IViperForward *m_OnClientPostAdminCheck;
+    
+    IViperForward *m_OnServerActivate;
+    IViperForward *m_OnMapStart;
+    
+    PyObject **m_Clients;
 };
+
+extern ViperPlayerManager g_Players;
+
+#endif // _INCLUDE_VIPER_PLAYERMANAGER_H_
+

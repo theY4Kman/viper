@@ -18,80 +18,213 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* TODO: Client object cache.
- * NOTE: IGamePlayers are invalidated when max clients changes.
- */
-
 #include <Python.h>
 #include <structmember.h>
 #include "extension.h"
 #include "py_clients.h"
+#include <iplayerinfo.h>
 #include <IPlayerHelpers.h>
+#include "PlayerManager.h"
 
 using SourceMod::IGamePlayer;
 
-#define CHECK_CLIENT_VALID(index, minindex) {\
-    CHECK_CLIENT_INRANGE(index, minindex);\
-    CHECK_CLIENT_CONNECTED(index);\
-}
-
-#define CHECK_CLIENT_INRANGE(index, minindex) {\
-    if (index < minindex || index > playerhelpers->GetMaxClients()) \
-    { \
-        PyErr_Format(g_pViperException, "Client %d is invalid", index); \
-        return NULL; \
-    } \
-}
-
-#define CHECK_CLIENT_CONNECTED(client) {\
-    if (!client->IsConnected()) \
-    { \
-        PyErr_Format(g_pViperException, "Client %d is not connected", index); \
-        return NULL; \
-    } \
-}
-
-static int
-clients__Client__init__(clients__Client *self, PyObject *args, PyObject *kwds)
-{
-    int index;
-    if (!PyArg_ParseTuple(args, "i", &index))
-        return -1;
-    
-    if (index < 0 || playerhelpers->GetMaxClients())
-    {
-        PyErr_Format(g_pViperException, "Client %d is invalid", index);
-        return -1;
-    }
-    
-    self->index = index;
-    
-    return 0;
-}
-
 static PyObject *
-clients__Client__str__(clients__Client *self)
+clients__Client__fakeget(clients__Client *self)
 {
-    return PyString_FromFormat("<Client %d>", self->index);
-}
-
-static PyObject *
-clients__Client__ipget(clients__Client *self)
-{
-    if (self->index < 1 || self->index > playerhelpers->GetMaxClients())
+    if (self->index < 1)
     {
         PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
         return NULL;
     }
     
-    IGamePlayer *client = playerhelpers->GetGamePlayer(self->index);
-    if (!client->IsConnected())
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
     {
         PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
         return NULL;
     }
     
-    return PyString_FromString(client->GetIPAddress());
+    if (player->IsFakeClient())
+        Py_RETURN_TRUE;
+    
+    Py_RETURN_FALSE;
+}
+
+static PyObject *
+clients__Client__ipget(clients__Client *self)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    
+    return PyString_FromString(player->GetIPAddress());
+}
+
+static PyObject *
+clients__Client__lang_idget(clients__Client *self)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    
+    return PyInt_FromLong(player->GetLanguageId());
+}
+
+static PyObject *
+clients__Client__nameget(clients__Client *self)
+{
+    if (self->index == 0)
+    {
+        static ConVar *hostname = NULL;
+        if (hostname == NULL)
+        {
+            hostname = icvar->FindVar("hostname");
+            if (hostname == NULL)
+            {
+                PyErr_SetString(g_pViperException, "Could not find \"hostname\""
+                    " cvar");
+                return NULL;
+            }
+        }
+        
+        return PyString_FromString(hostname->GetString());
+    }
+    
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    
+    return PyString_FromString(player->GetName());
+}
+
+static PyObject *
+clients__Client__steamidget(clients__Client *self)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    
+    /* The player has not yet been authorized */
+    if (player->GetAuthString() == NULL)
+        Py_RETURN_NONE;
+    
+    return PyString_FromString(player->GetAuthString());
+}
+
+static PyObject *
+clients__Client__teamget(clients__Client *self)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    else if (!player->IsInGame())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return NULL;
+    }
+
+	IPlayerInfo *pInfo = player->GetPlayerInfo();
+	if (pInfo == NULL)
+	{
+        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this game");
+        return NULL;
+	}
+
+	return PyInt_FromLong(pInfo->GetTeamIndex());
+}
+
+static PyObject *
+clients__Client__useridget(clients__Client *self)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    
+    return PyInt_FromLong(player->GetUserId());
+}
+
+static PyObject *
+clients__Client__str__(clients__Client *self)
+{
+    if (self->index > 0)
+    {
+        IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+        if (player->IsConnected())
+        {
+            return PyString_FromFormat("<Client %d (%d)::%s::%s::%s>",
+                self->index, player->GetUserId(), player->GetName(),
+                player->GetAuthString(), player->GetIPAddress());
+        }
+    }
+    
+    /* Grab the client's `name` property */
+    PyObject *name = clients__Client__nameget(self);
+    if (name != NULL)
+    {
+        return PyString_FromFormat("<Client %d::%s>", self->index,
+            PyString_AsString(name));
+    }
+    else if (PyErr_Occurred())
+    {
+        /* We don't care if there's an error */
+        PyErr_Clear();
+    }
+    
+    return PyString_FromFormat("<Client %d>", self->index);
 }
 
 static PyMemberDef clients__Client__members[] = {
@@ -101,21 +234,70 @@ static PyMemberDef clients__Client__members[] = {
 };
 
 static PyGetSetDef clients__Client__getsets[] = {
+    {"fake", (getter)clients__Client__fakeget, NULL,
+        "Whether the client is fake or not.\n"
+        "@throw ViperError: Invalid client or client not connected."},
     {"ip", (getter)clients__Client__ipget, NULL,
-        "The IP address of this client.", NULL},
-#if NOT_IMPLEMENTED_YET
-    {"name", (getter)clients__Client__nameget, (setter)clients__Client__nameset,
-        "The name of this client.", NULL},
+        "The IP address of this client.\n"
+        "@throw ViperError: Invalid client or client not connected."},
+    {"lang_id", (getter)clients__Client__lang_idget, NULL,
+        "This client's language id.\n"
+        "@throw ViperError: Invalid client or client not connected."},
+    {"name", (getter)clients__Client__nameget, NULL,
+        "The name of this client.\n"
+        "@throw ViperError: Invalid client or client not connected."},
     {"steamid", (getter)clients__Client__steamidget, NULL,
-        "The Steam ID of this client.", NULL},
+        "The Steam ID of this client. This is None when the client is not\n"
+        "authorized yet.\n"
+        "@throw ViperError: Invalid client or client not connected."},
+    {"team", (getter)clients__Client__teamget, NULL,
+        "This player's team.\n"
+        "@throw ViperError: Invalid client, client not connected, or client not in-game."},
     {"userid", (getter)clients__Client__useridget, NULL,
-        "The userid of this client.", NULL},
-#endif
+        "The userid of this client.\n"
+        "@throw ViperError: Invalid client or client not connected."},
     {NULL},
 };
 
 static PyMethodDef clients__Client__methods[] = {
 #ifdef NOT_IMPLEMENTED_YET
+    {"ban", (PyCFunction)clients__Client__ban, METH_VARARGS | METH_KEYWDS,
+        "ban(time, flags, reason, kickmsg=\"Kicked\"[, cmd=None[, source=0]]]) -> bool\n\n"
+        "Bans the client.\n",
+        "@type  time: int\n"
+        "@param time: Time, in minutes, to ban (0 = permanent)\n"
+        "@type  flags: banning.BANFLAG\n"
+        "@param flags: Flags for controlling the ban mechanism. If BANFLAG_AUTHID is\n"
+        "    set and no AUTHID is available, the ban will fail unless AUTO is also\n"
+        "    flagged.\n"
+        "@type  reason: str\n"
+        "@param reason: Reason to ban the client for.\n"
+        "@type  kickmsg: str\n"
+        "@param kickmsg: Message o display to the user when they're kicked.\n"
+        "@type  cmd: str\n"
+        "@param cmd: Command string to identify the source. If this is left empty,\n"
+        "    then the ban_client forward will not be called.\n"
+        "@type  source: object\n"
+        "@param source: A source value that could be interpreted as the identity of the\n"
+        "    player whom was the source of the banning (not actually checked by Core).\n"
+        "@rtype: bool\n"
+        "@return: True on success, False on failure."},
+    {"print_center", (PyCFunction)clients__Client__print_center, METH_VARARGS,
+        "print_center(message)\n\n"
+        "Prints a message to this client in the center of the screen."},
+    {"print_hint", (PyCFunction)clients__Client__print_hint, METH_VARARGS,
+        "print_hint(message)\n\n"
+        "Prints a message to this client with a hint box."}
+    {"print_to_console", (PyCFunction)clients__Client__print_to_console, METH_VARARGS,
+        "print_to_console(message)\n\n"
+        "Prints a message to this client's console.\n"
+        "@type  message: str\n"
+        "@param message: The message to print"},
+    {"print_to_chat", (PyCFunction)clients__Client__print_to_chat, METH_VARARGS,
+        "print_to_chat(message)\n\n"
+        "Prints a message to this client's chat area.\n"
+        "@type  message: str\n"
+        "@param message: The message to print"},
 #endif
     {NULL, NULL, 0, NULL}
 };
@@ -152,7 +334,7 @@ PyTypeObject clients__ClientType = {
     0,		                    /* tp_iternext */
     clients__Client__methods,   /* tp_methods */
     clients__Client__members,   /* tp_members */
-    0,                          /* tp_getset */
+    clients__Client__getsets,   /* tp_getset */
     0,                          /* tp_base */
     0,                          /* tp_dict */
     0,                          /* tp_descr_get */
@@ -160,8 +342,78 @@ PyTypeObject clients__ClientType = {
     0,                          /* tp_dictoffset */
     0,                          /* tp_init */
     0,                          /* tp_alloc */
-    PyType_GenericNew,          /* tp_new */
+    0,                          /* tp_new */
 };
+
+static PyObject *
+clients__get_client(PyObject *self, PyObject *args)
+{
+    int index;
+    if (!PyArg_ParseTuple(args, "i", &index))
+        return NULL;
+    
+    if (index < 0 || index > playerhelpers->GetMaxClients())
+    {
+        PyErr_Format(g_pViperException, "client index %d is invalid", index);
+        return NULL;
+    }
+    
+    PyObject *client = g_Players.GetPythonClient(index);
+    Py_XINCREF(client);
+    
+    return client;
+}
+
+static PyObject *
+clients__get_client_count(PyObject *self, PyObject *args)
+{
+    bool in_game_only = true;
+    if (!PyArg_ParseTuple(args, "|b", &in_game_only))
+        return NULL;
+    
+    if (in_game_only)
+        return PyInt_FromLong(playerhelpers->GetNumPlayers());
+    
+    int maxplayers = playerhelpers->GetMaxClients();
+    int count = 0;
+    for (int i=1; i<=maxplayers; ++i)
+    {
+        IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(i);
+        if ((pPlayer->IsConnected()) && !(pPlayer->IsInGame()))
+            count++;
+    }
+    
+    return PyInt_FromLong(playerhelpers->GetNumPlayers() + count);
+}
+
+static PyObject *
+clients__get_client_of_userid(PyObject *self, PyObject *args)
+{
+    int userid;
+    if (!PyArg_ParseTuple(args, "i", &userid))
+        return NULL;
+    
+    if (userid < 0)
+    {
+        PyErr_Format(g_pViperException, "Userid %d is invalid", userid);
+        return NULL;
+    }
+    
+    int index = playerhelpers->GetClientOfUserId(userid);
+    if (index == 0)
+        Py_RETURN_NONE;
+    
+    PyObject *client = g_Players.GetPythonClient(index);
+    Py_XINCREF(client);
+    
+    return client;
+}
+
+static PyObject *
+clients__get_max_clients(PyObject *self, PyObject *args)
+{
+    return PyInt_FromLong(playerhelpers->GetMaxClients());
+}
 
 static PyMethodDef clients__methods[] = {
 #ifdef NOT_IMPLEMENTED_YET
@@ -172,6 +424,14 @@ static PyMethodDef clients__methods[] = {
         "@param name: The name to use for the fake client\n"
         "@rtype: sourcemod.clients.Client\n"
         "@return: A valid Client object on success, None otherwise."},
+#endif
+    {"get_client", clients__get_client, METH_VARARGS,
+        "get_client(index) -> Client object\n\n"
+        "Retrieves the Client object of that client index\n"
+        "@type  index: int\n"
+        "@param index: The client index to find the Client object for\n"
+        "@rtype: sourcemod.clients.Client\n"
+        "@return: A valid Client object on success, None if an invalid client index."},
     {"get_client_count", clients__get_client_count, METH_VARARGS,
         "get_client_count([in_game_only=True]) -> int\n\n"
         "Returns the number of clients put in the server\n"
@@ -188,7 +448,6 @@ static PyMethodDef clients__methods[] = {
         "get_max_clients() -> int\n\n"
         "Returns the maximum number of clients allowed on the server. This may return 0\n"
         "if called before on_map_start."},
-#endif
     {NULL, NULL, 0, NULL},
 };
 

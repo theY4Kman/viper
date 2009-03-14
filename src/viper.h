@@ -30,7 +30,7 @@
 struct CachedCommandInfo
 {
 	const CCommand *args;
-#if !defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE < SE_ORANGEBOX
 	char cmd[300];
 #endif
 };

@@ -100,7 +100,7 @@ BaseViper::PushCommandStack(const CCommand *cmd)
 	CachedCommandInfo info;
 
 	info.args = cmd;
-#ifndef ORANGEBOX_BUILD
+#if SOURCE_ENGINE < SE_ORANGEBOX
 	strncopy(info.cmd, cmd->Arg(0), sizeof(info.cmd));
 #endif
 

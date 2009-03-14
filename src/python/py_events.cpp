@@ -22,13 +22,23 @@
 #include "EventManager.h"
 #include "PluginSys.h"
 #include <structmember.h>
+#include <bitbuf.h>
 
 /***** TODO: destroy Event object when its IGameEvent is freed ******/
 
 static PyObject *
 events__Event__cancel(events__Event *self)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     gameevents->FreeEvent(self->event);
+    
+    /* Invalidate this object */
+    self->event = NULL;
     
     Py_RETURN_NONE;
 }
@@ -36,11 +46,20 @@ events__Event__cancel(events__Event *self)
 static PyObject *
 events__Event__fire(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     bool dont_broadcast = false;
     if (!PyArg_ParseTuple(args, "b", &dont_broadcast))
         return NULL;
     
     gameevents->FireEvent(self->event, dont_broadcast);
+    
+    /* Invalidate this object */
+    self->event = NULL;
     
     Py_RETURN_NONE;
 }
@@ -48,6 +67,12 @@ events__Event__fire(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__get_bool(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     if (!PyArg_ParseTuple(args, "s", &field))
         return NULL;
@@ -58,6 +83,12 @@ events__Event__get_bool(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__get_float(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     if (!PyArg_ParseTuple(args, "s", &field))
         return NULL;
@@ -68,6 +99,12 @@ events__Event__get_float(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__get_int(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     if (!PyArg_ParseTuple(args, "s", &field))
         return NULL;
@@ -78,6 +115,12 @@ events__Event__get_int(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__get_string(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     if (!PyArg_ParseTuple(args, "s", &field))
         return NULL;
@@ -88,6 +131,12 @@ events__Event__get_string(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__has_field(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     if (!PyArg_ParseTuple(args, "s", &field))
         return NULL;
@@ -98,6 +147,12 @@ events__Event__has_field(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__set_bool(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     bool value;
     
@@ -112,6 +167,12 @@ events__Event__set_bool(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__set_float(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     float value;
     
@@ -126,6 +187,12 @@ events__Event__set_float(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__set_int(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     int value;
     
@@ -140,6 +207,12 @@ events__Event__set_int(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__set_string(events__Event *self, PyObject *args)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     char const *field;
     char const *value;
     
@@ -154,12 +227,21 @@ events__Event__set_string(events__Event *self, PyObject *args)
 static PyObject *
 events__Event__str__(events__Event *self)
 {
+    if (self->event == NULL)
+        return PyString_FromString("<Invalid Event>");
+    
     return PyString_FromFormat("<Event \"%s\">", self->event->GetName());
 }
 
 static PyObject *
 events__Event__nameget(events__Event *self)
 {
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
     return PyString_FromString(self->event->GetName());
 }
 
@@ -365,34 +447,6 @@ events__hook(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-events__hook_ex(PyObject *self, PyObject *args)
-{
-    char const *event;
-    PyObject *callback;
-    ViperEventHookMode mode = EventHookMode_Post;
-    
-    if (!PyArg_ParseTuple(args, "sO|i", &event, &callback, &mode))
-        return NULL;
-    
-    if (!PyCallable_Check(callback))
-    {
-        PyErr_SetString(g_pViperException, "The function passed was not callable");
-        return NULL;
-    }
-    
-    GET_THREAD_PLUGIN();
-    
-    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(callback,
-        pPlugin);
-    
-    ViperEventHookError status;
-    if ((status = g_EventManager.HookEvent(event, pFunc, mode)) > 0)
-        Py_RETURN_FALSE;
-    
-    Py_RETURN_TRUE;
-}
-
-static PyObject *
 events__unhook(PyObject *self, PyObject *args)
 {
     char const *event;
@@ -465,13 +519,6 @@ static PyMethodDef events__methods[] = {
         "     data won't be copied.\n"
         "@throw ViperException: Event does not exist\n"
         "@throw ViperException: Invalid callback"},
-    {"hook_ex", events__hook_ex, METH_VARARGS,
-        "hook_ex(event, callback[, mode=EventHookMode_Post]) -> bool\n\n"
-        "This is exactly like `hook`, but does not throw an exception if the game event\n"
-        "could not be found. Instead, it returns False when it does not exist.\n"
-        "@see: sourcemod.events.hook\n"
-        "@rtype: bool\n"
-        "@return: True if successfully hooked, False if the game event does not exist."},
     {"unhook", events__unhook, METH_VARARGS,
         "unhook(event, callback[, mode=EventHookMode_Post])\n\n"
         "Unhooks a callback from a game event.\n"

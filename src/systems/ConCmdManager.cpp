@@ -23,14 +23,15 @@
 #include "viper.h"
 #include "IViperForwardSys.h"
 #include "PluginSys.h"
+#include "PlayerManager.h"
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
     SH_DECL_HOOK1_void(ConCommand, Dispatch, SH_NOATTRIB, false, const CCommand &);
 #else
     SH_DECL_HOOK0_void(ConCommand, Dispatch, SH_NOATTRIB, false);
 #endif
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 void CommandCallback(const CCommand &command)
 {
 #else
@@ -178,7 +179,7 @@ CConCmdManager::OnRootConsoleCommand(char const *cmdname, const CCommand &comman
                 type = "admin";
                 break;
             default:
-                type = "sawce!";
+                assert(false, "'sawce' is not a valid command type.");
                 break;
             }
             
@@ -247,6 +248,12 @@ CConCmdManager::SetCommandClient(int client)
     m_CmdClient = client + 1;
 }
 
+int
+CConCmdManager::GetCommandClient()
+{
+    return m_CmdClient;
+}
+
 void
 CConCmdManager::RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_safe)
 {
@@ -303,8 +310,8 @@ ConCmdInfo *
 CConCmdManager::AddOrFindCommand(char const *name, char const *description,
                                  int flags)
 {
-    ConCmdInfo* pInfo;
-    ConCmdInfo** val = m_pCmds.retrieve(name);
+    ConCmdInfo *pInfo;
+    ConCmdInfo **val = m_pCmds.retrieve(name);
 
     // Aww, darn, sawce! You stole it from the trie!
     if(val == NULL)
@@ -394,7 +401,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
     py_cmd->args = (PyListObject*)args_list;
     py_cmd->argstring = command.ArgS();
     py_cmd->name = cmd;
-    py_cmd->client = client;
+    py_cmd->client = g_Players.GetPythonClient(client);
     
     PyObject *argslist = Py_BuildValue("(O)", (PyObject*)py_cmd);
     
@@ -426,17 +433,14 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             
             if(pyres == Py_None || !PyInt_Check(pyres))
             {
-                Py_XDECREF(pyres);
+                Py_DECREF(pyres);
 
-                g_pSM->LogMessage(myself, "[%s] Console command callback should"
-                    " return an action constant", pHook->pl->GetName());
-
-                PyThreadState_Swap(NULL);
+                PyThreadState_Swap(_save);
                 continue;
             }
             
             tempres = (ViperResultType)PyInt_AsLong(pyres);
-            Py_XDECREF(pyres);
+            Py_DECREF(pyres);
 
             if(tempres > result)
                 result = tempres;
@@ -453,7 +457,6 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             if (!pInfo->byViper)
                 RETURN_META(MRES_SUPERCEDE);
             
-            PyEval_AcquireLock();
             return;
         }
     }
@@ -507,17 +510,14 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             
             if(pyres == Py_None || !PyInt_Check(pyres))
             {
-                Py_XDECREF(pyres);
-                
-                g_pSM->LogMessage(myself, "[%s] Console command callback should return an action constant",
-                    pHook->pl->GetName());
+                Py_DECREF(pyres);
 
                 PyThreadState_Swap(_save);
                 continue;
             }
             
             tempres = (ViperResultType)PyInt_AsLong(pyres);
-            Py_XDECREF(pyres);
+            Py_DECREF(pyres);
 
             if(tempres > result)
                 result = tempres;

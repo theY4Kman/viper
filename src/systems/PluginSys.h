@@ -25,7 +25,6 @@
 #include "viper_globals.h"
 #include "sm_trie.h"
 #include <sh_list.h>
-#include <convar.h>
 #include <compat_wrappers.h>
 #include <IViperPluginSys.h>
 
