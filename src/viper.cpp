@@ -71,9 +71,9 @@ BaseViper::StartViper()
 	
 	/* Setup the game frame hook */
 	m_GameFrame = g_Forwards.CreateForward("GameFrame", ET_Ignore,
-	    PyTuple_New(0), NULL);
+	    m_EmptyTuple, NULL);
     
-    /* Loads the plugins */
+    /* Load the plugins */
     char plugins_path[PLATFORM_MAX_PATH];
     g_pSM->BuildPath(SourceMod::Path_SM, plugins_path, sizeof(plugins_path),
         "plugins");

@@ -26,6 +26,8 @@
 #ifndef _INCLUDE_VIPER_GLOBALS_H_
 #define _INCLUDE_VIPER_GLOBALS_H_
 
+/* Jesus, sawce, this file is horrendous. Clean up your room. */
+
 #include <Python.h>
 #if SOURCE_ENGINE == SE_LEFT4DEAD
 #include "convar_sm_l4d.h"

@@ -17,265 +17,6 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Release - Episode 1|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(OutDir)\viper.ext.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep1\viper.ext.dll&quot;&#x0D;&#x0A;"
-				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep1\viper.ext.dll&quot;"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\..\..\core;..;..\sdk;..\..\..\public;..\..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;;&quot;$(SOURCEMM16)\&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;SOURCEMOD_BUILD"
-				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="1"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/DELAYLOAD:python25.dll &quot;C:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
-				AdditionalDependencies="$(HL2SDK)\lib\public\tier0.lib $(HL2SDK)\lib\public\tier1.lib $(HL2SDK)\lib\public\vstdlib.lib $(HL2SDK)\lib\public\mathlib.lib C:\Coding\Python\libs\python25.lib"
-				OutputFile="$(OutDir)\viper.ext.dll"
-				LinkIncremental="1"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				Description="Copy output to SRCDS"
-				CommandLine="copy &quot;$(Outdir)\viper.ext.dll&quot; &quot;C:\Coding\smtestserver\cstrike\addons\sourcemod\extensions\viper.ext.dll&quot;;"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release - Orange Box|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(OutDir)\viper.ext.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep2\viper.ext.dll&quot;&#x0D;&#x0A;"
-				Outputs="$(InputDir)\build\addons\sourcemod\extensions\viper.ext.dll"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\..\..\core;..\;..\sdk;..\..\..\public;..\..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\game\server\&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;;&quot;$(SOURCEMM16)\&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;SOURCEMOD_BUILD;ORANGEBOX_BUILD"
-				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="1"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/DELAYLOAD:python25.dll &quot;C:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
-				AdditionalDependencies="$(HL2SDKOB)\lib\public\tier0.lib $(HL2SDKOB)\lib\public\tier1.lib $(HL2SDKOB)\lib\public\vstdlib.lib $(HL2SDKOB)\lib\public\mathlib.lib C:\Coding\Python\libs\python25.lib"
-				OutputFile="$(OutDir)\viper.ext.dll"
-				LinkIncremental="1"
-				IgnoreDefaultLibraryNames="LIBCMT"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				Description="Copy output to SRCDS"
-				CommandLine="copy &quot;$(Outdir)\viper.ext.dll&quot; &quot;C:\Coding\smtestserver\orangebox\tf\addons\sourcemod\extensions\viper.ext.dll&quot;;"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug - Episode 1|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(OutDir)\viper.ext.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep1\viper.ext.dll&quot;&#x0D;&#x0A;"
-				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep1\viper.ext.dll&quot;"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\..\..\core;..;..\sdk;..\..\..\public;..\..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;;&quot;$(SOURCEMM16)\&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD"
-				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="1"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/DELAYLOAD:python25.dll &quot;C:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
-				AdditionalDependencies="$(HL2SDK)\lib\public\tier0.lib $(HL2SDK)\lib\public\tier1.lib $(HL2SDK)\lib\public\vstdlib.lib $(HL2SDK)\lib\public\mathlib.lib C:\Coding\Python\libs\python25.lib"
-				OutputFile="$(OutDir)\viper.ext.dll"
-				LinkIncremental="1"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				Description="Copy output to SRCDS"
-				CommandLine="copy &quot;$(Outdir)\viper.ext.dll&quot; &quot;C:\Coding\smtestserver\cstrike\addons\sourcemod\extensions\viper.ext.dll&quot;;"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug - Orange Box|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
@@ -302,9 +43,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_LEFT4DEAD=4"
+				Optimization="0"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\..\..\core;..\;..\sdk;..\..\..\public;..\..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\game\server\&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;;&quot;$(SOURCEMM16)\&quot;"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\game\server\&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;../interfaces;../systems;../sourcemod"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;ORANGEBOX_BUILD"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="false"
@@ -318,6 +63,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -362,83 +108,110 @@
 				CommandLine="copy &quot;$(Outdir)\viper.ext.dll&quot; &quot;C:\Coding\smtestserver\orangebox\tf\addons\sourcemod\extensions\viper.ext.dll&quot;;"
 			/>
 		</Configuration>
+		<Configuration
+			Name="Release - Orange Box|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP /D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_LEFT4DEAD=4"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\game\server&quot;;&quot;$(HL2SDKOB)\public\mathlib&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCE_ENGINE=3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDKOB)\lib\public\tier0.lib&quot; &quot;$(HL2SDKOB)\lib\public\tier1.lib&quot; &quot;$(HL2SDKOB)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDKOB)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep2.dll"
+				LinkIncremental="1"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMTD"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath="..\console.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\extension.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\PluginSys.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\SmFunctions.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\ViperConCmdManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\ViperConVarManager.cpp"
-				>
-			</File>
-			<Filter
-				Name="python"
-				>
-				<File
-					RelativePath="..\python\py_clients.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_console.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_files.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_halflife.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_keyvalues.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_logging.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_timers.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\python\PyFunctions.cpp"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\systems\ConCmdManager.h"
+				>
+			</File>
 			<File
 				RelativePath="..\console.h"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\ConVarManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\EventManager.h"
 				>
 			</File>
 			<File
@@ -446,78 +219,181 @@
 				>
 			</File>
 			<File
-				RelativePath="..\PluginSys.h"
+				RelativePath="..\systems\ForwardSys.h"
 				>
 			</File>
 			<File
-				RelativePath="..\SmFunctions.h"
+				RelativePath="..\systems\PlayerManager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ViperConCmdManager.h"
+				RelativePath="..\systems\PluginSys.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ViperConVarManager.h"
+				RelativePath="..\systems\TimerSys.h"
 				>
 			</File>
-			<Filter
-				Name="python"
+			<File
+				RelativePath="..\viper.h"
 				>
-				<File
-					RelativePath="..\python\py_clients.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_console.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_files.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_halflife.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_keyvalues.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_logging.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\py_timers.h"
-					>
-				</File>
-				<File
-					RelativePath="..\python\PyFunctions.h"
-					>
-				</File>
-			</Filter>
+			</File>
+			<File
+				RelativePath="..\viper_globals.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Source Files"
+			>
+			<File
+				RelativePath="..\systems\ConCmdManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\console.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\ConVarManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\EventManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\extension.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\ForwardSys.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\PlayerManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\PluginSys.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\systems\TimerSys.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\viper.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="SDK"
+			>
+			<File
+				RelativePath="..\sdk\smsdk_config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sdk\smsdk_ext.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sdk\smsdk_ext.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Interfaces"
+			>
+			<File
+				RelativePath="..\interfaces\IViper.h"
+				>
+			</File>
+			<File
+				RelativePath="..\interfaces\IViperEngineSpecific.h"
+				>
+			</File>
+			<File
+				RelativePath="..\interfaces\IViperForwardSys.h"
+				>
+			</File>
+			<File
+				RelativePath="..\interfaces\IViperPluginSys.h"
+				>
+			</File>
+			<File
+				RelativePath="..\interfaces\IViperShareSys.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Python"
+			>
+			<File
+				RelativePath="..\python\init.h"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_clients.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_clients.h"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_console.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_console.h"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_entities.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_events.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_events.h"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_forwards.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\python\py_sourcemod.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="SourceMod"
-			UniqueIdentifier="{31958233-BB2D-4e41-A8F9-CE8A4684F436}"
 			>
-			<Filter
-				Name="SDK"
+			<File
+				RelativePath="..\sourcemod\convar_sm.h"
 				>
-				<File
-					RelativePath="..\sdk\smsdk_config.h"
-					>
-				</File>
-				<File
-					RelativePath="..\sdk\smsdk_ext.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\sdk\smsdk_ext.h"
-					>
-				</File>
-			</Filter>
+			</File>
+			<File
+				RelativePath="..\sourcemod\convar_sm_l4d.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sourcemod\convar_sm_ob.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sourcemod\sm_trie.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sourcemod\sm_trie.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

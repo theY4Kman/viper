@@ -105,13 +105,11 @@ ViperEventHookError
 ViperEventManager::HookEvent(char const *name, IViperPluginFunction *pFunc,
                              ViperEventHookMode mode)
 {
-    /* If we aren't listening to this event */
     if (!gameevents->FindListener(this, name))
     {
-        /* Then add ourselves */
         if (!gameevents->AddListener(this, name, true))
         {
-            /* If the event doesn't exist... */
+            /* sawce was too lazy to create this event. It doesn't exist. */
             return EventHookErr_InvalidEvent;
         }
     }

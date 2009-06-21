@@ -24,6 +24,7 @@
 #include "IViperForwardSys.h"
 #include "PluginSys.h"
 #include "PlayerManager.h"
+#include <assert.h>
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
     SH_DECL_HOOK1_void(ConCommand, Dispatch, SH_NOATTRIB, false, const CCommand &);
@@ -179,7 +180,8 @@ CConCmdManager::OnRootConsoleCommand(char const *cmdname, const CCommand &comman
                 type = "admin";
                 break;
             default:
-                assert(false, "'sawce' is not a valid command type.");
+                /* 'sawce' is not a valid command type. */
+                assert(false);
                 break;
             }
             
@@ -473,7 +475,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             if(!PyCallable_Check(pHook->pf))
                 continue;
 
-#if A_COLD_DAY_IN_HELL
+#if SAWCE != RUKIA
             /**
              * TODO: Admin commands
              */

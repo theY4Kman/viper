@@ -62,9 +62,9 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 	}
 	else if (strcmp(cmd, "credits") == 0)
 	{
-		g_pMenu->ConsolePrint(" Viper was developed by Zach \"theY4Kman\" Kanzler");
+		g_pMenu->ConsolePrint(" Viper is developed by Zach \"theY4Kman\" Kanzler");
 		g_pMenu->ConsolePrint(" Viper is an extension of SourceMod, developed by AlliedModders, LLC.");
-		g_pMenu->ConsolePrint(" Development would not have been possible without:");
+		g_pMenu->ConsolePrint(" Viper's development would not have been possible without:");
 		g_pMenu->ConsolePrint("  David \"BAILOPAN\" Anderson, for immense amounts of help");
 		g_pMenu->ConsolePrint("  Matt \"pRED\" Woodrow, for lots of help and support");
 		g_pMenu->ConsolePrint("  Mattie Casper, for invaluable help");
@@ -85,7 +85,7 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 
 		g_pMenu->ConsolePrint(" Viper Version Information:");
 		g_pMenu->ConsolePrint("    Viper Version: %s", SMEXT_CONF_VERSION);
-		g_pMenu->ConsolePrint("    Python Version: %s", py_ver);
+		g_pMenu->ConsolePrint("    Python Version: %s (Linked against %s)", py_ver, PY_VERSION);
 		g_pMenu->ConsolePrint("    http://y4kstudios.com/viper/");
 		
 		delete [] py_ver;

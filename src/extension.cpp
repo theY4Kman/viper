@@ -55,9 +55,7 @@ InitializePython(void)
      */
     Py_InitializeEx(0);
     
-    /* This will be removed until threads are determined to be useful. */  
-    /* PyEval_InitThreads(); */
-    
+    /* Save the thread state -- this may be the thread state ES is running in */
     g_pGlobalThreadState = PyThreadState_Get();
     
     /* Call initsourcemod so that it is loaded into the main thread state.

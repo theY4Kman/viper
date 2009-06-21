@@ -94,6 +94,7 @@ static PyMethodDef sourcemod__server_out__methods[] = {
 };
 
 PyTypeObject sourcemod__server_outType = {
+    /* TODO: Fix this -- Inheriting PyFile_Type fails */
     PyObject_HEAD_INIT(NULL)
     0,                          /*ob_size*/
     "sourcemod.server_out",     /*tp_name*/
@@ -154,7 +155,8 @@ initsourcemod(void)
     PyModule_AddModuleMacro(forwards);
     PyModule_AddModuleMacro(events);
     PyModule_AddModuleMacro(clients);
-    PyModule_AddModuleMacro(entities);
+    PyModule_AddModuleMacro(entity);
+    PyModule_AddModuleMacro(halflife);
     
     PyModule_AddObject(sourcemod, "__version__",
         PyString_FromString(SMEXT_CONF_VERSION));
@@ -163,8 +165,13 @@ initsourcemod(void)
     
     /* Redirect stdout to the server console */
     if (PyType_Ready(&sourcemod__server_outType) < 0)
+    {
         g_pSM->LogError(myself, "stdout to server console redirection failed."
             " `print` will output to stdout.");
+        
+        if (PyErr_Occurred())
+            PyErr_Print();
+    }
     else
     {
         sourcemod__server_outType.tp_new = PyType_GenericNew;

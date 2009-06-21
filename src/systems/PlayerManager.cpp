@@ -32,6 +32,10 @@
 #include "PlayerManager.h"
 #include "python/py_clients.h"
 
+/** Used for the OnClientConnect forward */
+char *g_RejectMsg = NULL;
+int g_RejectMsgLen = 0;
+
 ViperPlayerManager::ViperPlayerManager()
 {
 }
@@ -46,7 +50,7 @@ ViperPlayerManager::OnViperStartup(bool late)
     PyObject *pySingleClientArgs = PyTuple_Pack(1, &clients__ClientType);
     
     m_OnClientConnect = g_Forwards.CreateForward("client_connect",
-        ET_Ignore, pySingleClientArgs, NULL);
+        ET_Hook, pySingleClientArgs, InterceptClientConnectCallback);
     m_OnClientConnected = g_Forwards.CreateForward("client_connected",
         ET_Ignore, pySingleClientArgs, NULL);
     m_OnClientPutInServer = g_Forwards.CreateForward("client_put_in_server",
@@ -59,7 +63,7 @@ ViperPlayerManager::OnViperStartup(bool late)
         ET_Ignore, PyTuple_Pack(2, &clients__ClientType, &PyString_Type), NULL);
     
     m_OnClientPreAdminCheck = g_Forwards.CreateForward("client_pre_admin_check",
-        ET_Ignore, pySingleClientArgs, NULL);
+        ET_Hook, pySingleClientArgs, NULL);
     m_OnClientPostAdminCheck = g_Forwards.CreateForward("client_post_admin_check",
         ET_Ignore, pySingleClientArgs, NULL);
     
@@ -88,15 +92,39 @@ ViperPlayerManager::OnViperShutdown()
     g_Forwards.ReleaseForward(m_OnMapStart);
     
     playerhelpers->RemoveClientListener(this);
+    
+    for (unsigned int i=0; i<sizeof(m_Clients); i++)
+        Py_XDECREF(m_Clients[i]);
 }
 
 bool
 ViperPlayerManager::InterceptClientConnect(int client, char *reject, int maxrejectlen)
 {
+    g_RejectMsg = reject;
+    g_RejectMsgLen = maxrejectlen;
+    
     int result;
     m_OnClientConnect->Execute(&result, PyTuple_Pack(1, client));
     
-    return (bool)result;
+    /* result comes directly from InterceptClientConnectCallback */
+    return !((bool)result);
+}
+
+ViperResultType InterceptClientConnectCallback(PyObject *ret,
+                                               IViperPluginFunction *func)
+{
+    /* The plug-in wants to let the player in, continue */
+    if (ret == Py_None || ret == Py_True)
+        return Pl_Continue;
+    
+    /* The plug-in wants to reject the player, their return object will be used
+     * as a reject message.
+     */
+    PyObject *py_str = PyObject_Str(ret);
+    PyString_AsStringAndSize(py_str, &g_RejectMsg, &g_RejectMsgLen);
+    Py_DECREF(py_str);
+    
+    return Pl_Stop;
 }
 
 void
@@ -133,7 +161,10 @@ ViperPlayerManager::OnClientAuthorized(int client, char const *authstring)
 bool
 ViperPlayerManager::OnClientPreAdminCheck(int client)
 {
-    return true;
+    int result;
+    m_OnClientPreAdminCheck->Execute(&result, PyTuple_Pack(1, GetPythonClient(client)));
+    
+    return (bool)result;
 }
 
 void
@@ -161,6 +192,7 @@ ViperPlayerManager::GetPythonClient(int client)
         &clients__ClientType);
     newclient->index = client;
     
+    Py_INCREF((PyObject*)newclient);
     m_Clients[client] = (PyObject*)newclient;
     
     return m_Clients[client];

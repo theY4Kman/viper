@@ -46,6 +46,7 @@ forwards__Forward__add_function(forwards__Forward *self, PyObject *args)
     
     if (!PyCallable_Check(func))
     {
+        /* sawce would pass a non-callable object. */
         PyErr_SetString(g_pViperException, "The function passed was not callable");
         return NULL;
     }
@@ -72,6 +73,8 @@ forwards__Forward__fire(forwards__Forward *self, PyObject *args)
     {
     case ET_Single:
         return py_result;
+    case ET_Ignore:
+        Py_RETURN_NONE;
     
     default:
         return PyInt_FromLong(result);

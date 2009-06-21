@@ -22,9 +22,13 @@
 #define _INCLUDE_VIPER_PLAYERMANAGER_H_
 
 #include <IPlayerHelpers.h>
+#include <IViperPluginSys.h>
 #include "ForwardSys.h"
 #include "extension.h"
 #include "viper_globals.h"
+
+ViperResultType InterceptClientConnectCallback(PyObject *ret,
+                                               IViperPluginFunction *func);
 
 class ViperPlayerManager :
     public ViperGlobalClass,

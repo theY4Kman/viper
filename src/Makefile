@@ -26,7 +26,8 @@ OBJECTS += systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventMana
            systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp
 
 OBJECTS += python/py_clients.cpp python/py_events.cpp python/py_console.cpp \
-           python/py_forwards.cpp python/py_sourcemod.cpp python/py_entities.cpp
+           python/py_forwards.cpp python/py_sourcemod.cpp python/py_entity.cpp \
+           python/py_halflife.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -138,7 +139,8 @@ all: check
 		ln -sf $(SRCDS)/bin/vstdlib_i486.so vstdlib_i486.so; \
 		ln -sf $(SRCDS)/bin/tier0_i486.so tier0_i486.so; \
 	fi
-	ln -sf build/addons/sourcemod/extensions/viper/lib/plat-linux2/libpython2.5.so.1.0 libpython2.5.so
+#	ln -sf build/addons/sourcemod/extensions/viper/lib/plat-linux2/libpython2.5.so.1.0 libpython2.5.so
+	ln -sf $(SRCDS)/cstrike/addons/sourcemod/extensions/viper/lib/plat-linux2/libpython2.5.so.1.0 libpython2.5.so
 	$(MAKE) -f Makefile extension
 
 check:

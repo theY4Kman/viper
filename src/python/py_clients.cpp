@@ -29,6 +29,66 @@
 using SourceMod::IGamePlayer;
 
 static PyObject *
+clients__Client__print_center(clients__Client *self, PyObject *args)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    else if (!player->IsInGame())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return NULL;
+    }
+    
+    char *message;
+    if (!PyArg_ParseTuple(args, "s", &message))
+        return NULL;
+    
+    gamehelpers->TextMsg(self->index, HUD_PRINTCENTER, message);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+clients__Client__print_chat(clients__Client *self, PyObject *args)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    else if (!player->IsInGame())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return NULL;
+    }
+    
+    char *message;
+    if (!PyArg_ParseTuple(args, "s", &message))
+        return NULL;
+    
+    gamehelpers->TextMsg(self->index, HUD_PRINTTALK, message);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 clients__Client__fakeget(clients__Client *self)
 {
     if (self->index < 1)
@@ -99,6 +159,7 @@ clients__Client__nameget(clients__Client *self)
             hostname = icvar->FindVar("hostname");
             if (hostname == NULL)
             {
+                /* Damn it, sawce! It's all your fault hostname is gone! */
                 PyErr_SetString(g_pViperException, "Could not find \"hostname\""
                     " cvar");
                 return NULL;
@@ -220,7 +281,7 @@ clients__Client__str__(clients__Client *self)
     }
     else if (PyErr_Occurred())
     {
-        /* We don't care if there's an error */
+        /* The error created is like sawce: we don't care */
         PyErr_Clear();
     }
     
@@ -282,23 +343,32 @@ static PyMethodDef clients__Client__methods[] = {
         "    player whom was the source of the banning (not actually checked by Core).\n"
         "@rtype: bool\n"
         "@return: True on success, False on failure."},
-    {"print_center", (PyCFunction)clients__Client__print_center, METH_VARARGS,
-        "print_center(message)\n\n"
-        "Prints a message to this client in the center of the screen."},
-    {"print_hint", (PyCFunction)clients__Client__print_hint, METH_VARARGS,
-        "print_hint(message)\n\n"
-        "Prints a message to this client with a hint box."}
-    {"print_to_console", (PyCFunction)clients__Client__print_to_console, METH_VARARGS,
-        "print_to_console(message)\n\n"
+    {"notify_post_admin_check", (PyCFunction)clients__Client__notify_post_admin_check, METH_VARARGS,
+        "notify_post_admin_check()\n\n"
+        "Signals that a player has completed post-connection admin checks. Has no effect\n"
+        "if the player has already had this event signalled. Note: This must be sent even\n"
+        "if no admin id was assigned."},
+    {"print_console", (PyCFunction)clients__Client__print_console, METH_VARARGS,
+        "print_console(message)\n\n"
         "Prints a message to this client's console.\n"
         "@type  message: str\n"
         "@param message: The message to print"},
-    {"print_to_chat", (PyCFunction)clients__Client__print_to_chat, METH_VARARGS,
-        "print_to_chat(message)\n\n"
+    {"print_hint", (PyCFunction)clients__Client__print_hint, METH_VARARGS,
+        "print_hint(message)\n\n"
+        "Prints a message to this client with a hint box.\n"
+        "@type  message: str\n"
+        "@param message: The message to print"}
+#endif
+    {"print_center", (PyCFunction)clients__Client__print_center, METH_VARARGS,
+        "print_center(message)\n\n"
+        "Prints a message to this client in the center of the screen.\n"
+        "@type  message: str\n"
+        "@param message: The message to print"},
+    {"print_chat", (PyCFunction)clients__Client__print_chat, METH_VARARGS,
+        "print_chat(message)\n\n"
         "Prints a message to this client's chat area.\n"
         "@type  message: str\n"
         "@param message: The message to print"},
-#endif
     {NULL, NULL, 0, NULL}
 };
 
@@ -344,6 +414,24 @@ PyTypeObject clients__ClientType = {
     0,                          /* tp_alloc */
     0,                          /* tp_new */
 };
+
+static PyObject *
+clients__create_fake_client(PyObject *self, PyObject *args)
+{
+    char *name;
+    if (!PyArg_ParseTuple(args, "s", &name))
+        return NULL;
+    
+    edict_t *pEdict = engine->CreateFakeClient(name);
+    
+    if (pEdict == NULL)
+        Py_RETURN_NONE;
+    
+    PyObject *client = g_Players.GetPythonClient(IndexOfEdict(pEdict));
+    Py_XINCREF(client);
+    
+    return client;
+}
 
 static PyObject *
 clients__get_client(PyObject *self, PyObject *args)
@@ -416,7 +504,6 @@ clients__get_max_clients(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef clients__methods[] = {
-#ifdef NOT_IMPLEMENTED_YET
     {"create_fake_client", clients__create_fake_client, METH_VARARGS,
         "create_fake_client(name) -> Client object\n\n"
         "Creates a fake client.\n"
@@ -424,7 +511,6 @@ static PyMethodDef clients__methods[] = {
         "@param name: The name to use for the fake client\n"
         "@rtype: sourcemod.clients.Client\n"
         "@return: A valid Client object on success, None otherwise."},
-#endif
     {"get_client", clients__get_client, METH_VARARGS,
         "get_client(index) -> Client object\n\n"
         "Retrieves the Client object of that client index\n"

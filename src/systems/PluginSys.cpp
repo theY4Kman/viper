@@ -348,8 +348,8 @@ CPluginManager::LoadPluginsFromDir(char const *dir)
     {
         libsys->GetPlatformError(error, sizeof(error));
 
-        g_pSM->LogError(myself, "Could not load plugins from %s", dir);
-        g_pSM->LogError(myself, "Platform returned error: %s", error);
+        g_pSM->LogError(myself, "Could not load plugins from %s\n", dir);
+        g_pSM->LogError(myself, "Platform returned error: %s\n", error);
 
         return;
     }
@@ -440,9 +440,7 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path,
         }
     }
     
-
     pPlugin = CPlugin::CreatePlugin(path, error, maxlength);
-
     assert(pPlugin != NULL);
 
     pPlugin->m_type = ViperPluginType_MapUpdated;
@@ -450,6 +448,7 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path,
     sm_trie_insert(m_trie, path, pPlugin);
     m_list.push_back(pPlugin);
 
+    /* Setup Python aspects of plug-in and begin execution */
     pPlugin->RunPlugin();
     
     *_plugin = pPlugin;
@@ -559,15 +558,31 @@ CPluginManager::FindPluginByConsoleArg(char const *arg)
 			return pl;
 	}
     
-    /* Then folder name */
+    /* Then path */
     if (sm_trie_retrieve(m_trie, arg, (void **)&pl))
         return pl;
     
-    /* Finally by plug-in name */
+    /* XXX: Deepest folder name, should be path relative to plugins/ */
+	bool found = false;
+	char const *folder = GetLastFolderOfPath(arg);
 	SourceHook::List<CPlugin *>::iterator iter;
 	for(iter = m_list.begin(); iter != m_list.end(); iter++)
 	{
-		if(strcmp(arg, (*iter)->GetName()) == 0)
+		if(stricmp(arg, (*iter)->GetFolder()) == 0)
+	    {
+			found = true;
+			break;
+		}
+	}
+	
+	delete [] folder;
+	if (found)
+	    return (*iter);
+	
+    /* Finally by plug-in name */
+	for(iter = m_list.begin(); iter != m_list.end(); iter++)
+	{
+		if(stricmp(arg, (*iter)->GetName()) == 0)
 			return (*iter);
 	}
 
