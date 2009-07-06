@@ -40,7 +40,7 @@ public: // ViperGlobalClass
     virtual void OnViperStartup(bool late);
     virtual void OnViperShutdown();
 public: // IClientListener
-    virtual bool InterceptClientConnect(int client, char *reject, int maxrejectlen);
+    virtual bool InterceptClientConnect(int client, char *reject, size_t maxrejectlen);
     virtual void OnClientConnected(int client);
     virtual void OnClientPutInServer(int client);
     virtual void OnClientDisconnecting(int client);
@@ -54,6 +54,7 @@ public: // IClientListener
 public:
     /**
      * @brief Returns the sourcemod.clients.Client object for that client index
+     * @note: This returns a NEW REFERENCE
      */
     PyObject *GetPythonClient(int client);
 

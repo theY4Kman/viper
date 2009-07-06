@@ -38,10 +38,20 @@ public: //IViperForward
     virtual unsigned int GetFunctionCount();
     virtual char const *GetForwardName();
     virtual bool RemoveFunction(IViperPluginFunction *func);
-    virtual bool RemoveFunctionsOfPlugin(IViperPlugin *plugin);
+    virtual bool RemoveFunction(unsigned int idx);
+    virtual void RemoveFunctionsOfPlugin(IViperPlugin *plugin);
+    
+    /**
+     * @note: The PluginFunction passed is copied and saved, so you're free to
+     *        delete it after calling this function.
+     */
     virtual void AddFunction(IViperPluginFunction *func);
+    
+    virtual IViperPluginFunction *GetFunction(unsigned int idx);
+    
     virtual ViperExecType GetExecType();
     virtual PyObject *GetParamTypes();
+    virtual void Clear();
 public:
     static CForward *CreateForward(char const *name, ViperExecType et,
                                    PyObject *types, IForwardCallback callback);

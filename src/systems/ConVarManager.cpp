@@ -141,12 +141,15 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
         if (sm_trie_retrieve(m_ConVarCache, name, (void**)&handle))
             return handle;
         
-        handle = PyObject_GC_New(console__ConVar, &console__ConVarType);
+        handle = PyObject_New(console__ConVar, &console__ConVarType);
+        assert(handle != NULL);
+        
         handle->byViper = false;
         handle->name = cvar->GetName();
         handle->cvarChangeHooks = NULL;
         handle->pVar = cvar;
         
+        Py_INCREF(handle);
         m_ConVars.push_back(handle);
         sm_trie_insert(m_ConVarCache, name, handle);
         
@@ -162,7 +165,9 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
         pBase = const_cast<ConCommandBase *>(pBase->GetNext());
     }
     
-    handle = PyObject_GC_New(console__ConVar, &console__ConVarType);
+    handle = PyObject_New(console__ConVar, &console__ConVarType);
+    assert(handle != NULL);
+    
     handle->byViper = true;
     handle->cvarChangeHooks = NULL;
     
@@ -172,6 +177,7 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
     handle->pVar = cvar;
     handle->name = cvar->GetName();
     
+    Py_INCREF(handle);
     AddConVarToPluginList(pl, cvar);
     sm_trie_insert(m_ConVarCache, name, handle);
     

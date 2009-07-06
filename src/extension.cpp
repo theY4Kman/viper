@@ -24,8 +24,10 @@
  */
 
 #include "extension.h"
+#include <metamod_wrappers.h>
 #include <random.h>
 #include "python/init.h"
+#include "python/py_entity.h"
 #include "viper.h"
 
 ViperExtension g_ViperExt;
@@ -75,19 +77,63 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         "extensions/viper/lib/plat-win/");
     SetDllDirectory(libpath);
     
-    HMODULE python25_DLL = NULL;
-    if (!(python25_DLL = GetModuleHandle(_T("python25.dll"))))
+    HMODULE python25_DLL = GetModuleHandle(_T("python25.dll"));
+    if (python25_DLL == NULL)
+    {
+        strncpy(error, "Unable to load python25.dll", maxlength);
         return false;
+    }
     
     Py_None = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_NoneStruct");
     _Py_TrueStruct = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_TrueStruct");
     _Py_ZeroStruct = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_ZeroStruct");
+    
+    g_pSendProxy_EHandleToInt = memutils->FindPattern(g_SMAPI->GetServerFactory(false),
+        "\x83\x2A\x2A\x8B\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x33\xC9\x89\x2A\x2A\x2A"
+        "\x8B\x2A\x2A\x2A\x89\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x3D\x70\xC1\x13\x22"
+        "\xC7\x2A\x2A\x5C\x4C\x44\x22", 41);
+    
+    if (g_pSendProxy_EHandleToInt == NULL)
+    {
+        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
+                "autodetection would fail without it. Unloading.", maxlength);
+        return false;
+    }
 #else
     /* We must load in the binary to allow access to it.
      * Thanks to your-name-here for that bit of info!
      */
     if (dlopen("libpython2.5.so.1.0", RTLD_NOW) == NULL)
+    {
+        strncpy(error, "Unable to load libpython2.5.so.1.0", maxlength);
         return false;
+    }
+    
+    Dl_info info;
+    if (dladdr((void*)g_SMAPI->GetServerFactory(false), &info) == 0)
+    {
+        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
+                "autodetection would fail without it. Unloading.1", maxlength);
+        return false;
+    }
+    
+    void *handle = dlopen(info.dli_fname, RTLD_NOW);
+    if (handle == NULL)
+    {
+        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
+                "autodetection would fail without it. Unloading.2", maxlength);
+        return false;
+    }
+    
+    g_pSendProxy_EHandleToInt = dlsym(handle, "_Z22SendProxy_EHandleToIntPK8SendPropPKvS3_P8DVariantii");
+    dlclose(handle);
+    
+    if (g_pSendProxy_EHandleToInt == NULL)
+    {
+        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
+                "autodetection would fail without it. Unloading.3", maxlength);
+        return false;
+    }
 #endif
     
     InitializePython();

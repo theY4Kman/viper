@@ -26,6 +26,14 @@
 //=======================================
 CForward::~CForward()
 {
+    for (SourceHook::List<IViperPluginFunction *>::iterator iter=m_functions.begin();
+         iter!=m_functions.end(); iter++)
+    {
+        delete (*iter);
+    }
+    
+    m_functions.clear();
+    
     if (m_sName != NULL)
         delete [] m_sName;
 }
@@ -152,9 +160,9 @@ CForward::RemoveFunction(IViperPluginFunction *func)
     
     for (iter=m_functions.begin(); iter!=m_functions.end(); iter++)
     {
-        if ((*iter)->GetOwnerPlugin() == func->GetOwnerPlugin() &&
-            (*iter)->GetFunction() == func->GetFunction())
+        if ((*iter)->GetFunction() == func->GetFunction())
         {
+            delete (*iter);
             m_functions.erase(iter);
             return true;
         }
@@ -164,6 +172,19 @@ CForward::RemoveFunction(IViperPluginFunction *func)
 }
 
 bool
+CForward::RemoveFunction(unsigned int idx)
+{
+    if (idx > GetFunctionCount())
+        return false;
+    
+    SourceHook::List<IViperPluginFunction *>::iterator iter;
+    for (iter=m_functions.begin(); iter!=m_functions.end() && idx; iter++, idx--)
+        m_functions.erase(iter);
+    
+    return true;
+}
+
+void
 CForward::RemoveFunctionsOfPlugin(IViperPlugin *plugin)
 {
     SourceHook::List<IViperPluginFunction *>::iterator iter;
@@ -171,18 +192,49 @@ CForward::RemoveFunctionsOfPlugin(IViperPlugin *plugin)
     
     for (iter=m_functions.begin(); iter!=m_functions.end(); iter++)
     {
-        func = (*iter);
-        if (func->GetOwnerPlugin() == plugin)
+        if ((*iter)->GetOwnerPlugin() == plugin)
+        {
+            delete (*iter);
             iter = m_functions.erase(iter);
+        }
+    }
+}
+
+void CForward::Clear()
+{
+    for (SourceHook::List<IViperPluginFunction *>::iterator iter=m_functions.begin();
+         iter!=m_functions.end(); iter++)
+    {
+        delete (*iter);
     }
     
-    return true;
+    m_functions.clear();
 }
 
 void
 CForward::AddFunction(IViperPluginFunction *func)
-{   
-    m_functions.push_back(func);
+{
+    assert(func != NULL);
+    assert(func->GetFunction() != NULL);
+    
+    IViperPluginFunction *copy = CPluginFunction::CreatePluginFunction(
+        func->GetFunction(), func->GetOwnerPlugin());
+    
+    m_functions.push_back(copy);
+    Py_INCREF(copy->GetFunction());
+}
+
+IViperPluginFunction *
+CForward::GetFunction(unsigned int idx)
+{
+    if (idx > GetFunctionCount())
+        return NULL;
+    
+    SourceHook::List<IViperPluginFunction *>::iterator iter;
+    for (iter=m_functions.begin(); iter!=m_functions.end() && idx; iter++, idx--)
+        return (*iter);
+    
+    return NULL;
 }
 
 unsigned int
@@ -246,6 +298,7 @@ CForwardManager::~CForwardManager()
     SourceHook::CStack<CForward *>::iterator iter;
     for (iter=m_FreeForwards.begin(); iter!=m_FreeForwards.end(); iter++)
     {
+        (*iter)->Clear();
         delete (*iter);
     }
     
@@ -266,6 +319,9 @@ CForwardManager::ForwardFree(CForward *fwd)
     
     /* The param types tuple is no longer being used */
     Py_XDECREF(fwd->GetParamTypes());
+    
+    /* Delete all our IViperPluginFunctions */
+    fwd->Clear();
     
     m_FreeForwards.push(fwd);
     m_ForwardsList.remove(fwd);

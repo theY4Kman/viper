@@ -123,6 +123,7 @@ console__ConVar__hook_change(console__ConVar *self, PyObject *args)
         pPlugin);
     
     g_ConVarManager.HookConVarChange(self->pVar, pFunc);
+    delete pFunc;
     
     Py_RETURN_NONE;
 }
@@ -154,6 +155,7 @@ console__ConVar__unhook_change(console__ConVar *self, PyObject *args)
         pPlugin);
     
     g_ConVarManager.UnhookConVarChange(self->pVar, pFunc);
+    delete pFunc;
     
     if (PyErr_Occurred())
         return NULL;
@@ -252,7 +254,11 @@ console__ConVar__valueset(console__ConVar *self, PyObject *value)
     if (value == NULL)
         self->pVar->SetValue("");
     else
-        self->pVar->SetValue(PyString_AsString(PyObject_Str(value)));
+    {
+        PyObject *str = PyObject_Str(value);
+        self->pVar->SetValue(PyString_AsString(str));
+        Py_DECREF(str);
+    }
     
     return 0;
 }
@@ -536,9 +542,8 @@ static PyMethodDef console__methods[] = {
 PyObject *
 initconsole(void)
 {
-    if (PyType_Ready(&console__ConCommandReplyType) < 0)
-        return NULL;
-    if (PyType_Ready(&console__ConVarType) < 0)
+    if (PyType_Ready(&console__ConCommandReplyType) < 0 ||
+        PyType_Ready(&console__ConVarType) < 0)
         return NULL;
     
     PyObject *console = Py_InitModule3("console", console__methods,

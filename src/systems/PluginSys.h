@@ -30,6 +30,9 @@
 
 class CPluginFunction : public IViperPluginFunction
 {
+public:
+    ~CPluginFunction();
+
 public: //IViperPluginFunction
     virtual PyObject *Execute(PyObject *args, PyObject *keywds=NULL);
     virtual IViperPlugin *GetOwnerPlugin();

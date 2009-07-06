@@ -254,13 +254,12 @@ ViperEventManager::OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast)
         
         if (pForward != NULL)
         {
-            events__Event *pyEvent = PyObject_GC_New(events__Event,
+            events__Event *pyEvent = PyObject_New(events__Event,
                 &events__EventType);
             pyEvent->event = pEvent;
             pyEvent->bDontBroadcast = bDontBroadcast;
             
-            (void)pForward->Execute(&res, PyTuple_Pack(2, pyEvent,
-                PyString_FromString(name)));
+            pForward->Execute(&res, PyTuple_Pack(2, pyEvent, PyString_FromString(name)));
         }
         
         if (pHook->postCopy)
@@ -301,7 +300,7 @@ ViperEventManager::OnFireEvent_Post(IGameEvent *pEvent, bool bDontBroadcast)
         IGameEvent *pEventCopy = m_EventCopies.front();
         if (pHook->postCopy)
         {
-            events__Event *pyEvent = PyObject_GC_New(events__Event,
+            events__Event *pyEvent = PyObject_New(events__Event,
                 &events__EventType);
             pyEvent->event = pEventCopy;
             pyEvent->bDontBroadcast = bDontBroadcast;

@@ -26,12 +26,12 @@
 
 extern PyTypeObject events__EventType;
 
-typedef struct {
+struct events__Event {
     PyObject_HEAD
     
     IGameEvent *event;
     bool bDontBroadcast;
-} events__Event;
+};
 
 #endif // _INCLUDE_PYTHON_EVENTS_H_
 

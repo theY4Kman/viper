@@ -22,6 +22,7 @@
 #include <structmember.h>
 #include "extension.h"
 #include "py_clients.h"
+#include "py_entity.h"
 #include <iplayerinfo.h>
 #include <IPlayerHelpers.h>
 #include "PlayerManager.h"
@@ -86,6 +87,41 @@ clients__Client__print_chat(clients__Client *self, PyObject *args)
     gamehelpers->TextMsg(self->index, HUD_PRINTTALK, message);
     
     Py_RETURN_NONE;
+}
+
+static PyObject *
+clients__Client__entityget(clients__Client *self)
+{
+    if (self->index < 1)
+    {
+        PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return NULL;
+    }
+    else if (!player->IsInGame())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return NULL;
+    }
+    
+    edict_t *pEdict = player->GetEdict();
+    if (pEdict == NULL)
+    {
+        PyErr_Format(g_pViperException, "Unable to retrieve client %d's edict", self->index);
+        return NULL;
+    }
+    
+    entity__Entity *entity = (entity__Entity *)entity__EntityType.tp_new(
+        &entity__EntityType, NULL, NULL);
+    entity->edict = pEdict;
+
+	return (PyObject*)entity;
 }
 
 static PyObject *
@@ -295,6 +331,9 @@ static PyMemberDef clients__Client__members[] = {
 };
 
 static PyGetSetDef clients__Client__getsets[] = {
+    {"entity", (getter)clients__Client__entityget, NULL,
+        "The Entity of the client.\n"
+        "@throw ViperError: Invalid client, client not connected, or client not in-game."},
     {"fake", (getter)clients__Client__fakeget, NULL,
         "Whether the client is fake or not.\n"
         "@throw ViperError: Invalid client or client not connected."},
@@ -427,10 +466,7 @@ clients__create_fake_client(PyObject *self, PyObject *args)
     if (pEdict == NULL)
         Py_RETURN_NONE;
     
-    PyObject *client = g_Players.GetPythonClient(IndexOfEdict(pEdict));
-    Py_XINCREF(client);
-    
-    return client;
+    return g_Players.GetPythonClient(IndexOfEdict(pEdict));
 }
 
 static PyObject *
@@ -446,10 +482,7 @@ clients__get_client(PyObject *self, PyObject *args)
         return NULL;
     }
     
-    PyObject *client = g_Players.GetPythonClient(index);
-    Py_XINCREF(client);
-    
-    return client;
+    return g_Players.GetPythonClient(index);
 }
 
 static PyObject *
@@ -491,10 +524,7 @@ clients__get_client_of_userid(PyObject *self, PyObject *args)
     if (index == 0)
         Py_RETURN_NONE;
     
-    PyObject *client = g_Players.GetPythonClient(index);
-    Py_XINCREF(client);
-    
-    return client;
+    return g_Players.GetPythonClient(index);
 }
 
 static PyObject *

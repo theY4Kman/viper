@@ -394,7 +394,7 @@ events__create(PyObject *self, PyObject *args)
     if (pEvent == NULL)
         Py_RETURN_NONE;
     
-    events__Event *pyEvent = PyObject_GC_New(events__Event, &events__EventType);
+    events__Event *pyEvent = PyObject_New(events__Event, &events__EventType);
     pyEvent->event = pEvent;
     
     return (PyObject*)pyEvent;
@@ -421,25 +421,24 @@ events__hook(PyObject *self, PyObject *args)
     IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(callback,
         pPlugin);
     
-    ViperEventHookError status;
-    if ((status = g_EventManager.HookEvent(event, pFunc, mode)) > 0)
+    ViperEventHookError status = g_EventManager.HookEvent(event, pFunc, mode);
+    delete pFunc;
+    
+    if (status > 0)
     {
         switch(status)
         {
         case EventHookErr_InvalidEvent:
-            PyErr_Format(g_pViperException, "Event '%s' does not exist",
+            return PyErr_Format(g_pViperException, "Event '%s' does not exist",
                 event);
-            break;
         
         case EventHookErr_NotActive:
-            PyErr_Format(g_pViperException, "Event '%s' has no active hook",
+            return PyErr_Format(g_pViperException, "Event '%s' has no active hook",
                 event);
-            break;
         
         case EventHookErr_InvalidCallback:
-            PyErr_Format(g_pViperException, "Event '%s' does not fire the"
+            return PyErr_Format(g_pViperException, "Event '%s' does not fire the"
                 "specified callback", event);
-            break;
         };
     }
     
@@ -467,25 +466,24 @@ events__unhook(PyObject *self, PyObject *args)
     IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(callback,
         pPlugin);
     
-    ViperEventHookError status;
-    if ((status = g_EventManager.UnhookEvent(event, pFunc, mode)) > 0)
+    ViperEventHookError status = g_EventManager.UnhookEvent(event, pFunc, mode);
+    delete pFunc;
+    
+    if (status > 0)
     {
         switch(status)
         {
         case EventHookErr_InvalidEvent:
-            PyErr_Format(g_pViperException, "Event '%s' does not exist",
+            return PyErr_Format(g_pViperException, "Event '%s' does not exist",
                 event);
-            break;
         
         case EventHookErr_NotActive:
-            PyErr_Format(g_pViperException, "Event '%s' has no active hook",
+            return PyErr_Format(g_pViperException, "Event '%s' has no active hook",
                 event);
-            break;
         
         case EventHookErr_InvalidCallback:
-            PyErr_Format(g_pViperException, "Event '%s' does not fire the"
+            return PyErr_Format(g_pViperException, "Event '%s' does not fire the"
                 "specified callback", event);
-            break;
         };
     }
     

@@ -397,7 +397,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
         PyList_SetItem(args_list, i-1, PyString_FromString(command.Arg(i)));
     
     /* Creates a new ConCommandReply object */
-    console__ConCommandReply *py_cmd = PyObject_GC_New(console__ConCommandReply,
+    console__ConCommandReply *py_cmd = PyObject_New(console__ConCommandReply,
         &console__ConCommandReplyType);
     
     py_cmd->args = (PyListObject*)args_list;
@@ -428,7 +428,9 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             
             if(pyres == NULL)
             {
-                PyErr_Print();
+                if (PyErr_Occurred())
+                    PyErr_Print();
+                
                 PyThreadState_Swap(_save);
                 continue;
             }

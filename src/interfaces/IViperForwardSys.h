@@ -68,20 +68,36 @@ public:
     
     /**
      * @brief Removes a function from the forward
+     * @param func  The function to remove
+     * @return: true if the function was found and removed, false otherwise
      */
     virtual bool RemoveFunction(IViperPluginFunction *func) =0;
     
     /**
-     * @brief Removes all functions owned by a plugin from the forward
+     * @brief Removes a function from the forward at the specified index
+     * @param idx   The index into the internal list of the function to remove
+     * @return: true if the function was found and removed, false otherwise
      */
-    virtual bool RemoveFunctionsOfPlugin(IViperPlugin *plugin) =0;
+    virtual bool RemoveFunction(unsigned int idx) =0;
+    
+    /**
+     * @brief Removes all functions owned by a plugin from the forward
+     * @param plugin    The plugin of which to remove functions owned by
+     */
+    virtual void RemoveFunctionsOfPlugin(IViperPlugin *plugin) =0;
     
     /**
      * @brief Returns the number of functions hooked on this forward
-     *
      * @return Number of functions in forward
      */
     virtual unsigned int GetFunctionCount() =0;
+    
+    /**
+     * @brief Return the function at the specified index in the forward.
+     * @param idx   The index into the internal list of the function to retrieve
+     * @return The function on success, NULL if idx is invalid.
+     */
+    virtual IViperPluginFunction *GetFunction(unsigned int idx) =0;
     
     /**
      * @brief Returns the execution type of the forward
@@ -92,6 +108,11 @@ public:
      * @brief Returns the Python types of the parameters
      */
     virtual PyObject *GetParamTypes() =0;
+    
+    /**
+     * @brief Removes all the functions hooked on this forward
+     */
+    virtual void Clear() =0;
 };
 
 class IViperForwardManager

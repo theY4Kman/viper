@@ -46,32 +46,32 @@ BaseViper::StartViper()
     SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &BaseViper::GameFrame, false);
     
     /* Notify! */
-	ViperGlobalClass *pBase = ViperGlobalClass::head;
-	while (pBase)
-	{
-		pBase->OnViperStartup(false);
-		pBase = pBase->m_pGlobalClassNext;
-	}
+    ViperGlobalClass *pBase = ViperGlobalClass::head;
+    while (pBase)
+    {
+        pBase->OnViperStartup(false);
+        pBase = pBase->m_pGlobalClassNext;
+    }
 
-	/* Notify! */
-	pBase = ViperGlobalClass::head;
-	while (pBase)
-	{
-		pBase->OnViperAllInitialized();
-		pBase = pBase->m_pGlobalClassNext;
-	}
+    /* Notify! */
+    pBase = ViperGlobalClass::head;
+    while (pBase)
+    {
+        pBase->OnViperAllInitialized();
+        pBase = pBase->m_pGlobalClassNext;
+    }
 
-	/* Notify! */
-	pBase = ViperGlobalClass::head;
-	while (pBase)
-	{
-		pBase->OnViperAllInitialized_Post();
-		pBase = pBase->m_pGlobalClassNext;
-	}
-	
-	/* Setup the game frame hook */
-	m_GameFrame = g_Forwards.CreateForward("GameFrame", ET_Ignore,
-	    m_EmptyTuple, NULL);
+    /* Notify! */
+    pBase = ViperGlobalClass::head;
+    while (pBase)
+    {
+        pBase->OnViperAllInitialized_Post();
+        pBase = pBase->m_pGlobalClassNext;
+    }
+    
+    /* Setup the game frame hook */
+    m_GameFrame = g_Forwards.CreateForward("GameFrame", ET_Ignore,
+        m_EmptyTuple, NULL);
     
     /* Load the plugins */
     char plugins_path[PLATFORM_MAX_PATH];
@@ -83,12 +83,12 @@ BaseViper::StartViper()
 void
 BaseViper::OnViperUnload()
 {
-	ViperGlobalClass *pBase = ViperGlobalClass::head;
-	while (pBase)
-	{
-		pBase->OnViperShutdown();
-		pBase = pBase->m_pGlobalClassNext;
-	}
+    ViperGlobalClass *pBase = ViperGlobalClass::head;
+    while (pBase)
+    {
+        pBase->OnViperShutdown();
+        pBase = pBase->m_pGlobalClassNext;
+    }
 }
 
 /* Oh, I just love copying code directly from SourceMod
@@ -97,29 +97,29 @@ BaseViper::OnViperUnload()
 void
 BaseViper::PushCommandStack(const CCommand *cmd)
 {
-	CachedCommandInfo info;
+    CachedCommandInfo info;
 
-	info.args = cmd;
+    info.args = cmd;
 #if SOURCE_ENGINE < SE_ORANGEBOX
-	strncopy(info.cmd, cmd->Arg(0), sizeof(info.cmd));
+    strncopy(info.cmd, cmd->Arg(0), sizeof(info.cmd));
 #endif
 
-	m_CommandStack.push(info);
+    m_CommandStack.push(info);
 }
 
 const CCommand *
 BaseViper::PeekCommandStack()
 {
-	if (m_CommandStack.empty())
-		return NULL;
+    if (m_CommandStack.empty())
+        return NULL;
 
-	return m_CommandStack.front().args;
+    return m_CommandStack.front().args;
 }
 
 void
 BaseViper::PopCommandStack()
 {
-	m_CommandStack.pop();
+    m_CommandStack.pop();
 }
 
 void
@@ -131,7 +131,6 @@ BaseViper::GameFrame(bool simulating)
 BaseViper g_Viper;
 
 ViperGlobalClass *ViperGlobalClass::head = NULL;
-
 ViperGlobalClass::ViperGlobalClass()
 {
     m_pGlobalClassNext = ViperGlobalClass::head;
@@ -139,89 +138,104 @@ ViperGlobalClass::ViperGlobalClass()
 }
 
 /* Utility functions */
-size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...)
+size_t
+UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	size_t len = vsnprintf(buffer, maxlength, fmt, ap);
-	va_end(ap);
+    va_list ap;
+    va_start(ap, fmt);
+    size_t len = vsnprintf(buffer, maxlength, fmt, ap);
+    va_end(ap);
 
-	if (len >= maxlength)
-	{
-		buffer[maxlength - 1] = '\0';
-		return (maxlength - 1);
-	}
-	else
-	{
-		return len;
-	}
+    if (len >= maxlength)
+    {
+        buffer[maxlength - 1] = '\0';
+        return (maxlength - 1);
+    }
+    else
+    {
+        return len;
+    }
 }
 
-char *sm_strdup(char const *str)
+char *
+sm_strdup(char const *str)
 {
-	char *ptr = new char[strlen(str)+1];
-	strcpy(ptr, str);
-	return ptr;
+    char *ptr = new char[strlen(str)+1];
+    strcpy(ptr, str);
+    return ptr;
 }
 
-int StrReplace(char *str, char const *from, char const *to, int maxlen) 
+int
+StrReplace(char *str, char const *from, char const *to, int maxlen) 
 {
-	char *pstr = str;
-	int fromlen = strlen(from);
-	int tolen = strlen(to);
-	int	RC = 0;
+    char *pstr = str;
+    int fromlen = strlen(from);
+    int tolen = strlen(to);
+    int RC = 0;
 
-	while (*pstr != '\0' && pstr - str < maxlen) {
-		if (strncmp(pstr, from, fromlen) != 0) {
-			*pstr++;
-			continue;
-		}
-		memmove(pstr + tolen, pstr + fromlen, maxlen - ((pstr + tolen) - str) - 1);
-		memcpy(pstr, to, tolen);
-		pstr += tolen;
-		RC++;
-	}
-	return RC;
+    while (*pstr != '\0' && pstr - str < maxlen) {
+        if (strncmp(pstr, from, fromlen) != 0) {
+            *pstr++;
+            continue;
+        }
+        memmove(pstr + tolen, pstr + fromlen, maxlen - ((pstr + tolen) - str) - 1);
+        memcpy(pstr, to, tolen);
+        pstr += tolen;
+        RC++;
+    }
+    return RC;
 }
 
-char const *GetLastFolderOfPath(char const *path)
+char const *
+GetLastFolderOfPath(char const *path)
 {
-	char const *lastslash = strrchr(path, '/')-1;
-	
-	/* No slashes found, so just send 'er on back */
-	if (lastslash == NULL)
-	    return path;
-	
-	char *seclastslash = const_cast<char*>(lastslash);
-	while (seclastslash > path)
-	{
-		if (*(--seclastslash) == '/')
-			break;
-	}
+    char const *lastslash = strrchr(path, '/')-1;
+    
+    /* No slashes found, so just send 'er on back */
+    if (lastslash == NULL)
+        return path;
+    
+    char *seclastslash = const_cast<char*>(lastslash);
+    while (seclastslash > path)
+    {
+        if (*(--seclastslash) == '/')
+            break;
+    }
     
     size_t length = lastslash - seclastslash + 1;
     char *nicename = (char*)malloc(length);
     
-	strncpy(nicename, seclastslash+1, length);
-	nicename[lastslash-seclastslash] = '\0';
+    strncpy(nicename, seclastslash+1, length);
+    nicename[lastslash-seclastslash] = '\0';
 
-	return static_cast<char const *>(nicename);
+    return static_cast<char const *>(nicename);
 }
 
-unsigned int strncopy(char *dest, char const *src, size_t count)
+char const *
+GetLastOfPath(char const *path)
 {
-	if (!count)
-	{
-		return 0;
-	}
+    char const *lastslash = strrchr(path, '/');
+    if (lastslash == NULL)
+        return path;
+    
+    return lastslash + 1;
+}
 
-	char *start = dest;
-	while ((*src) && (--count))
-	{
-		*dest++ = *src++;
-	}
-	*dest = '\0';
+unsigned int
+strncopy(char *dest, char const *src, size_t count)
+{
+    if (!count)
+    {
+        return 0;
+    }
 
-	return (dest - start);
+    char *start = dest;
+    while ((*src) && (--count))
+    {
+        *dest++ = *src++;
+    }
+    *dest = '\0';
+
+    return (dest - start);
 }
 

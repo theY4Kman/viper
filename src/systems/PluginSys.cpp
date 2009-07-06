@@ -23,14 +23,18 @@
 #include "ConCmdManager.h"
 #include "python/init.h"
 
+CPluginFunction::~CPluginFunction()
+{
+    Py_DECREF(m_pFunc);
+}
+
 PyObject *
 CPluginFunction::Execute(PyObject *args, PyObject *keywds)
 {
     PyThreadState *_save = PyThreadState_Get();
     PyThreadState_Swap(m_pPlugin->GetThreadState());
     
-    if (!PyCallable_Check(m_pFunc))
-        return NULL;
+    assert(PyCallable_Check(m_pFunc));
     
     PyObject *result = PyObject_Call(m_pFunc, args, keywds);
     
@@ -58,6 +62,9 @@ CPluginFunction::GetFunction()
 CPluginFunction *
 CPluginFunction::CreatePluginFunction(PyFunction *func, IViperPlugin *pl)
 {
+    assert(func != NULL);
+    assert(pl != NULL);
+    
     CPluginFunction *plfunc = NULL;
     
     PyThreadState *_save = PyThreadState_Get();
@@ -69,6 +76,8 @@ CPluginFunction::CreatePluginFunction(PyFunction *func, IViperPlugin *pl)
     plfunc = new CPluginFunction;
     plfunc->m_pFunc = func;
     plfunc->m_pPlugin = pl;
+    
+    Py_INCREF(func);
     
 end:
     PyThreadState_Swap(_save);
@@ -92,6 +101,8 @@ CPlugin::~CPlugin()
 {
     sm_trie_destroy(m_pProps);
     
+    Py_DECREF(m_pPluginDict);
+    
     if (m_psErrorType)
     {
         delete [] m_psErrorType;
@@ -113,18 +124,24 @@ CPlugin::~CPlugin()
     /* Destroy the plug-in's sub-interpreter and switch back to main */
     if (m_pThreadState != NULL)
     {
+        PyThreadState *_swap = PyThreadState_Get();
         PyThreadState_Swap(m_pThreadState);
         
+        if (_swap == m_pThreadState)
+            _swap = NULL;
+        
         if (GetStatus() == ViperPlugin_Running)
+        {
             Py_EndInterpreter(m_pThreadState);
+            PyThreadState_Swap(_swap);
+        }
         else
         {
-            PyThreadState_Swap(NULL);
+            PyThreadState_Swap(_swap);
             PyThreadState_Clear(m_pThreadState);
             PyThreadState_Delete(m_pThreadState);
         }
     }
-    
 }
 
 CPlugin *
@@ -168,22 +185,22 @@ CPlugin::RunPlugin()
     PyThreadState_Swap(m_pThreadState);
     
     /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
-    char *path_string = (char*)malloc(PLATFORM_MAX_PATH);
+    char *path_string = new char[PLATFORM_MAX_PATH];
     unsigned int len = strrchr(m_sPath, '/') - m_sPath;
     strncpy(path_string, m_sPath, len);
     path_string[len] = '\0';
     
-    PyObject *newpath = PyList_New(6);
+    PyObject *newpath = PyList_New(5);
     PyList_SetItem(newpath, 0, PyString_FromString(path_string));
     
     g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH, "extensions/viper/lib");
+    
     /* Let's keep the folder separators consistent */
     StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
     PyList_SetItem(newpath, 1, PyString_FromString(path_string));
     
-    PyList_SetItem(newpath, 2, PyString_FromFormat("%s/lib-tk", path_string));
-    PyList_SetItem(newpath, 3, PyString_FromFormat("%s/lib-dynload", path_string));
-    PyList_SetItem(newpath, 4, PyString_FromFormat("%s/site-packages", path_string));
+    PyList_SetItem(newpath, 2, PyString_FromFormat("%s/lib-dynload", path_string));
+    PyList_SetItem(newpath, 3, PyString_FromFormat("%s/site-packages", path_string));
     
 #ifdef WIN32
     g_pSM->BuildPath(SourceMod::Path_SM, path_string, PLATFORM_MAX_PATH,
@@ -193,7 +210,7 @@ CPlugin::RunPlugin()
         "extensions/viper/lib/plat-linux2");
 #endif
     StrReplace(path_string, "\\", "/", PLATFORM_MAX_PATH);
-    PyList_SetItem(newpath, 5, PyString_FromString(path_string));
+    PyList_SetItem(newpath, 4, PyString_FromString(path_string));
     
     delete [] path_string;
     
@@ -208,6 +225,7 @@ CPlugin::RunPlugin()
     
     /* Create the plug-in's globals dict */
     m_pPluginDict = PyModule_GetDict(PyImport_ImportModule("__main__"));
+    Py_INCREF(m_pPluginDict);
     
     /* Initialize the sourcemod Python module. */
     initsourcemod();
@@ -228,14 +246,15 @@ CPlugin::RunPlugin()
         /* This clears the current error; we must restore it manually later */
         PyErr_Fetch(&errobj, &errdata, &errtraceback);
         
-        if (errobj != NULL && PyString_Check(pystring = PyObject_Str(errobj)))
+        pystring = PyObject_Str(errobj);
+        if (errobj != NULL && pystring != NULL)
             m_psErrorType = sm_strdup(PyString_AsString(pystring));
         else
             m_psErrorType = sm_strdup("<no exception type>");
         
         Py_XDECREF(pystring);
         
-        if (errdata != NULL && PyString_Check(pystring = PyObject_Str(errdata)))
+        if (errdata != NULL && pystring != NULL)
             m_psErrorType = sm_strdup(PyString_AsString(pystring));
         else
             m_psErrorType = sm_strdup("<no exception data>");
@@ -264,10 +283,16 @@ CPlugin::RunPlugin()
 void
 CPlugin::UpdateInfo()
 {
-#define RETRIEVE_INFO_FIELD(field) {\
-    PyObject *_obj;\
-    if ((_obj = PyDict_GetItemString(myinfo, #field)) != NULL)\
-        m_info.field = sm_strdup(PyString_AsString(PyObject_Str(_obj)));}
+#define RETRIEVE_INFO_FIELD(field)\
+    { \
+        PyObject *_obj;\
+        if ((_obj = PyDict_GetItemString(myinfo, #field)) != NULL) \
+        { \
+            PyObject *str = PyObject_Str(_obj); \
+            m_info.field = sm_strdup(PyString_AsString(str)); \
+            Py_DECREF(str); \
+        } \
+    }
     
     PyObject *myinfo = PyDict_GetItemString((PyObject*)m_pPluginDict, "myinfo");
     if (myinfo == NULL || !PyDict_Check(myinfo))
@@ -384,41 +409,41 @@ CPlugin *
 CPluginManager::LoadPlugin(char const *path, ViperPluginType type,
     char error[], size_t maxlength, bool *wasloaded)
 {
-	CPlugin *pl;
-	ViperLoadRes res;
+    CPlugin *pl;
+    ViperLoadRes res;
 
-	if ((res = _LoadPlugin(&pl, path, type, error, maxlength)) == ViperLoadRes_Failure)
-	{
-		if(pl == NULL)
-			return NULL;
-		else
-			return pl;
-	}
-	
-	if (res == ViperLoadRes_AlreadyLoaded)
-	{
-		*wasloaded = true;
-		return pl;
-	}
+    if ((res = _LoadPlugin(&pl, path, type, error, maxlength)) == ViperLoadRes_Failure)
+    {
+        if(pl == NULL)
+            return NULL;
+        else
+            return pl;
+    }
+    
+    if (res == ViperLoadRes_AlreadyLoaded)
+    {
+        *wasloaded = true;
+        return pl;
+    }
 
-	if (res == ViperLoadRes_NeverLoad)
-	{
-		if (m_LoadingLocked)
-			UTIL_Format(error, maxlength, "There is a global plugin loading "
-			    "lock in effect");
-		else
-			UTIL_Format(error, maxlength, "This plugin is blocked from loading "
-			    "(see ViperPlugin_settings.cfg)");
-		return NULL;
-	}
-	
+    if (res == ViperLoadRes_NeverLoad)
+    {
+        if (m_LoadingLocked)
+            UTIL_Format(error, maxlength, "There is a global plugin loading "
+                "lock in effect");
+        else
+            UTIL_Format(error, maxlength, "This plugin is blocked from loading "
+                "(see ViperPlugin_settings.cfg)");
+        return NULL;
+    }
+    
     SourceHook::List<IViperPluginsListener *>::iterator iter;
     for (iter=m_Listeners.begin(); iter!=m_Listeners.end(); iter++)
     {
         (*iter)->OnPluginLoaded(pl);
     }
 
-	return pl;
+    return pl;
 }
 
 ViperLoadRes
@@ -465,24 +490,24 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path,
 
 bool CPluginManager::ReloadPlugin(CPlugin *plugin)
 {
-	char filename[PLATFORM_MAX_PATH];
-	bool wasloaded;
-	ViperPluginType ptype;
+    char filename[PLATFORM_MAX_PATH];
+    bool wasloaded;
+    ViperPluginType ptype;
 
-	strcpy(filename, plugin->GetPath());
-	ptype = plugin->GetType();
+    strcpy(filename, plugin->GetPath());
+    ptype = plugin->GetType();
 
-	if (!UnloadPlugin(plugin))
-		return false;
+    if (!UnloadPlugin(plugin))
+        return false;
 
-	CPlugin *newpl;
-	if ((newpl = LoadPlugin(filename, ptype, NULL, 0, &wasloaded)) == NULL)
-		return false;
-	
-	if (newpl->GetStatus() == ViperPlugin_Error)
-	    return false;
+    CPlugin *newpl;
+    if ((newpl = LoadPlugin(filename, ptype, NULL, 0, &wasloaded)) == NULL)
+        return false;
+    
+    if (newpl->GetStatus() == ViperPlugin_Error)
+        return false;
 
-	return true;
+    return true;
 }
 
 bool
@@ -493,15 +518,15 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
     {
         (*iter)->OnPluginUnloaded(plugin);
     }
-	
-	sm_trie_delete(m_trie, plugin->GetPath());
-	m_list.remove(plugin);
+    
+    sm_trie_delete(m_trie, plugin->GetPath());
+    m_list.remove(plugin);
     
     PyThreadState *_save = PyThreadState_Get();
-	delete plugin;
-	PyThreadState_Swap(_save);
+    delete plugin;
+    PyThreadState_Swap(_save);
 
-	return true;
+    return true;
 }
 
 CPlugin *
@@ -520,12 +545,15 @@ CPluginManager::GetPluginOfInterpreterState(PyInterpreterState *interp)
 CPlugin *
 CPluginManager::GetPluginByPath(char const *path)
 {
-	CPlugin *pPlugin;
+    CPlugin *pPlugin;
 
-	if (!sm_trie_retrieve(m_trie, path, (void **)&pPlugin))
-		return NULL;
+    if (!sm_trie_retrieve(m_trie, path, (void **)&pPlugin))
+    {
+        if (!sm_trie_retrieve(m_trie, GetLastOfPath(path), (void **)&pPlugin))
+            return NULL;
+    }
 
-	return pPlugin;
+    return pPlugin;
 }
 
 CPlugin *
@@ -545,48 +573,41 @@ CPluginManager::GetPluginByOrder(int num)
 CPlugin *
 CPluginManager::FindPluginByConsoleArg(char const *arg)
 {
-	int id;
-	char *end;
-	CPlugin *pl;
-	
-	/* By order first */
-	id = strtol(arg, &end, 10);
-	if (*end == '\0')
-	{
-		pl = GetPluginByOrder(id);
-		if (pl != NULL)
-			return pl;
-	}
+    int id;
+    char *end;
+    CPlugin *pl;
+    
+    /* By order first */
+    id = strtol(arg, &end, 10);
+    if (*end == '\0')
+    {
+        pl = GetPluginByOrder(id);
+        if (pl != NULL)
+            return pl;
+    }
     
     /* Then path */
-    if (sm_trie_retrieve(m_trie, arg, (void **)&pl))
+    pl = GetPluginByPath(arg);
+    if (pl != NULL)
         return pl;
     
     /* XXX: Deepest folder name, should be path relative to plugins/ */
-	bool found = false;
-	char const *folder = GetLastFolderOfPath(arg);
-	SourceHook::List<CPlugin *>::iterator iter;
-	for(iter = m_list.begin(); iter != m_list.end(); iter++)
-	{
-		if(stricmp(arg, (*iter)->GetFolder()) == 0)
-	    {
-			found = true;
-			break;
-		}
-	}
-	
-	delete [] folder;
-	if (found)
-	    return (*iter);
-	
+    char const *folder = GetLastOfPath(arg);
+    SourceHook::List<CPlugin *>::iterator iter;
+    for(iter = m_list.begin(); iter != m_list.end(); iter++)
+    {
+        if(stricmp(folder, (*iter)->GetFolder()) == 0)
+            return (*iter);
+    }
+    
     /* Finally by plug-in name */
-	for(iter = m_list.begin(); iter != m_list.end(); iter++)
-	{
-		if(stricmp(arg, (*iter)->GetName()) == 0)
-			return (*iter);
-	}
+    for(iter = m_list.begin(); iter != m_list.end(); iter++)
+    {
+        if(stricmp(arg, (*iter)->GetName()) == 0)
+            return (*iter);
+    }
 
-	return NULL;
+    return NULL;
 }
 
 int

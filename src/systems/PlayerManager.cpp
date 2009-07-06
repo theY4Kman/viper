@@ -78,6 +78,8 @@ ViperPlayerManager::OnViperStartup(bool late)
 void
 ViperPlayerManager::OnViperShutdown()
 {
+    playerhelpers->RemoveClientListener(this);
+    
     g_Forwards.ReleaseForward(m_OnClientConnect);
     g_Forwards.ReleaseForward(m_OnClientConnected);
     g_Forwards.ReleaseForward(m_OnClientPutInServer);
@@ -91,20 +93,21 @@ ViperPlayerManager::OnViperShutdown()
     g_Forwards.ReleaseForward(m_OnServerActivate);
     g_Forwards.ReleaseForward(m_OnMapStart);
     
-    playerhelpers->RemoveClientListener(this);
-    
     for (unsigned int i=0; i<sizeof(m_Clients); i++)
         Py_XDECREF(m_Clients[i]);
 }
 
 bool
-ViperPlayerManager::InterceptClientConnect(int client, char *reject, int maxrejectlen)
+ViperPlayerManager::InterceptClientConnect(int client, char *reject, size_t maxrejectlen)
 {
+    if (m_OnClientConnect->GetFunctionCount() == 0)
+        return true;
+    
     g_RejectMsg = reject;
     g_RejectMsgLen = maxrejectlen;
     
     int result;
-    m_OnClientConnect->Execute(&result, PyTuple_Pack(1, client));
+    m_OnClientConnect->Execute(&result, PyTuple_Pack(1, GetPythonClient(client)));
     
     /* result comes directly from InterceptClientConnectCallback */
     return !((bool)result);
@@ -113,6 +116,7 @@ ViperPlayerManager::InterceptClientConnect(int client, char *reject, int maxreje
 ViperResultType InterceptClientConnectCallback(PyObject *ret,
                                                IViperPluginFunction *func)
 {
+    /* TODO: Accept a return value of (bool let_user_in, str reject_msg) */
     /* The plug-in wants to let the player in, continue */
     if (ret == Py_None || ret == Py_True)
         return Pl_Continue;
@@ -186,9 +190,12 @@ ViperPlayerManager::GetPythonClient(int client)
         return NULL;
     
     if (m_Clients[client] != NULL)
+    {
+        Py_INCREF(m_Clients[client]);
         return m_Clients[client];
+    }
     
-    clients__Client *newclient = PyObject_GC_New(clients__Client,
+    clients__Client *newclient = PyObject_New(clients__Client,
         &clients__ClientType);
     newclient->index = client;
     

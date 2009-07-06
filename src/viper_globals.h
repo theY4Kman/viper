@@ -38,6 +38,7 @@
 #endif
 #include "sdk/smsdk_ext.h"
 #include <random.h>
+#include <eiface.h>
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
 #include <igameevents.h>
@@ -110,6 +111,11 @@ extern int StrReplace(char *str, char const *from, char const *to, int maxlen);
  * @brief Retrieves the name of the deepest folder in a path
  */
 extern char const *GetLastFolderOfPath(char const *path);
+
+/**
+ * @brief Retrieves all the text past the last slash in a path
+ */
+extern char const *GetLastOfPath(char const *path);
 
 /* From sm_stringutils.cpp */
 extern unsigned int strncopy(char *dest, char const *src, size_t count);

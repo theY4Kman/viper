@@ -53,12 +53,11 @@ forwards__Forward__add_function(forwards__Forward *self, PyObject *args)
     
     GET_THREAD_PLUGIN();
     
-    Py_INCREF(func);
-    
     IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(func,
         pPlugin);
     
     self->fwd->AddFunction(pFunc);
+    delete pFunc;
     
     Py_RETURN_NONE;
 }
@@ -106,15 +105,54 @@ forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
         pPlugin);
        
     bool removed = self->fwd->RemoveFunction(pFunc);
+    delete pFunc;
     
-    if (removed)
+    return PyBool_FromLong(removed);
+}
+
+static int
+forwards__Forward__contains__(forwards__Forward *self, PyObject *value)
+{
+    /* Forwards only contain functions, so it's pointless to iterate through
+     * all the forward's functions to find what's not going to be there
+     */
+    if (!PyCallable_Check(value))
+        return 0;
+    
+    for (int i=0, length=self->fwd->GetFunctionCount(); i<length; i++)
     {
-        Py_DECREF(func);
-        delete pFunc;
-        Py_RETURN_TRUE;
+        IViperPluginFunction *pfunc = self->fwd->GetFunction(i);
+        assert(pfunc != NULL);
+        
+        PyObject *pyfunc = pfunc->GetFunction();
+        assert(pyfunc != NULL);
+        
+        if (pyfunc == value)
+            return 1;
     }
     
-    Py_RETURN_FALSE;
+    return 0;
+}
+
+static PyObject *
+forwards__Forward__item__(forwards__Forward *self, Py_ssize_t i)
+{
+    /* Damn compiler complaining about signedness comparison */
+    if ((i < 0 ? 0 : i) >= self->fwd->GetFunctionCount())
+    {
+        PyErr_SetString(PyExc_IndexError, "list index out of range");
+        return NULL;
+    }
+    
+    IViperPluginFunction *pfunc = self->fwd->GetFunction(i);
+    assert(pfunc != NULL);
+    
+    PyObject *pyfunc = pfunc->GetFunction();
+    assert(pyfunc != NULL);
+    
+    Py_INCREF(pyfunc);
+    
+    return pyfunc;
 }
 
 static Py_ssize_t
@@ -170,11 +208,11 @@ static PySequenceMethods forwards__ForwardSequenceType = {
 	(lenfunc)forwards__Forward__len__, /*sq_length*/
 	0,                          /*sq_concat*/
 	0,                          /*sq_repeat*/
-	0,                          /*sq_item*/
+	(ssizeargfunc)forwards__Forward__item__,/*sq_item*/
 	0,                          /*sq_slice*/
 	0,                          /*sq_ass_item*/
 	0,                          /*sq_ass_slice*/
-	0,                          /*sq_contains*/
+	(objobjproc)forwards__Forward__contains__,/*sq_contains*/
 	0,                          /*sq_inplace_concat*/
 	0,                          /*sq_inplace_repeat*/
 };
@@ -236,16 +274,15 @@ forwards__register(PyObject *self, PyObject *args)
     
     IViperForward *fwd = g_Forwards.FindForward(name);
     if (fwd == NULL)
-        Py_RETURN_FALSE;
+        return PyErr_Format(g_pViperException, "Forward '%s' does not exist", name);
     
     GET_THREAD_PLUGIN();
-    
-    Py_INCREF(callback);
     
     IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(callback,
         pPlugin);
     
     fwd->AddFunction(pFunc);
+    delete pFunc;
     
     Py_RETURN_TRUE;
 }
@@ -273,7 +310,7 @@ forwards__create(PyObject *self, PyObject *args)
     IViperForward *fwd = g_Forwards.CreateForward(name, et, types, NULL);
     
     /* Create a new Python Forward object */
-    forwards__Forward *py_fwd = PyObject_GC_New(forwards__Forward,
+    forwards__Forward *py_fwd = PyObject_New(forwards__Forward,
         &forwards__ForwardType);
     
     py_fwd->fwd = fwd;
