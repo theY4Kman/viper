@@ -45,9 +45,9 @@ ViperConVarManager::~ViperConVarManager()
 void
 ViperConVarManager::OnViperStartup(bool late)
 {
-    /* I don't know why, but Python chokes when I use console__ConVarType */
     m_HookParams = PyTuple_Pack(3, &console__ConVarType, &PyString_Type,
                                 &PyString_Type);
+    assert(m_HookParams != NULL);
 }
 
 void
@@ -76,14 +76,16 @@ ViperConVarManager::OnViperShutdown()
             delete [] handle->pVar->GetHelpText();
             delete [] handle->pVar->GetDefault();
             delete handle->pVar;
+            
+            handle->pVar = NULL;
         }
         
-        delete handle;
+        Py_DECREF((PyObject *)handle);
     }
     
     sm_trie_clear(m_ConVarCache);
     
-    Py_XDECREF(m_HookParams);
+    Py_DECREF(m_HookParams);
 }
 
 void
@@ -177,8 +179,9 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
     handle->pVar = cvar;
     handle->name = cvar->GetName();
     
-    Py_INCREF(handle);
     AddConVarToPluginList(pl, cvar);
+    
+    Py_INCREF(handle);
     sm_trie_insert(m_ConVarCache, name, handle);
     
     return handle;
@@ -187,7 +190,12 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
 void
 ViperConVarManager::OnPluginUnloaded(IViperPlugin *pl)
 {
-    /* TODO */
+    ConVarList *pConVarList;
+    if (!pl->GetProperty("ConVarList", (void**)&pConVarList, true))
+        return;
+    
+    pConVarList->clear();
+    delete pConVarList;
 }
 
 void
@@ -271,8 +279,6 @@ ViperConVarManager::UnhookConVarChange(ConVar *pVar, IViperPluginFunction *pFunc
         handle->cvarChangeHooks = NULL;
     }
     
-    Py_XDECREF(m_HookParams);
-    
     return;
 }
 
@@ -300,6 +306,8 @@ ViperConVarManager::OnConVarChanged(ConVar *pConVar, char const *oldValue)
         PyObject *args = Py_BuildValue("(Oss)", handle, oldValue,
             handle->pVar->GetString());
         pForward->Execute(NULL, args);
+        
+        Py_DECREF(args);
     }
 }
 

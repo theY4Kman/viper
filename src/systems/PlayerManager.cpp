@@ -46,8 +46,9 @@ ViperPlayerManager::OnViperStartup(bool late)
     m_Clients = new PyObject*[ABSOLUTE_PLAYER_LIMIT + 1];
     memset(m_Clients, 0, sizeof(PyObject*) * (ABSOLUTE_PLAYER_LIMIT + 1));
     
-    Py_INCREF(&clients__ClientType);
     PyObject *pySingleClientArgs = PyTuple_Pack(1, &clients__ClientType);
+    PyObject *pyClientStringArgs = PyTuple_Pack(2, &clients__ClientType, &PyString_Type);
+    PyObject *pySingleIntArgs = PyTuple_Pack(1, &PyInt_Type);
     
     m_OnClientConnect = g_Forwards.CreateForward("client_connect",
         ET_Hook, pySingleClientArgs, InterceptClientConnectCallback);
@@ -60,7 +61,7 @@ ViperPlayerManager::OnViperStartup(bool late)
     m_OnClientDisconnected = g_Forwards.CreateForward("client_disconnected",
         ET_Ignore, pySingleClientArgs, NULL);
     m_OnClientAuthorized = g_Forwards.CreateForward("client_authorized",
-        ET_Ignore, PyTuple_Pack(2, &clients__ClientType, &PyString_Type), NULL);
+        ET_Ignore, pyClientStringArgs, NULL);
     
     m_OnClientPreAdminCheck = g_Forwards.CreateForward("client_pre_admin_check",
         ET_Hook, pySingleClientArgs, NULL);
@@ -68,9 +69,13 @@ ViperPlayerManager::OnViperStartup(bool late)
         ET_Ignore, pySingleClientArgs, NULL);
     
     m_OnServerActivate = g_Forwards.CreateForward("server_activate", ET_Ignore,
-        PyTuple_Pack(1, &PyInt_Type), NULL);
+        pySingleIntArgs, NULL);
     m_OnMapStart = g_Forwards.CreateForward("map_start", ET_Ignore,
         pySingleClientArgs, NULL);
+    
+    Py_DECREF(pySingleClientArgs);
+    Py_DECREF(pyClientStringArgs);
+    Py_DECREF(pySingleIntArgs);
     
     playerhelpers->AddClientListener(this);
 }
@@ -107,7 +112,9 @@ ViperPlayerManager::InterceptClientConnect(int client, char *reject, size_t maxr
     g_RejectMsgLen = maxrejectlen;
     
     int result;
-    m_OnClientConnect->Execute(&result, PyTuple_Pack(1, GetPythonClient(client)));
+    PyObject *args = PyTuple_Pack(1, GetPythonClient(client));
+    m_OnClientConnect->Execute(&result, args);
+    Py_DECREF(args);
     
     /* result comes directly from InterceptClientConnectCallback */
     return !((bool)result);
@@ -131,56 +138,46 @@ ViperResultType InterceptClientConnectCallback(PyObject *ret,
     return Pl_Stop;
 }
 
-void
-ViperPlayerManager::OnClientConnected(int client)
-{
-    m_OnClientConnected->Execute(NULL, PyTuple_Pack(1, GetPythonClient(client)));
-}
+#define PY_CLIENT_FORWARD_HANDLE(forward) \
+    void \
+    ViperPlayerManager::forward(int client) \
+    { \
+        PyObject *args = PyTuple_Pack(1, GetPythonClient(client)); \
+        m_##forward->Execute(NULL, args); \
+        Py_DECREF(args); \
+    }
 
-void
-ViperPlayerManager::OnClientPutInServer(int client)
-{
-    m_OnClientPutInServer->Execute(NULL, PyTuple_Pack(1, GetPythonClient(client)));
-}
-
-void
-ViperPlayerManager::OnClientDisconnecting(int client)
-{
-    m_OnClientDisconnecting->Execute(NULL, PyTuple_Pack(1, GetPythonClient(client)));
-}
-
-void
-ViperPlayerManager::OnClientDisconnected(int client)
-{
-    m_OnClientDisconnected->Execute(NULL, PyTuple_Pack(1, GetPythonClient(client)));
-}
+PY_CLIENT_FORWARD_HANDLE(OnClientConnected);
+PY_CLIENT_FORWARD_HANDLE(OnClientPutInServer);
+PY_CLIENT_FORWARD_HANDLE(OnClientDisconnecting);
+PY_CLIENT_FORWARD_HANDLE(OnClientDisconnected);
+PY_CLIENT_FORWARD_HANDLE(OnClientPostAdminCheck);
 
 void
 ViperPlayerManager::OnClientAuthorized(int client, char const *authstring)
 {
-    m_OnClientAuthorized->Execute(NULL,
-        PyTuple_Pack(2, GetPythonClient(client), PyString_FromString(authstring)));
+    PyObject *args = PyTuple_Pack(2, GetPythonClient(client),
+        PyString_FromString(authstring));
+    m_OnClientAuthorized->Execute(NULL, args);
+    Py_DECREF(args);
 }
 
 bool
 ViperPlayerManager::OnClientPreAdminCheck(int client)
 {
     int result;
-    m_OnClientPreAdminCheck->Execute(&result, PyTuple_Pack(1, GetPythonClient(client)));
+    PyObject *args = PyTuple_Pack(1, GetPythonClient(client));
+    m_OnClientPreAdminCheck->Execute(&result, args);
+    Py_DECREF(args);
     
     return (bool)result;
 }
-
-void
-ViperPlayerManager::OnClientPostAdminCheck(int client)
-{
-    m_OnClientPostAdminCheck->Execute(NULL, PyTuple_Pack(1, GetPythonClient(client)));
-}
-
 void
 ViperPlayerManager::OnServerActivate(int clientMax)
 {
-    m_OnServerActivate->Execute(NULL, PyTuple_Pack(1, PyInt_FromLong(clientMax)));
+    PyObject *args = PyTuple_Pack(1, PyInt_FromLong(clientMax));
+    m_OnServerActivate->Execute(NULL, args);
+    Py_DECREF(args);
 }
 
 PyObject *

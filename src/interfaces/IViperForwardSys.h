@@ -35,7 +35,7 @@ enum ViperResultType
 enum ViperExecType
 {
     ET_Ignore = 0,  /**< Ignore all return values, return NULL */
-    ET_Single = 1,  /**< Only return the last exec, ignore all others */
+    ET_Single = 1,  /**< REMOVED! This will act like ET_Ignore. */
     ET_Event = 2,   /**< Acts as an event with the ResultTypes above, no mid-Stops allowed, returns highest if number */
     ET_Hook = 3,    /**< Acts as a hook with the ResultTypes above, mid-Stops allowed, returns highest if number */
     ET_LowEvent = 4,/**< Same as ET_Event, except that it returns the lowest value if number */
@@ -127,7 +127,10 @@ public:
      * @param name  Name of forward
      * @param et    Execution type to be used
      * @param types A Python tuple containing the types of the parameters
-     * @param callback  The callback to call when the result of a forward call is reached
+     * @param callback  A function that processes the return values of the Python
+     *      hooks. It should return a Pl_* constant, such as Pl_Stop. This
+     *      return value will be processed according to the forward's execution
+     *      type. The PyObject* passed is a borrowed reference.
      * @return  New IForward on success, NULL otherwise.
      */
     virtual IViperForward *CreateForward(char const *name, ViperExecType et,

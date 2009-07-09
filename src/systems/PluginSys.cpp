@@ -94,14 +94,32 @@ CPlugin::CPlugin(char const *file)
     
     m_pProps = sm_trie_create();
 
-    snprintf(m_sPath, sizeof(m_sPath), "%s", file);
+    strncpy(m_sPath, file, sizeof(m_sPath));
+    
+    m_sFolder = GetLastFolderOfPath(m_sPath);
+    
+    m_info.name = m_sFolder;
+    m_info.author = "";
+    m_info.description = "";
+    m_info.version = "";
+    m_info.url = "";
+    
+    /* Create a completeley new environment (sub-interpreter) */
+    m_pThreadState = Py_NewInterpreter();
+    if (m_pThreadState == NULL)
+    {
+        g_pSM->LogError(myself, "Fatal error in creating Python "
+            "sub-interpreter for %s!", m_sFolder);
+        g_VPlugins.UnloadPlugin(this);
+        return;
+    }
+    
+    m_pInterpState = m_pThreadState->interp;
 }
 
 CPlugin::~CPlugin()
 {
     sm_trie_destroy(m_pProps);
-    
-    Py_DECREF(m_pPluginDict);
     
     if (m_psErrorType)
     {
@@ -117,7 +135,7 @@ CPlugin::~CPlugin()
     
     if (m_pErrorTraceback)
     {
-        Py_XDECREF(m_pErrorTraceback);
+        Py_DECREF(m_pErrorTraceback);
         m_pErrorTraceback = NULL;
     }
     
@@ -162,31 +180,11 @@ CPlugin::CreatePlugin(char const *path, char* error, size_t maxlength)
 void
 CPlugin::RunPlugin()
 {
-    m_sFolder = GetLastFolderOfPath(m_sPath);
-    
-    m_info.name = m_sFolder;
-    m_info.author = "";
-    m_info.description = "";
-    m_info.version = "";
-    m_info.url = "";
-    
-    /* Create a completeley new environment (sub-interpreter) */
-    m_pThreadState = Py_NewInterpreter();
-    if (m_pThreadState == NULL)
-    {
-        g_pSM->LogError(myself, "Fatal error in creating Python "
-            "sub-interpreter for %s!", m_sFolder);
-        g_VPlugins.UnloadPlugin(this);
-        return;
-    }
-    
-    m_pInterpState = m_pThreadState->interp;
-    
     PyThreadState_Swap(m_pThreadState);
     
     /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
     char *path_string = new char[PLATFORM_MAX_PATH];
-    unsigned int len = strrchr(m_sPath, '/') - m_sPath;
+    size_t len = strrchr(m_sPath, '/') - m_sPath;
     strncpy(path_string, m_sPath, len);
     path_string[len] = '\0';
     
@@ -214,18 +212,25 @@ CPlugin::RunPlugin()
     
     delete [] path_string;
     
+    // SetObject increases the refcnt by one
     PySys_SetObject("path", newpath);
+    Py_DECREF(newpath);
     
     /* Set the custom excepthook, so that the annoying "Error in sys.excepthook:"
      * doesn't happen. The cause of it is that when an exception occurs, too
      * much of the sys module is unloaded to handle the exception correctly.
      */
     PyObject *tb = PyImport_ImportModule("traceback");
-    PySys_SetObject("excepthook", PyObject_GetAttrString(tb, "print_exception"));
+    PyObject *print_exception = PyObject_GetAttrString(tb, "print_exception");
+    PySys_SetObject("excepthook", print_exception);
+    
+    Py_DECREF(tb);
+    Py_DECREF(print_exception);
     
     /* Create the plug-in's globals dict */
-    m_pPluginDict = PyModule_GetDict(PyImport_ImportModule("__main__"));
-    Py_INCREF(m_pPluginDict);
+    PyObject *__main__ = PyImport_ImportModule("__main__");
+    m_pPluginDict = PyModule_GetDict(__main__);
+    Py_DECREF(__main__);
     
     /* Initialize the sourcemod Python module. */
     initsourcemod();
@@ -238,23 +243,22 @@ CPlugin::RunPlugin()
     /* Save the error if one has occurred, and print it out to the server */
     if (PyErr_Occurred())
     {
-        PyObject *errobj,
-                 *errdata,
-                 *errtraceback,
-                 *pystring = NULL;
+        PyObject *errobj, *errdata, *errtraceback;
+        PyObject *pystring = NULL;
         
         /* This clears the current error; we must restore it manually later */
         PyErr_Fetch(&errobj, &errdata, &errtraceback);
         
         pystring = PyObject_Str(errobj);
-        if (errobj != NULL && pystring != NULL)
+        if (errobj != NULL || pystring != NULL)
             m_psErrorType = sm_strdup(PyString_AsString(pystring));
         else
             m_psErrorType = sm_strdup("<no exception type>");
         
         Py_XDECREF(pystring);
         
-        if (errdata != NULL && pystring != NULL)
+        pystring = PyObject_Str(errdata);
+        if (errdata != NULL || pystring != NULL)
             m_psErrorType = sm_strdup(PyString_AsString(pystring));
         else
             m_psErrorType = sm_strdup("<no exception data>");
@@ -262,7 +266,10 @@ CPlugin::RunPlugin()
         Py_XDECREF(pystring);
         
         if (errtraceback != NULL)
+        {
+            Py_INCREF(errtraceback);
             m_pErrorTraceback = errtraceback;
+        }
         
         PyErr_Restore(errobj, errdata, errtraceback);
         PyErr_Print();
@@ -285,7 +292,7 @@ CPlugin::UpdateInfo()
 {
 #define RETRIEVE_INFO_FIELD(field)\
     { \
-        PyObject *_obj;\
+        PyObject *_obj; \
         if ((_obj = PyDict_GetItemString(myinfo, #field)) != NULL) \
         { \
             PyObject *str = PyObject_Str(_obj); \
@@ -424,9 +431,8 @@ CPluginManager::LoadPlugin(char const *path, ViperPluginType type,
     {
         *wasloaded = true;
         return pl;
-    }
-
-    if (res == ViperLoadRes_NeverLoad)
+    } 
+    else if (res == ViperLoadRes_NeverLoad)
     {
         if (m_LoadingLocked)
             UTIL_Format(error, maxlength, "There is a global plugin loading "
@@ -813,7 +819,6 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                 PyObject *tb_strings = NULL;
                 PyObject *format_tb = NULL;
                 PyObject *traceback = NULL;
-                int size;
                 
                 traceback = PyImport_ImportModule("traceback");
                 if (!traceback)
@@ -828,15 +833,14 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
                 if (!tb_strings)
                     goto done;
                 
-                int i;
+                Py_ssize_t i;
+                Py_ssize_t size;
+                
                 size = PyList_Size(tb_strings);
                 /* Start at frame #1, because frame #0 will always be the
                  * execfile() frame: File "<string>", line 1, in <module>
                  */
-                if (size >= 1)
-                    i = 1;
-                else
-                    i = 0;
+                i = (size > 1) ? 1 : 0;
                 
                 for (; i < size; i++)
                 {
@@ -879,8 +883,6 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
         }
         else
         {
-            /* TODO */
-            /*g_pMenu->ConsolePrint("  Load error: %s", pl->m_errormsg);*/
             g_pMenu->ConsolePrint("  File info: (title \"%s\") (version \"%s\")", 
                 info->name, info->version ? info->version : "<none>");
             

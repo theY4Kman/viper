@@ -52,18 +52,24 @@ PyThreadState *g_pGlobalThreadState = NULL;
 void
 InitializePython(void)
 {
-    /* Initialize the python interpreter, passing 0 to skip registration of
-     * Python's default signal handlers (like SIGINT)
-     */
-    Py_InitializeEx(0);
+    PyImport_AppendInittab("sourcemod", initsourcemod);
+    
+    if (!Py_IsInitialized())
+    {
+        /* Initialize the python interpreter, passing 0 to skip registration of
+         * Python's default signal handlers (like SIGINT)
+         */
+        Py_InitializeEx(0);
+    }
     
     /* Save the thread state -- this may be the thread state ES is running in */
     g_pGlobalThreadState = PyThreadState_Get();
     
     /* Call initsourcemod so that it is loaded into the main thread state.
      * This allows ES users to access the sourcemod module.
+     * XXX: Does this actually work? TEST!
      */
-    initsourcemod();
+    //initsourcemod();
 }
 
 bool
@@ -113,7 +119,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     if (dladdr((void*)g_SMAPI->GetServerFactory(false), &info) == 0)
     {
         strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
-                "autodetection would fail without it. Unloading.1", maxlength);
+                "autodetection would fail without it. Unloading.", maxlength);
         return false;
     }
     
@@ -121,7 +127,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     if (handle == NULL)
     {
         strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
-                "autodetection would fail without it. Unloading.2", maxlength);
+                "autodetection would fail without it. Unloading.", maxlength);
         return false;
     }
     
@@ -131,7 +137,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     if (g_pSendProxy_EHandleToInt == NULL)
     {
         strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
-                "autodetection would fail without it. Unloading.3", maxlength);
+                "autodetection would fail without it. Unloading.", maxlength);
         return false;
     }
 #endif
@@ -148,17 +154,13 @@ ViperExtension::SDK_OnUnload()
     
     PyThreadState_Swap(g_pGlobalThreadState);
     
-    /* Reset sys.stdout */
-    PyObject *sourcemod = PyImport_AddModule("sourcemod");
-    PySys_SetObject("stdout", PyObject_GetAttrString(sourcemod, "stdout"));
-    
     Py_Finalize();
 }
 
 void
 ViperExtension::SDK_OnAllLoaded()
 {
-    // TODO
+    // TODO: SourceMod natives
 }
 
 bool

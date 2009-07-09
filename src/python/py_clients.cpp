@@ -90,6 +90,34 @@ clients__Client__print_chat(clients__Client *self, PyObject *args)
 }
 
 static PyObject *
+clients__Client__set_fake_client_convar(clients__Client *self, PyObject *args)
+{
+    char const *convar;
+    char const *value;
+    
+    if (!PyArg_ParseTuple(args, "ss", &convar, &value))
+        return NULL;
+    
+    if (self->index < 1)
+        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+    
+    if (!player->IsFakeClient())
+        return PyErr_Format(g_pViperException, "Client %d is not fake", self->index);
+    
+    edict_t *pEdict = player->GetEdict();
+    if (pEdict == NULL)
+        return PyErr_Format(g_pViperException, "Unable to retrieve client %d's edict", self->index);
+    
+    engine->SetFakeClientConVarValue(pEdict, convar, value);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 clients__Client__entityget(clients__Client *self)
 {
     if (self->index < 1)
@@ -100,22 +128,14 @@ clients__Client__entityget(clients__Client *self)
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-    {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
-        return NULL;
-    }
+        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+    
     else if (!player->IsInGame())
-    {
-        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
-        return NULL;
-    }
+        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
     
     edict_t *pEdict = player->GetEdict();
     if (pEdict == NULL)
-    {
-        PyErr_Format(g_pViperException, "Unable to retrieve client %d's edict", self->index);
-        return NULL;
-    }
+        return PyErr_Format(g_pViperException, "Unable to retrieve client %d's edict", self->index);
     
     entity__Entity *entity = (entity__Entity *)entity__EntityType.tp_new(
         &entity__EntityType, NULL, NULL);
@@ -331,6 +351,26 @@ static PyMemberDef clients__Client__members[] = {
 };
 
 static PyGetSetDef clients__Client__getsets[] = {
+#ifdef NOT_DOCUMENTED_YET
+    {"alive",},
+    {"model",},
+    {"health",},
+    {"weapon",},
+    {"maxs",},
+    {"mins",},
+    {"abs_angles",},
+    {"abs_origin",},
+    {"armor",},
+    {"deaths",},
+    {"frags",},
+    {"data_rate",},
+    {"avg_latency",},
+    {"avg_loss",},
+    {"avg_choke",},
+    {"avg_data",},
+    {"avg_packets",},
+    {"serial",},
+#endif
     {"entity", (getter)clients__Client__entityget, NULL,
         "The Entity of the client.\n"
         "@throw ViperError: Invalid client, client not connected, or client not in-game."},
@@ -360,6 +400,29 @@ static PyGetSetDef clients__Client__getsets[] = {
 };
 
 static PyMethodDef clients__Client__methods[] = {
+#ifdef NOT_DOCUMENTED_YET
+    {"get_info",}, // Should this be renamed? It's misleading
+    {"kick",}, // Be sure to implement delay, and delay=False
+    
+    /* TODO: All admin stuff
+     * XXX: Should "user" be removed from the names?
+     */
+    {"set_user_admin",},
+    {"add_user_flags",},
+    {"remove_user_flags",},
+    {"get_user_flag_bits",},
+    {"set_user_flag_bits",},
+    {"",},
+    {"UNDEFINED",},
+    {"UNDEFINED",},
+    
+    {"is_in_kick_queue",},
+    {"can_user_target",},
+    {"is_timing_out",},
+    {"UNDEFINED",},
+    {"UNDEFINED",},
+    {"UNDEFINED",},
+#endif
 #ifdef NOT_IMPLEMENTED_YET
     {"ban", (PyCFunction)clients__Client__ban, METH_VARARGS | METH_KEYWDS,
         "ban(time, flags, reason, kickmsg=\"Kicked\"[, cmd=None[, source=0]]]) -> bool\n\n"
@@ -408,6 +471,13 @@ static PyMethodDef clients__Client__methods[] = {
         "Prints a message to this client's chat area.\n"
         "@type  message: str\n"
         "@param message: The message to print"},
+    {"set_fake_client_convar", (PyCFunction)clients__Client__set_fake_client_convar, METH_VARARGS,
+        "set_fake_client_convar(convar, value)\n\n"
+        "Sets a convar value on a fake client.\n"
+        "@type  convar: str\n"
+        "@param convar: The ConVar name.\n"
+        "@type  value: str\n"
+        "@param value: The value to set the ConVar to."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -508,7 +578,7 @@ clients__get_client_count(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-clients__get_client_of_userid(PyObject *self, PyObject *args)
+clients__get_client_from_userid(PyObject *self, PyObject *args)
 {
     int userid;
     if (!PyArg_ParseTuple(args, "i", &userid))
@@ -534,6 +604,9 @@ clients__get_max_clients(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef clients__methods[] = {
+#ifdef NOT_DOCUMENTED_YET    
+    {"get_client_from_serial",},
+#endif
     {"create_fake_client", clients__create_fake_client, METH_VARARGS,
         "create_fake_client(name) -> Client object\n\n"
         "Creates a fake client.\n"
@@ -553,7 +626,7 @@ static PyMethodDef clients__methods[] = {
         "Returns the number of clients put in the server\n"
         "@type  in_game_only: bool\n"
         "@param in_game_only: If False, players currently connecting are also counted."},
-    {"get_client_of_userid", clients__get_client_of_userid, METH_VARARGS,
+    {"get_client_from_userid", clients__get_client_from_userid, METH_VARARGS,
         "get_client_of_userid(userid) -> Client object\n"
         "Translates a userid index to a Client object\n"
         "@type  userid: int\n"

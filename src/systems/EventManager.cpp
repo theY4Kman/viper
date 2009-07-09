@@ -40,7 +40,6 @@ void
 ViperEventManager::OnViperStartup(bool late)
 {
     m_HookParams = PyTuple_Pack(2, &events__EventType, &PyString_Type);
-    Py_INCREF(m_HookParams);
 }
 
 void
@@ -59,6 +58,8 @@ ViperEventManager::OnViperShutdown()
         &ViperEventManager::OnFireEvent, false);
     SH_REMOVE_HOOK_MEMFUNC(IGameEventManager2, FireEvent, gameevents, this,
         &ViperEventManager::OnFireEvent_Post, true);
+    
+    Py_DECREF(m_HookParams);
     
     gameevents->RemoveListener(this);
 }
@@ -259,7 +260,9 @@ ViperEventManager::OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast)
             pyEvent->event = pEvent;
             pyEvent->bDontBroadcast = bDontBroadcast;
             
-            pForward->Execute(&res, PyTuple_Pack(2, pyEvent, PyString_FromString(name)));
+            PyObject *args = PyTuple_Pack(2, pyEvent, PyString_FromString(name));
+            pForward->Execute(&res, args);
+            Py_DECREF(args);
         }
         
         if (pHook->postCopy)
@@ -296,6 +299,7 @@ ViperEventManager::OnFireEvent_Post(IGameEvent *pEvent, bool bDontBroadcast)
     if (pForward != NULL)
     {
         PyObject *args = PyTuple_Pack(2, Py_None, PyString_FromString(pHook->name));
+        assert(args != NULL);
         
         IGameEvent *pEventCopy = m_EventCopies.front();
         if (pHook->postCopy)
@@ -315,6 +319,8 @@ ViperEventManager::OnFireEvent_Post(IGameEvent *pEvent, bool bDontBroadcast)
             gameevents->FreeEvent(pEventCopy);
             m_EventCopies.pop();
         }
+        
+        Py_DECREF(args);
     }
     
     if (--pHook->refcnt == 0)

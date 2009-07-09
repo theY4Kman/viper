@@ -69,8 +69,8 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 		g_pMenu->ConsolePrint("  Matt \"pRED\" Woodrow, for lots of help and support");
 		g_pMenu->ConsolePrint("  Mattie Casper, for invaluable help");
 		g_pMenu->ConsolePrint("  CShadowRun, for the motivation");
-		g_pMenu->ConsolePrint("  Tsunami, for always being there");
-		g_pMenu->ConsolePrint(" A special shoutout to Viper from GameConnect: this is named after him");
+		g_pMenu->ConsolePrint("  Tsunami, for always being there and enormous help with sigscanning.");
+		g_pMenu->ConsolePrint(" A special shoutout to Viper from GameConnect: this is named after him.");
 		g_pMenu->ConsolePrint(" Finally, I'd like to thank all the people of gs#sourcemod");
 		g_pMenu->ConsolePrint(" http://y4kstudios.com/viper/");
 		return;

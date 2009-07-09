@@ -22,6 +22,12 @@
 #include "extension.h"
 
 static PyObject *
+halflife__get_game_folder_name(PyObject *self)
+{
+    return PyString_FromString(g_pSM->GetGameFolderName());
+}
+
+static PyObject *
 halflife__get_current_map(PyObject *self)
 {
     return PyString_FromString(gamehelpers->GetCurrentMap());
@@ -46,6 +52,7 @@ halflife__guess_sdk_version(PyObject *self)
     
     case SOURCE_ENGINE_ORANGEBOX:
         return PyInt_FromLong(30);
+    }
 #else
     /* The Ship is the only known game to use the old engine */
     if (strcasecmp(g_pSM->GetGameFolderName(), "ship") == 0)
@@ -60,7 +67,10 @@ halflife__guess_sdk_version(PyObject *self)
 static PyObject *
 halflife__is_dedicated_server(PyObject *self)
 {
-    return engine->IsDedicatedServer() ? Py_True : Py_False;
+    PyObject *ret = engine->IsDedicatedServer() ? Py_True : Py_False;
+    Py_INCREF(ret);
+    
+    return ret;
 }
 
 static PyObject *
@@ -70,7 +80,10 @@ halflife__is_map_valid(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &map))
         return NULL;
     
-    return engine->IsMapValid(map) ? Py_True : Py_False;
+    PyObject *ret = engine->IsMapValid(map) ? Py_True : Py_False;
+    Py_INCREF(ret);
+    
+    return ret;
 }
 
 static PyMethodDef halflife__methods[] = {
@@ -100,11 +113,6 @@ static PyMethodDef halflife__methods[] = {
         "    potential hooks from plug-ins.\n"
         "@rtype: str\n"
         "@return: The description of the game."},
-    {"get_game_folder_name", (PyCFunction)halflife__get_game_folder_name, METH_NOARGS,
-        "get_game_folder_name() -> str\n\n"
-        "Returns the name of the game's directory (e.g. 'cstrike', 'tf')\n"
-        "@rtype: str\n"
-        "@return: The directory name."},
     {"get_game_time", (PyCFunction)halflife__get_game_time, METH_NOARGS,
         "get_game_time() -> float\n\n"
         "Returns the game time based on the game tick.\n"
@@ -116,6 +124,11 @@ static PyMethodDef halflife__methods[] = {
         "Returns the current map name\n"
         "@rtype: str\n"
         "@return The map name, excluding the .bsp extension"},
+    {"get_game_folder_name", (PyCFunction)halflife__get_game_folder_name, METH_NOARGS,
+        "get_game_folder_name() -> str\n\n"
+        "Returns the name of the game's directory (e.g. 'cstrike', 'tf')\n"
+        "@rtype: str\n"
+        "@return: The directory name."},
     {"guess_sdk_version", (PyCFunction)halflife__guess_sdk_version, METH_NOARGS,
         "guess_sdk_version() -> int\n\n"
         "Guesses the SDK version a mod was compiled against. If nothing specific is\n"

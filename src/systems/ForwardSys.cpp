@@ -60,31 +60,45 @@ CForward::Execute(int *result, PyObject *args)
     IViperPluginFunction *func;
     PyObject *py_result;
     
-    unsigned int failed=0, success=0;
+    size_t failed=0, success=0;
     int cur_result;
     int high_result, low_result;
     
     for (iter=m_functions.begin(); iter!=m_functions.end(); iter++)
     {
         func = (*iter);
-        py_result = func->Execute(args, NULL);
+        py_result = func->Execute(args, NULL); // Returns new reference
         
         if (result == NULL)
+        {
+            if (PyErr_Occurred())
+                PyErr_Print();
+            
             failed++;
+        }
         else
         {
             success++;
             
             if (m_callback != NULL)
+            {
                 cur_result = m_callback(py_result, func);
+                Py_DECREF(py_result);
+            }
             else if (PyInt_Check(py_result))
             {
                 PyThreadState_Swap(func->GetOwnerPlugin()->GetThreadState());
+                
                 cur_result = PyInt_AsLong(py_result);
+                Py_DECREF(py_result);
+                
                 PyThreadState_Swap(current);
             }
             else
+            {
+                Py_DECREF(py_result);
                 continue;
+            }
             
             switch (m_ExecType)
             {
@@ -123,6 +137,7 @@ done:
     {
         switch (m_ExecType)
         {
+        case ET_Single:
         case ET_Ignore:
             {
                 cur_result = 0;

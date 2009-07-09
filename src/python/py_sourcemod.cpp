@@ -63,6 +63,8 @@ static PyMethodDef sourcemod__methods[] = {
 typedef struct 
 {
     PyObject_HEAD
+    
+    PyObject *real_stdout;
 } sourcemod__server_out;
 
 static PyObject *
@@ -84,6 +86,15 @@ sourcemod__server_out__write(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static void
+sourcemod__server_out__del__(sourcemod__server_out *self)
+{
+    PySys_SetObject("stdout", self->real_stdout);
+    Py_DECREF(self->real_stdout);
+    
+    self->ob_type->tp_free((PyObject *)self);
+}
+
 static PyMethodDef sourcemod__server_out__methods[] = {
     {"write", sourcemod__server_out__write, METH_STATIC|METH_VARARGS,
         "write(msg)\n\n"
@@ -100,7 +111,7 @@ PyTypeObject sourcemod__server_outType = {
     "sourcemod.server_out",     /*tp_name*/
     sizeof(sourcemod__server_out),/*tp_basicsize*/
     0,                          /*tp_itemsize*/
-    0,                          /*tp_dealloc*/
+    (destructor)sourcemod__server_out__del__,/*tp_dealloc*/
     0,                          /*tp_print*/
     0,                          /*tp_getattr*/
     0,                          /*tp_setattr*/
@@ -143,12 +154,11 @@ initsourcemod(void)
         "The standard Viper library.");
     
     g_pViperException = PyErr_NewException("sourcemod.ViperError", NULL, NULL);
-    Py_INCREF(g_pViperException);
     PyModule_AddObject(sourcemod, "ViperError", g_pViperException);
     
-#define PyModule_AddModuleMacro(name) {\
-    PyObject *_name = init##name();\
-    Py_XINCREF(_name);\
+#define PyModule_AddModuleMacro(name) { \
+    PyObject *_name = init##name(); \
+    Py_INCREF(_name); \
     PyModule_AddObject(sourcemod, #name, _name); }
     
     PyModule_AddModuleMacro(console);
@@ -157,13 +167,18 @@ initsourcemod(void)
     PyModule_AddModuleMacro(clients);
     PyModule_AddModuleMacro(entity);
     PyModule_AddModuleMacro(halflife);
+
+#define PyModule_AddStringMacro(name, string) { \
+    PyObject *_name = PyString_FromString((string)); \
+    /*Py_INCREF(_name);*/ \
+    PyModule_AddObject(sourcemod, #name, _name); }
     
-    PyModule_AddObject(sourcemod, "__version__",
-        PyString_FromString(SMEXT_CONF_VERSION));
-    PyModule_AddObject(sourcemod, "__date__",
-        PyString_FromString(SMEXT_CONF_DATESTRING));
+    PyModule_AddStringMacro("__author__", SMEXT_CONF_AUTHOR);
+    PyModule_AddStringMacro("__date__", SMEXT_CONF_DATESTRING);
+    PyModule_AddStringMacro("__version__", SMEXT_CONF_VERSION);
     
     /* Redirect stdout to the server console */
+    sourcemod__server_outType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&sourcemod__server_outType) < 0)
     {
         g_pSM->LogError(myself, "stdout to server console redirection failed."
@@ -174,16 +189,14 @@ initsourcemod(void)
     }
     else
     {
-        sourcemod__server_outType.tp_new = PyType_GenericNew;
-        
         PyObject *py_stdout = PySys_GetObject("stdout");
-        
         PyObject *server_out = sourcemod__server_outType.tp_new(
-            &sourcemod__server_outType, NULL, NULL);
+            (PyTypeObject *)&sourcemod__server_outType, NULL, NULL);
+        
+        Py_INCREF(py_stdout);
+        ((sourcemod__server_out *)server_out)->real_stdout = py_stdout;
         
         PyModule_AddObject(sourcemod, "stdout", py_stdout);
-        
-        Py_INCREF(server_out);
         PyModule_AddObject(sourcemod, "server_out", server_out);
         
         PySys_SetObject("stdout", server_out);

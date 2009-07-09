@@ -294,6 +294,7 @@ forwards__create(PyObject *self, PyObject *args)
     PyObject *callback;
     ViperExecType et;
     
+    // TODO: TypeError: function takes exactly 3 arguments (5 given)
     if (!PyArg_ParseTuple(args, "sOi|", &name, &callback, &et))
         return NULL;
     
@@ -306,12 +307,14 @@ forwards__create(PyObject *self, PyObject *args)
     /* Get all the arguments after et */
     PyObject *types = PyTuple_GetSlice(args, 3, PyTuple_Size(args)-1);
     
-    // TODO: callback
+    // TODO: user-defined Python callback function
     IViperForward *fwd = g_Forwards.CreateForward(name, et, types, NULL);
+    assert(fwd != NULL);
     
     /* Create a new Python Forward object */
     forwards__Forward *py_fwd = PyObject_New(forwards__Forward,
         &forwards__ForwardType);
+    assert(py_fwd != NULL);
     
     py_fwd->fwd = fwd;
     py_fwd->fwd_name = fwd->GetForwardName();
@@ -331,8 +334,18 @@ static PyMethodDef forwards__methods[] = {
         "@return: True if successful, false if the specified forward could not be found,\n"
         "   or the forward name passed is blank."},
     {"create", forwards__create, METH_VARARGS,
-        "create(name, callback, et) -> Forward object\n\n"
-        "Creates a new forward.\n"
+        "create(name, callback, et, ...) -> Forward object\n\n"
+        "Creates a new forward. All the arguments after |et| are the types of the objects\n"
+        "that will be passed to the forward's hooks. For example:\n\n"
+        "   >>> myforward = create(\"\", None, ET_Ignore, int, int, str)\n"
+        "       <anonymous Forward: 0x819c12d>\n"
+        "   >>> def myhook(num1, num2, name):\n"
+        "   >>>     print num1, num2, name"
+        "   >>>     return Plugin_Continue\n"
+        "\n"
+        "   >>> myforward.add_function(myhook)\n"
+        "   >>> myforward.fire(3, 1337, \"elite\")\n"
+        "3 1337 elite\n\n"
         "@note: Pass a blank forward name to create an anonymous forward.\n"
         "@type  name: string\n"
         "@param name: The name of the new forward\n"
@@ -343,6 +356,9 @@ static PyMethodDef forwards__methods[] = {
         "@type  et: ET constant\n"
         "@param et: How return values of functions are handled when the forward is fired.\n"
         "   Use ET_Ignore, ET_Single, ET_Event, ET_Hook, or ET_LowEvent\n"
+        "@type  ...: type\n"
+        "@param ...: The types of the parameters that will be passed to all the hooks\n"
+        "   when the forward is fired."
         "@rtype: sourcemod.forwards.Forward\n"
         "@return: A Forward object that may manipulate the forward."},
     {NULL, NULL, 0, NULL},

@@ -107,6 +107,12 @@ PyTypeObject console__ConCommandReplyType = {
 static PyObject *
 console__ConVar__hook_change(console__ConVar *self, PyObject *args)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     PyObject *callback;
     if (!PyArg_ParseTuple(args, "O", &callback))
         return NULL;
@@ -131,6 +137,12 @@ console__ConVar__hook_change(console__ConVar *self, PyObject *args)
 static PyObject *
 console__ConVar__reset(console__ConVar *self)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     self->pVar->Revert();
     
     Py_RETURN_NONE;
@@ -139,6 +151,12 @@ console__ConVar__reset(console__ConVar *self)
 static PyObject *
 console__ConVar__unhook_change(console__ConVar *self, PyObject *args)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     PyObject *callback;
     if (!PyArg_ParseTuple(args, "O", &callback))
         return NULL;
@@ -166,12 +184,24 @@ console__ConVar__unhook_change(console__ConVar *self, PyObject *args)
 static PyObject *
 console__ConVar__flagsget(console__ConVar *self)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     return PyInt_FromLong(self->pVar->GetFlags());
 }
 
 static int
 console__ConVar__flagsset(console__ConVar *self, PyObject *value)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return -1;
+    }
+    
     if (!PyInt_Check(value))
     {
         PyErr_SetString(PyExc_TypeError, "flags must be an int");
@@ -187,6 +217,12 @@ console__ConVar__flagsset(console__ConVar *self, PyObject *value)
 static PyObject *
 console__ConVar__lower_boundget(console__ConVar *self)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     float lower_bound;
     
     if (self->pVar->GetMin(lower_bound))
@@ -198,6 +234,12 @@ console__ConVar__lower_boundget(console__ConVar *self)
 static int
 console__ConVar__lower_boundset(console__ConVar *self, PyObject *value)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return -1;
+    }
+    
     /* If set to None, remove the bound */
     if (value == Py_None)
         self->pVar->SetMin(false);
@@ -216,6 +258,12 @@ console__ConVar__lower_boundset(console__ConVar *self, PyObject *value)
 static PyObject *
 console__ConVar__upper_boundget(console__ConVar *self)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     float upper_bound;
     
     if (self->pVar->GetMax(upper_bound))
@@ -227,6 +275,12 @@ console__ConVar__upper_boundget(console__ConVar *self)
 static int
 console__ConVar__upper_boundset(console__ConVar *self, PyObject *value)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return -1;
+    }
+    
     /* If set to None, remove the bound */
     if (value == Py_None)
         self->pVar->SetMax(false);
@@ -245,12 +299,24 @@ console__ConVar__upper_boundset(console__ConVar *self, PyObject *value)
 static PyObject *
 console__ConVar__valueget(console__ConVar *self)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return NULL;
+    }
+    
     return PyString_FromString(self->pVar->GetString());
 }
 
 static int
 console__ConVar__valueset(console__ConVar *self, PyObject *value)
 {
+    if (self->pVar == NULL)
+    {
+        PyErr_SetString(g_pViperException, "ConVar has been invalidated.");
+        return -1;
+    }
+    
     if (value == NULL)
         self->pVar->SetValue("");
     else
@@ -485,7 +551,7 @@ console__server_command(PyObject *self, PyObject *args)
 static PyMethodDef console__methods[] = {
 #if NOT_IMPLEMENTED_YET
     {"find_convar", console__find_convar, METH_VARARGS,
-        "find_convar(name) -> ConVar object\n\n"
+        "find_convar(name) -> ConVar\n\n"
         "Finds the specified ConVar.\n"
         "@type  name: str\n"
         "@param name: The name of the ConVar to retrieve.\n"
@@ -494,7 +560,7 @@ static PyMethodDef console__methods[] = {
         "    found"},
 #endif
     {"create_convar", (PyCFunction)console__create_convar, METH_VARARGS|METH_KEYWORDS,
-        "create_convar(name, value[, description[, flags[, min[, max]]]]) -> ConVar object\n\n"
+        "create_convar(name, value[, description[, flags[, min[, max]]]]) -> ConVar\n\n"
         "Creates a new console variable.\n"
         "@type  name: string\n"
         "@param name: Name of the ConVar\n"
@@ -524,8 +590,7 @@ static PyMethodDef console__methods[] = {
         "@param name: Name of the ConCommand\n"
         "@type  callback: callable\n"
         "@param callback: A function to call when the ConCommand is executed.\n"
-        "    The function should receive one argument: a sourcemod.console.ConCommand\n"
-        "    object.\n"
+        "    The function should receive one argument: a console.ConCommandReply object.\n"
         "@type  description: string\n"
         "@param description: (Optional) Description of the ConCommand\n"
         "@type  flags: FCVAR constants\n"
@@ -549,14 +614,9 @@ initconsole(void)
     PyObject *console = Py_InitModule3("console", console__methods,
         "Contains functions and objects pertaining to console interaction.");
     
-    /* PyModule_AddObject steals a reference, but it is not taken care of in
-     * Python's core. Thus, to fix this, we have to INCREF it ourselves.
-     * It will solve the problem, but leak memory :(
-     */
     Py_INCREF((PyObject*)&console__ConCommandReplyType);
-    PyModule_AddObject(console, "ConCommandReply", (PyObject*)&console__ConCommandReplyType);
-    
     Py_INCREF((PyObject*)&console__ConVarType);
+    PyModule_AddObject(console, "ConCommandReply", (PyObject*)&console__ConCommandReplyType);
     PyModule_AddObject(console, "ConVar", (PyObject*)&console__ConVarType);
     
     PyModule_AddIntConstant(console, "Plugin_Continue", Pl_Continue);

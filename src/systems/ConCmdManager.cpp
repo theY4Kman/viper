@@ -212,6 +212,7 @@ CConCmdManager::AddCommand(IViperPlugin *pPlugin, PyFunction *callback, CmdType 
     
     pInfo->pl = pPlugin;
     
+    Py_INCREF(callback);
     CmdHook *pHook = new CmdHook();
     pHook->pl = pPlugin;
     pHook->pf = callback;
@@ -303,6 +304,8 @@ CConCmdManager::RemoveConCmds(SourceHook::List<CmdHook *> &cmdlist, IViperPlugin
         }
         
         delete pHook->pAdmin;
+        
+        Py_DECREF(pHook->pf);
         delete pHook;
         iter = cmdlist.erase(iter);
     }
@@ -404,8 +407,9 @@ CConCmdManager::InternalDispatch(const CCommand &command)
     py_cmd->argstring = command.ArgS();
     py_cmd->name = cmd;
     py_cmd->client = g_Players.GetPythonClient(client);
+    assert(py_cmd->client != NULL);
     
-    PyObject *argslist = Py_BuildValue("(O)", (PyObject*)py_cmd);
+    PyObject *argslist = PyTuple_Pack(1, (PyObject*)py_cmd);
     
     if (client == 0 && pInfo->srvhooks.size())
     {
@@ -507,7 +511,9 @@ CConCmdManager::InternalDispatch(const CCommand &command)
 
             if(pyres == NULL)
             {
-                PyErr_Print();
+                if (PyErr_Occurred())
+                    PyErr_Print();
+                
                 PyThreadState_Swap(_save);
                 continue;
             }
@@ -532,6 +538,8 @@ CConCmdManager::InternalDispatch(const CCommand &command)
             }
         }
     }
+    
+    Py_DECREF(argslist);
 
     if (result >= Pl_Handled)
     {

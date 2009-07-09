@@ -704,10 +704,10 @@ entity__Entity__cmp__(entity__Entity *self, PyObject *other)
 static void
 entity__Entity__del__(entity__Entity *self)
 {
-    Py_XDECREF(self->sendprops);
-    Py_XDECREF(self->datamaps);
+    Py_CLEAR(self->sendprops);
+    Py_CLEAR(self->datamaps);
     
-    ((PyObject *)self)->ob_type->tp_free((void *)self);
+    ((PyObject *)self)->ob_type->tp_free((PyObject *)self);
 }
 
 static int
@@ -756,6 +756,15 @@ entity__Entity__str__(entity__Entity *self)
     
     return PyString_FromFormat("<Entity %d: '%s' at: %p>",
         gamehelpers->IndexOfEdict(self->edict), cls, self->edict);
+}
+
+static int
+entity__Entity__traverse__(entity__Entity *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->sendprops);
+    Py_VISIT(self->datamaps);
+    
+    return 0;
 }
 
 static PyObject *
@@ -891,10 +900,10 @@ PyTypeObject entity__EntityType = {
     0,                          /*tp_getattro*/
     0,                          /*tp_setattro*/
     0,                          /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,/*tp_flags*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,/*tp_flags*/
     /* tp_doc */
     "Contains methods and members to manipulate an edict and the entity it describes.",
-    0,                          /* tp_traverse */
+    (traverseproc)entity__Entity__traverse__,/* tp_traverse */
     0,                          /* tp_clear */
     0,                          /* tp_richcompare */
     0,                          /* tp_weaklistoffset */
@@ -953,9 +962,8 @@ initentity(void)
         "Contains functions and objects to manipulate entities.");
     
     Py_INCREF((PyObject*)&entity__EntityType);
-    PyModule_AddObject(entity, "Entity", (PyObject*)&entity__EntityType);
-    
     Py_INCREF((PyObject*)&entity__EntityPropsType);
+    PyModule_AddObject(entity, "Entity", (PyObject*)&entity__EntityType);
     PyModule_AddObject(entity, "EntityProps", (PyObject*)&entity__EntityPropsType);
     
     return entity;
