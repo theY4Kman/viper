@@ -52,8 +52,6 @@ PyThreadState *g_pGlobalThreadState = NULL;
 void
 InitializePython(void)
 {
-    PyImport_AppendInittab("sourcemod", initsourcemod);
-    
     if (!Py_IsInitialized())
     {
         /* Initialize the python interpreter, passing 0 to skip registration of

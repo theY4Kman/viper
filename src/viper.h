@@ -37,12 +37,14 @@ struct CachedCommandInfo
 
 class BaseViper : public IBaseViper
 {
+friend class ViperExtension;
 public: // IBaseViper
     virtual void PushCommandStack(const CCommand *cmd);
     virtual const CCommand *PeekCommandStack();
     virtual void PopCommandStack();
+    virtual PyObject *GetSourcemodModule();
 
-public:
+private:
     /**
      * @brief   Called when the extension is loaded; initializes Viper
      */
@@ -66,6 +68,7 @@ public:
 private:
 	SourceHook::CStack<CachedCommandInfo> m_CommandStack;
 	
+	PyObject *m_SourcemodModule;
 	IViperForward *m_GameFrame;
 	PyObject *m_EmptyTuple;
 };

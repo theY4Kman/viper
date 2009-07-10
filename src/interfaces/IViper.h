@@ -21,6 +21,8 @@
 #ifndef _INCLUDE_VIPER_IVIPER_H_
 #define _INCLUDE_VIPER_IVIPER_H_
 
+#include <Python.h>
+
 class CCommand;
 
 class IBaseViper
@@ -29,6 +31,9 @@ public:
     virtual void PushCommandStack(const CCommand *cmd) =0;
     virtual const CCommand *PeekCommandStack() =0;
     virtual void PopCommandStack() =0;
+    
+    /** Retrieves the main sourcemod module. Returns a new reference. */
+    virtual PyObject *GetSourcemodModule() =0;
 };
 
 #endif /* _INCLUDE_VIPER_IVIPER_H_ */

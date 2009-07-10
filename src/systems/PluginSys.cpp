@@ -22,6 +22,7 @@
 #include "PluginSys.h"
 #include "ConCmdManager.h"
 #include "python/init.h"
+#include "viper.h"
 
 CPluginFunction::~CPluginFunction()
 {
@@ -380,8 +381,8 @@ CPluginManager::LoadPluginsFromDir(char const *dir)
     {
         libsys->GetPlatformError(error, sizeof(error));
 
-        g_pSM->LogError(myself, "Could not load plugins from %s\n", dir);
-        g_pSM->LogError(myself, "Platform returned error: %s\n", error);
+        g_pSM->LogError(myself, "Could not load plugins from %s", dir);
+        g_pSM->LogError(myself, "Platform returned error: %s", error);
 
         return;
     }
@@ -626,10 +627,6 @@ void
 CPluginManager::OnRootConsoleCommand(char const *cmdname,
     const CCommand &command)
 {
-    /* :TODO: 
-    - plugins
-      - refresh */
-
     char const *cmd = command.Arg(3);
     int argc = command.ArgC();
 
@@ -921,6 +918,73 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
 
         return;
     }
+    else if (strcmp(cmd, "refresh") == 0)
+    {
+        // TODO: Make this code less disgusting.
+        
+        char plugins_path[PLATFORM_MAX_PATH];
+        g_pSM->BuildPath(SourceMod::Path_SM, plugins_path, sizeof(plugins_path),
+            "plugins");
+        SourceMod::IDirectory *pDir = libsys->OpenDirectory(plugins_path);
+        
+        char error[256];
+        if (pDir == NULL)
+        {
+            libsys->GetPlatformError(error, sizeof(error));
+
+            g_pSM->LogError(myself, "Could not open \"%s\"", plugins_path);
+            g_pSM->LogError(myself, "Platform returned error: %s", error);
+
+            return;
+        }
+
+        char pyinit[PLATFORM_MAX_PATH];
+        size_t loaded = 0;
+        while (pDir->MoreFiles())
+        {
+            if (pDir->IsEntryDirectory()
+                && strcmp(pDir->GetEntryName(), ".") != 0
+                && strcmp(pDir->GetEntryName(), "..") != 0
+                && strcmp(pDir->GetEntryName(), "disabled") != 0
+                && strcmp(pDir->GetEntryName(), "optional") != 0)
+            {
+                UTIL_Format(pyinit, sizeof(pyinit), "%s/%s/__init__.py", plugins_path,
+                    pDir->GetEntryName());
+
+                if (libsys->PathExists(pyinit) &&
+                    !sm_trie_retrieve(m_trie, pyinit, NULL))
+                {
+                    META_CONPRINTF("%s\n", pyinit);
+                    g_VPlugins.LoadPlugin((char const *)pyinit,
+                        ViperPluginType_MapOnly, error, sizeof(error), NULL);
+                    loaded++;
+                }
+            }
+
+            pDir->NextEntry();
+        }
+
+        libsys->CloseDirectory(pDir);
+        
+        if (loaded)
+            g_pMenu->ConsolePrint("[Viper] Loaded %d plug-ins", loaded);
+        else
+            g_pMenu->ConsolePrint("[Viper] No new plug-ins to load!");
+        
+        return;
+    }
+    else if (strcmp(cmd, "unload_all") == 0)
+    {
+            SourceHook::List<CPlugin *>::iterator iter;
+            for (iter=m_list.begin(); iter!=m_list.end(); iter++)
+            {
+                UnloadPlugin((*iter));
+            }
+        
+        g_pMenu->ConsolePrint("[Viper] Unloaded all plugins!");
+        
+        return;
+    }
     
     g_pMenu->ConsolePrint("Viper Plugins Menu:");
     g_pMenu->DrawGenericOption("info", "Information about a plugin");
@@ -928,9 +992,10 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
     g_pMenu->DrawGenericOption("load", "Load a plugin");
     g_pMenu->DrawGenericOption("load_lock", "Prevents any more plugins from being loaded");
     g_pMenu->DrawGenericOption("load_unlock", "Re-enables plugin loading");
-    //g_pMenu->DrawGenericOption("refresh", "Reloads/refreshes all plugins in the plugin folder");
+    g_pMenu->DrawGenericOption("refresh", "Loads any plugins not already loaded in the plugin folder");
     g_pMenu->DrawGenericOption("reload", "Reloads a plugin");
     g_pMenu->DrawGenericOption("unload", "Unloads a plugin");
+    g_pMenu->DrawGenericOption("unload_all", "Unloads all plugins");
     return;
 }
 

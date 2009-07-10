@@ -138,7 +138,7 @@ ViperResultType InterceptClientConnectCallback(PyObject *ret,
     return Pl_Stop;
 }
 
-#define PY_CLIENT_FORWARD_HANDLE(forward) \
+#define PY_CLIENT_FORWARD(forward) \
     void \
     ViperPlayerManager::forward(int client) \
     { \
@@ -147,11 +147,11 @@ ViperResultType InterceptClientConnectCallback(PyObject *ret,
         Py_DECREF(args); \
     }
 
-PY_CLIENT_FORWARD_HANDLE(OnClientConnected);
-PY_CLIENT_FORWARD_HANDLE(OnClientPutInServer);
-PY_CLIENT_FORWARD_HANDLE(OnClientDisconnecting);
-PY_CLIENT_FORWARD_HANDLE(OnClientDisconnected);
-PY_CLIENT_FORWARD_HANDLE(OnClientPostAdminCheck);
+PY_CLIENT_FORWARD(OnClientConnected);
+PY_CLIENT_FORWARD(OnClientPutInServer);
+PY_CLIENT_FORWARD(OnClientDisconnecting);
+PY_CLIENT_FORWARD(OnClientDisconnected);
+PY_CLIENT_FORWARD(OnClientPostAdminCheck);
 
 void
 ViperPlayerManager::OnClientAuthorized(int client, char const *authstring)

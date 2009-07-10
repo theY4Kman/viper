@@ -28,9 +28,9 @@
 
 /**
  * Initializes the standard Viper library module, `sourcemod`,
- * as well as initializes and adds sub-modules, such as `console` and `clients`
+ * as well as initializes and adds submodules, such as `console` and `clients`
  */
-void initsourcemod(void);
+PyObject *initsourcemod(void);
 
 /** Initializes the module and returns it. */
 PyObject *initconsole(void);

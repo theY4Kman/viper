@@ -26,6 +26,7 @@
 #include <Python.h>
 #include "viper_globals.h"
 #include "python/init.h"
+#include "viper.h"
 
 static PyObject *
 sourcemod__get_game_path(PyObject *self, PyObject *args)
@@ -147,7 +148,7 @@ PyTypeObject sourcemod__server_outType = {
 
 PyObject *g_pViperException = NULL;
 
-void
+PyObject *
 initsourcemod(void)
 {
     PyObject *sourcemod = Py_InitModule3("sourcemod", sourcemod__methods,
@@ -155,22 +156,10 @@ initsourcemod(void)
     
     g_pViperException = PyErr_NewException("sourcemod.ViperError", NULL, NULL);
     PyModule_AddObject(sourcemod, "ViperError", g_pViperException);
-    
-#define PyModule_AddModuleMacro(name) { \
-    PyObject *_name = init##name(); \
-    Py_INCREF(_name); \
-    PyModule_AddObject(sourcemod, #name, _name); }
-    
-    PyModule_AddModuleMacro(console);
-    PyModule_AddModuleMacro(forwards);
-    PyModule_AddModuleMacro(events);
-    PyModule_AddModuleMacro(clients);
-    PyModule_AddModuleMacro(entity);
-    PyModule_AddModuleMacro(halflife);
 
 #define PyModule_AddStringMacro(name, string) { \
     PyObject *_name = PyString_FromString((string)); \
-    /*Py_INCREF(_name);*/ \
+    Py_INCREF(_name); \
     PyModule_AddObject(sourcemod, #name, _name); }
     
     PyModule_AddStringMacro("__author__", SMEXT_CONF_AUTHOR);
@@ -197,9 +186,45 @@ initsourcemod(void)
         ((sourcemod__server_out *)server_out)->real_stdout = py_stdout;
         
         PyModule_AddObject(sourcemod, "stdout", py_stdout);
+        Py_INCREF(server_out);
         PyModule_AddObject(sourcemod, "server_out", server_out);
         
         PySys_SetObject("stdout", server_out);
     }
+    
+    if (g_Viper.GetSourcemodModule() == NULL)
+    {
+#define PyModule_AddModuleMacro(name) { \
+        PyObject *_name = init##name(); \
+        PyModule_AddObject(sourcemod, #name, _name); }
+        
+        PyModule_AddModuleMacro(console);
+        PyModule_AddModuleMacro(forwards);
+        PyModule_AddModuleMacro(events);
+        PyModule_AddModuleMacro(clients);
+        PyModule_AddModuleMacro(entity);
+        PyModule_AddModuleMacro(halflife);
+    }
+    else
+    {
+        PyObject *first_sourcemod = g_Viper.GetSourcemodModule();
+        PyObject *first_sm_dict = PyModule_GetDict(first_sourcemod);
+        
+        PyObject *sm_dict = PyModule_GetDict(sourcemod);
+        
+#define PyModule_ReinitMacro(name) { \
+        PyObject *_name = PyDict_GetItemString(first_sm_dict, #name); \
+        Py_INCREF(_name); \
+        PyDict_SetItemString(sm_dict, #name, _name); }
+    
+        PyModule_ReinitMacro(console);
+        PyModule_ReinitMacro(forwards);
+        PyModule_ReinitMacro(events);
+        PyModule_ReinitMacro(clients);
+        PyModule_ReinitMacro(entity);
+        PyModule_ReinitMacro(halflife);
+    }
+    
+    return sourcemod;
 }
 

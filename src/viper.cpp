@@ -19,6 +19,7 @@
  */
 
 #include "viper.h"
+#include "python/init.h"
 #include "viper_globals.h"
 #include "PluginSys.h"
 
@@ -33,11 +34,20 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
     g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
     SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
     
+    m_SourcemodModule = NULL;
+    m_SourcemodModule = initsourcemod();
     m_EmptyTuple = PyTuple_New(0);
     
     StartViper();
     
     return true;
+}
+
+PyObject *
+BaseViper::GetSourcemodModule()
+{
+    Py_XINCREF(m_SourcemodModule);
+    return m_SourcemodModule;
 }
 
 void
@@ -89,6 +99,9 @@ BaseViper::OnViperUnload()
         pBase->OnViperShutdown();
         pBase = pBase->m_pGlobalClassNext;
     }
+    
+    Py_DECREF(m_SourcemodModule);
+    Py_DECREF(m_EmptyTuple);
 }
 
 /* Oh, I just love copying code directly from SourceMod
