@@ -22,6 +22,8 @@
 #define _INCLUDE_VIPER_IVIPERPLUGINSYS_H_
 
 #include <Python.h>
+#include "IViperShareSys.h"
+#include "IViperForwardSys.h"
 
 /** 
  * @brief Encapsulates plugin public information exposed through "myinfo."
@@ -160,7 +162,7 @@ public:
      * 
      * @return The PyObject returned by the function
      * @note To use the PyObject, the interpreter lock must be released and the
-     *      current thread state must be of the plug-in. See GetOwnerPlugin()
+     *       current thread state must be of the plug-in. See GetOwnerPlugin()
      */
     virtual PyObject *Execute(PyObject *args, PyObject *keywds=NULL) =0;
     
@@ -173,6 +175,15 @@ public:
      * @brief Returns the Python function
      */
     virtual PyObject *GetFunction() =0;
+    
+    /**
+     * @brief Calls this Python function with the two arguments result and
+     *        fwd_function and expects an integer value for its return. This
+     *        function helps Python functions to be used as callbacks when
+     *        executing a Forward.
+     */
+    virtual ViperResultType ForwardCallback(IViperForward *fwd, PyObject *result,
+                                            IViperPluginFunction *fwd_function);
 };
 
 /**
@@ -218,9 +229,21 @@ public:
     }
 };
 
-class IViperPluginManager
+class IViperPluginSys : public ViperInterface
 {
+public: // ViperInterface
+    virtual unsigned int GetInterfaceVersion()
+    {
+        return 1;
+    }
+    
+    virtual char const *GetInterfaceName()
+    {
+        return "PluginSys";
+    }
+
 public:
+    // TODO: Functions to retrieve an IViperPlugin
     /**
      * @brief Adds a listener to the list
      * The listener will be notified when plugins load, unload, etc

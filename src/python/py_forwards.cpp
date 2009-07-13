@@ -30,12 +30,43 @@
 #include "IViperPluginSys.h"
 #include "PluginSys.h"
 #include "ForwardSys.h"
+#include <sh_list.h>
+
+using SourceHook::List;
 
 typedef struct {
     PyObject_HEAD
     IViperForward *fwd;
     char const *fwd_name; /**< This is here so it can be exposed as a member */
+    IViperPluginFunction *callback;
 } forwards__Forward;
+
+static List<forwards__Forward*> g_ForwardCallbacks;
+
+void
+AddToForwardCallbacks(forwards__Forward *fwd)
+{
+    g_ForwardCallbacks.push_back(fwd);
+}
+
+void
+RemoveFromForwardCallbacks(forwards__Forward *fwd)
+{
+    g_ForwardCallbacks.remove(fwd);
+}
+
+ViperResultType
+ForwardCallback(IViperForward *fwd, PyObject *result, IViperPluginFunction *func)
+{
+    List<forwards__Forward*>::iterator iter;
+    for (iter=g_ForwardCallbacks.begin(); iter!=g_ForwardCallbacks.end(); iter++)
+    {
+        if ((*iter)->fwd == fwd)
+            return (*iter)->callback->ForwardCallback(fwd, result, func);
+    }
+    
+    return Pl_Continue;
+}
 
 static PyObject *
 forwards__Forward__add_function(forwards__Forward *self, PyObject *args)
@@ -108,6 +139,15 @@ forwards__Forward__remove_function(forwards__Forward *self, PyObject *args)
     delete pFunc;
     
     return PyBool_FromLong(removed);
+}
+
+static void
+forwards__Forward__del__(forwards__Forward *self)
+{
+    RemoveFromForwardCallbacks(self);
+    delete self->callback;
+    
+    ((PyObject *)self)->ob_type->tp_free((PyObject *)self);
 }
 
 static int
@@ -223,7 +263,7 @@ PyTypeObject forwards__ForwardType = {
     "sourcemod.forwards.Forward",/*tp_name*/
     sizeof(forwards__Forward),  /*tp_basicsize*/
     0,                          /*tp_itemsize*/
-    0,                          /*tp_dealloc*/
+    (destructor)forwards__Forward__del__,/*tp_dealloc*/
     0,                          /*tp_print*/
     0,                          /*tp_getattr*/
     0,                          /*tp_setattr*/
@@ -294,21 +334,44 @@ forwards__create(PyObject *self, PyObject *args)
     PyObject *callback;
     ViperExecType et;
     
-    // TODO: TypeError: function takes exactly 3 arguments (5 given)
-    if (!PyArg_ParseTuple(args, "sOi|", &name, &callback, &et))
-        return NULL;
-    
-    if (callback != Py_None && !PyCallable_Check(callback))
+    if (PyTuple_Size(args) < 3)
     {
-        PyErr_SetString(g_pViperException, "The callback passed was not callable");
+        PyErr_SetString(PyExc_TypeError, "forwards.create takes at least 3 arguments");
         return NULL;
     }
+    
+    PyObject *pyname = PyTuple_GetItem(args, 0);
+    if (!PyString_Check(pyname))
+        return PyErr_Format(PyExc_TypeError, "argument 1 must be string, not %s",
+            pyname->ob_type->tp_name);
+    name = PyString_AS_STRING(pyname);
+    
+    callback = PyTuple_GetItem(args, 1);
+    if (!PyCallable_Check(callback) && callback != Py_None)
+        return PyErr_Format(PyExc_TypeError, "argument 2 must be callable");
+    
+    PyObject *pyet = PyTuple_GetItem(args, 2);
+    if (!PyInt_Check(pyet))
+        return PyErr_Format(PyExc_TypeError, "argument 3 must be int, not %s",
+            pyet->ob_type->tp_name);
+    int int_et = PyInt_AS_LONG(pyet);
+    
+    if (int_et < ET_Ignore || int_et > ET_LowEvent)
+        return PyErr_Format(PyExc_TypeError, "argument 3 must be a valid ExecType");
     
     /* Get all the arguments after et */
     PyObject *types = PyTuple_GetSlice(args, 3, PyTuple_Size(args)-1);
     
-    // TODO: user-defined Python callback function
-    IViperForward *fwd = g_Forwards.CreateForward(name, et, types, NULL);
+    IViperPluginFunction *pFunc = NULL;
+    IViperForwardCallback fwd_callback = NULL;
+    if (callback != Py_None)
+    {
+        GET_THREAD_PLUGIN();
+        pFunc = CPluginFunction::CreatePluginFunction(callback, pPlugin);
+        fwd_callback = ForwardCallback;
+    }
+    
+    IViperForward *fwd = g_Forwards.CreateForward(name, et, types, fwd_callback);
     assert(fwd != NULL);
     
     /* Create a new Python Forward object */
@@ -318,6 +381,10 @@ forwards__create(PyObject *self, PyObject *args)
     
     py_fwd->fwd = fwd;
     py_fwd->fwd_name = fwd->GetForwardName();
+    py_fwd->callback = pFunc;
+    
+    if (callback != Py_None)
+        AddToForwardCallbacks(py_fwd);
     
     return (PyObject*)py_fwd;
 }

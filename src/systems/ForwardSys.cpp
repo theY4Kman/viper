@@ -82,7 +82,7 @@ CForward::Execute(int *result, PyObject *args)
             
             if (m_callback != NULL)
             {
-                cur_result = m_callback(py_result, func);
+                cur_result = m_callback(this, py_result, func);
                 Py_DECREF(py_result);
             }
             else if (PyInt_Check(py_result))
@@ -247,9 +247,9 @@ CForward::GetFunction(unsigned int idx)
     
     SourceHook::List<IViperPluginFunction *>::iterator iter;
     for (iter=m_functions.begin(); iter!=m_functions.end() && idx; iter++, idx--)
-        return (*iter);
+    {}
     
-    return NULL;
+    return (*iter);
 }
 
 unsigned int
@@ -278,7 +278,7 @@ CForward::GetParamTypes()
 
 CForward *
 CForward::CreateForward(char const *name, ViperExecType et, PyObject *types,
-                        IForwardCallback callback)
+                        IViperForwardCallback callback)
 {
     if (!PyTuple_Check(types))
         return NULL;
@@ -368,7 +368,7 @@ CForwardManager::ReleaseForward(IViperForward *forward)
 
 IViperForward *
 CForwardManager::CreateForward(char const *name, ViperExecType et,
-                               PyObject *types, IForwardCallback callback)
+                               PyObject *types, IViperForwardCallback callback)
 {
     CForward *fwd = CForward::CreateForward(name, et, types, callback);
     if (fwd == NULL)

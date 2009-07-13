@@ -54,7 +54,7 @@ public: //IViperForward
     virtual void Clear();
 public:
     static CForward *CreateForward(char const *name, ViperExecType et,
-                                   PyObject *types, IForwardCallback callback);
+                                   PyObject *types, IViperForwardCallback callback);
 
 protected:
     mutable SourceHook::List<IViperPluginFunction *> m_functions;
@@ -62,7 +62,7 @@ protected:
     
     ViperExecType m_ExecType;
     char const *m_sName;
-    IForwardCallback m_callback;
+    IViperForwardCallback m_callback;
     PyObject *m_types;
     int m_iTypesCnt;
 };
@@ -83,7 +83,7 @@ public: //ViperGlobalClass
 public: //IViperForwardManager
     virtual IViperForward *CreateForward(char const *name, ViperExecType et,
                                          PyObject *types,
-                                         IForwardCallback callback);
+                                         IViperForwardCallback callback);
     virtual IViperForward *FindForward(char const *name);
     virtual void ReleaseForward(IViperForward *forward);
 

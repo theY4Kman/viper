@@ -542,8 +542,12 @@ console__server_command(PyObject *self, PyObject *args)
 
 	if(!PyArg_ParseTuple(args, "s", &command))
 		return NULL;
-
-	engine->ServerCommand(command);
+    
+    size_t size = strlen(command);
+    char *command_newline = new char[size];
+    command_newline[size-1] = '\n';
+    
+	engine->ServerCommand(command_newline);
 	
 	Py_RETURN_NONE;
 }

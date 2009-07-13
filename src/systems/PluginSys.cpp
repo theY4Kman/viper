@@ -60,6 +60,38 @@ CPluginFunction::GetFunction()
     return m_pFunc;
 }
 
+ViperResultType
+CPluginFunction::ForwardCallback(PyObject *result,
+                                 IViperPluginFunction *fwd_function)
+{
+    PyObject *args = PyTuple_Pack(2, result, fwd_function->GetFunction());
+    
+    PyThreadState *_save = PyThreadState_Get();
+    PyThreadState_Swap(m_pPlugin->GetThreadState());
+    
+    assert(PyCallable_Check(m_pFunc));
+    
+    PyObject *pyresult = PyObject_CallObject(m_pFunc, args);
+    
+    /* Damn it, sawce, stop causing errors in callbacks */
+    if (pyresult == NULL && PyErr_Occurred())
+        PyErr_Print();
+    
+    PyThreadState_Swap(_save);
+    
+    if (!PyInt_Check(pyresult))
+        return Pl_Continue;
+    
+    int int_res = PyInt_AS_LONG(pyresult);
+    if (int_res < Pl_Continue)
+        return Pl_Continue;
+    
+    if (int_res > Pl_Stop)
+        return Pl_Stop;
+    
+    return (ViperResultType)int_res;
+}
+
 CPluginFunction *
 CPluginFunction::CreatePluginFunction(PyFunction *func, IViperPlugin *pl)
 {

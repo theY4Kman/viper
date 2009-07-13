@@ -351,25 +351,60 @@ static PyMemberDef clients__Client__members[] = {
 };
 
 static PyGetSetDef clients__Client__getsets[] = {
-#ifdef NOT_DOCUMENTED_YET
-    {"alive",},
-    {"model",},
-    {"health",},
-    {"weapon",},
-    {"maxs",},
-    {"mins",},
-    {"abs_angles",},
-    {"abs_origin",},
-    {"armor",},
-    {"deaths",},
-    {"frags",},
-    {"data_rate",},
-    {"avg_latency",},
-    {"avg_loss",},
-    {"avg_choke",},
-    {"avg_data",},
-    {"avg_packets",},
-    {"serial",},
+#ifdef NOT_IMPLEMENTED_YET
+    {"abs_angles", (getter)clients__Client__abs_anglesget, NULL,
+        "The client's angles vector.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"abs_origin", (getter)clients__Client__abs_originget, NULL,
+        "The client's origin vector.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"alive", (getter)clients__Client__aliveget, NULL,
+        "Whether the client is alive or dead.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"armor", (getter)clients__Client__armorget, NULL,
+        "The client's armor value.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"avg_choke", (getter)clients__Client__avg_chokeget, NULL,
+        "The client's average packet choke. Value is a percentage ranging from 0.0 to 1.0\n"
+        "@throw ViperError: Invalid client, client not in-game, or fake client."},
+    {"avg_data", (getter)clients__Client__avg_dataget, NULL,
+        "The client's data flow in bytes per second.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"avg_latency", (getter)clients__Client__avg_latencyget, NULL,
+        "The client's average packet latency in seconds.\n"
+        "@throw ViperError: Invalid client, client not in-game, or fake client."},
+    {"avg_loss", (getter)clients__Client__avg_lossget, NULL,
+        "The client's average packet loss. Value is a percentage ranging from 0.0 to 1.0\n"
+        "@throw ViperError: Invalid client, client not in-game, or fake client."},
+    {"avg_packets", (getter)clients__Client__avg_packetsget, NULL,
+        "The client's average packet frequency in packets per second.\n"
+        "@throw ViperError: Invalid client, client not in-game, or fake client."},
+    {"data_rate", (getter)clients__Client__data_rateget, NULL,
+        "The client's send data rate in bytes per second.\n"
+        "@throw ViperError: Invalid client, client not in-game, or fake client."},
+    {"deaths", (getter)clients__Client__deathsget, NULL,
+        "The client's death count.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"frags", (getter)clients__Client__fragsget, NULL,
+        "The client's frag count.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"health", (getter)clients__Client__healthhealthget, NULL,
+        "The health of the client.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"maxs", (getter)clients__Client__maxsget, NULL,
+        "The client's max size vector.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"mins", (getter)clients__Client__minsget, NULL,
+        "The client's min size vector.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"model", (getter)clients__Client__modelget, NULL,
+        "The client's model name.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
+    {"serial", (getter)clients__Client__serialget, NULL,
+        "The client's unique serial identifier."},
+    {"weapon", (getter)clients__Client__weaponget, NULL,
+        "The client's weapon name.\n"
+        "@throw ViperError: Invalid client, client not in-game, or no mod support."},
 #endif
     {"entity", (getter)clients__Client__entityget, NULL,
         "The Entity of the client.\n"

@@ -1,7 +1,7 @@
 # Viper Makefile
 #   Copyright (C) 2007-2009 Zach Kanzler
 #   Copyright (C) 2004-2009 SourceMod Development Team
-# Makefile written by David "BAILOPAN" Anderson
+# Makefile originally written by David "BAILOPAN" Anderson
 
 SMSDK = ../../sourcemod-central
 SRCDS_BASE = ~/srcds
@@ -87,7 +87,7 @@ endif
 
 LINK += -m32 -lm -ldl -Wl,--rpath,\$$ORIGIN/../viper/lib/plat-linux2 libpython2.5.so
 
-INCLUDE += -Iinterfaces -Isystems -Isourcemod -I$(PYTHON) -I$(PYTHON)/Include
+INCLUDE += -I../public -Isystems -Isourcemod -I$(PYTHON) -I$(PYTHON)/Include
 
 CFLAGS += -D_LINUX -Dstricmp=strcasecmp -D_stricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp \
 	-D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -Wall -Werror -Wno-switch \
@@ -135,10 +135,8 @@ all: check
 	mkdir -p $(BIN_DIR)/systems
 	mkdir -p $(BIN_DIR)/python
 	mkdir -p $(BIN_DIR)/sourcemod
-	if [ "$(USEMETA)" = "true" ]; then \
-		ln -sf $(SRCDS)/bin/vstdlib_i486.so vstdlib_i486.so; \
-		ln -sf $(SRCDS)/bin/tier0_i486.so tier0_i486.so; \
-	fi
+	ln -sf $(SRCDS)/bin/vstdlib_i486.so vstdlib_i486.so
+	ln -sf $(SRCDS)/bin/tier0_i486.so tier0_i486.so
 #	ln -sf build/addons/sourcemod/extensions/viper/lib/plat-linux2/libpython2.5.so.1.0 libpython2.5.so
 	ln -sf $(SRCDS)/cstrike/addons/sourcemod/extensions/viper/lib/plat-linux2/libpython2.5.so.1.0 libpython2.5.so
 	$(MAKE) -f Makefile extension

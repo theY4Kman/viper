@@ -22,7 +22,9 @@
 #define _INCLUDE_VIPER_IFORWARDSYS_H_
 
 #include <Python.h>
-#include <IViperPluginSys.h>
+
+class IViperPluginFunction;
+class IViperPlugin;
 
 enum ViperResultType
 {
@@ -41,7 +43,8 @@ enum ViperExecType
     ET_LowEvent = 4,/**< Same as ET_Event, except that it returns the lowest value if number */
 };
 
-typedef ViperResultType (*IForwardCallback)(PyObject*, IViperPluginFunction*);
+class IViperForward;
+typedef ViperResultType (*IViperForwardCallback)(IViperForward*, PyObject*, IViperPluginFunction*);
 
 class IViperForward
 {
@@ -135,7 +138,7 @@ public:
      */
     virtual IViperForward *CreateForward(char const *name, ViperExecType et,
                                          PyObject *types,
-                                         IForwardCallback callback) =0;
+                                         IViperForwardCallback callback) =0;
     
     /**
      * @brief Finds a forward by its name.

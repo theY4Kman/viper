@@ -27,6 +27,12 @@ struct entity__EntityProps;
 extern PyTypeObject entity__EntityType;
 extern void *g_pSendProxy_EHandleToInt;
 
+enum ViperPropType
+{
+    Prop_Send = 0,
+    Prop_Data
+};
+
 struct entity__Entity {
     PyObject_HEAD
     
@@ -35,6 +41,10 @@ struct entity__Entity {
     entity__EntityProps *sendprops;
     entity__EntityProps *datamaps;
 };
+
+PyObject * GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
+                                 ViperPropType type, void *propdata=NULL,
+                                 int a_prop_offset=-1);
 
 #endif//_INCLUDE_PYTHON_ENTITY_H_
 

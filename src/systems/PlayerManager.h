@@ -27,7 +27,7 @@
 #include "extension.h"
 #include "viper_globals.h"
 
-ViperResultType InterceptClientConnectCallback(PyObject *ret,
+ViperResultType InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
                                                IViperPluginFunction *func);
 
 class ViperPlayerManager :

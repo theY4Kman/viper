@@ -35,12 +35,6 @@ using SourceMod::sm_sendprop_info_t;
 /* Pointer to SendPropEHandle for SendProp entity detection */
 void *g_pSendProxy_EHandleToInt;
 
-enum ViperPropType
-{
-    Prop_Send = 0,
-    Prop_Data
-};
-
 enum ViperFieldType
 {
     FIELDTYPE_AUTODETECT = -1,
@@ -91,34 +85,37 @@ inline char const *GetTypeString(ViperFieldType type)
     }
 }
 
-struct entity__EntityProps {
+struct entity__EntityPropsArray
+{
     PyObject_HEAD
     
     entity__Entity *entity;
-    ViperPropType type;
+    int prop_offset;
+    
+    /* TODO: Datamap arrays */
+    SendTable *array;
 };
 
-static PyObject *
-entity__EntityProps__subscript(entity__EntityProps *self, PyObject *pyprop)
+static void
+entity__EntityPropsArray__del__(entity__EntityPropsArray *self)
 {
-    /* TODO: ARRAYS!!! */
-    PyObject *pypropstring = PyObject_Str(pyprop);
-    char const *prop = PyString_AsString(pypropstring);
-    Py_DECREF(pypropstring);
+    Py_CLEAR(self->entity);
     
-    if (prop == NULL)
+    ((PyObject *)self)->ob_type->tp_free((PyObject *)self);
+}
+
+static int
+entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
+                                     Py_ssize_t n, PyObject *setobj)
+{
+    /* TODO: Datamap arrays */
+    if (n < 0 || n >= self->array->GetNumProps())
     {
-        PyErr_SetString(g_pViperException, "Key object passed could not be "
-            "coerced into a string.");
-        return NULL;
+        PyErr_Format(PyExc_IndexError, "SendProp Array index %d out of range", n);
+        return -1;
     }
     
-    if (prop[0] == '\0')
-    {
-        PyErr_SetString(g_pViperException, "Entity properties cannot be empty.");
-        return NULL;
-    }
-    
+    SendProp *sendprop = self->array->GetProp(n);
     int bit_count;
     int prop_offset;
     int size;
@@ -129,203 +126,290 @@ entity__EntityProps__subscript(entity__EntityProps *self, PyObject *pyprop)
     {
         PyErr_Format(g_pViperException, "Entity %d is invalid.",
             gamehelpers->IndexOfEdict(self->entity->edict));
-        return NULL;
+        return -1;
     }
     
     char const *class_name = self->entity->edict->GetClassName();
     if (class_name == NULL)
         class_name = "";
     
-    switch (self->type)
+    bit_count = sendprop->m_nBits;
+    prop_offset = self->prop_offset + sendprop->GetOffset();
+    
+    switch (sendprop->GetType())
     {
-    case Prop_Data:
+    case DPT_Int:
+        if ((void*)sendprop->GetProxyFn() == g_pSendProxy_EHandleToInt)
         {
-            typedescription_t *td;
-            
-            datamap_t *pMap;
-            if ((pMap = gamehelpers->GetDataMap(pEntity)) == NULL)
-            {
-                PyErr_SetString(g_pViperException, "Could not retrieve datamap");
-                return NULL;
-            }
-            
-            if ((td = gamehelpers->FindInDataMap(pMap, prop)) == NULL)
-            {
-                PyErr_Format(g_pViperException, "Property \"%s\" not found (entity %d/%s)",
-                    prop, gamehelpers->IndexOfEdict(self->entity->edict), class_name);
-                return NULL;
-            }
-            
-            prop_offset = td->fieldOffset[TD_OFFSET_NORMAL];
-            
-            switch (td->fieldType)
-            {
-            case FIELD_TICK:
-            case FIELD_MODELINDEX:
-            case FIELD_MATERIALINDEX:
-            case FIELD_INTEGER:
-            case FIELD_COLOR32:
-                bit_count = 32;
-                field_type = FIELDTYPE_INTEGER;
-                break;
-            case FIELD_SHORT:
-                bit_count = 16;
-                field_type = FIELDTYPE_INTEGER;
-                break;
-            case FIELD_CHARACTER:
-                bit_count = 8;
-                field_type = FIELDTYPE_INTEGER;
-                break;
-            case FIELD_BOOLEAN:
-                bit_count = 1;
-                field_type = FIELDTYPE_INTEGER;
-                break;
-            
-            case FIELD_EHANDLE:
-                field_type = FIELDTYPE_ENTITY;
-                break;
-            
-            case FIELD_VECTOR:
-            case FIELD_POSITION_VECTOR:
-                field_type = FIELDTYPE_VECTOR;
-            
-            case FIELD_STRING:
-            case FIELD_MODELNAME:
-            case FIELD_SOUNDNAME:
-                field_type = FIELDTYPE_STRING;
-            
-            default:
-                PyErr_Format(g_pViperException, "Unable to autodetect the type "
-                    "of data field %s (type %d)", prop, td->fieldType);
-                return NULL;
-            }
-            
+            field_type = FIELDTYPE_ENTITY;
             break;
         }
-    case Prop_Send:
-        {
-            sm_sendprop_info_t info;
-            
-            IServerNetworkable *pNet = self->entity->edict->GetNetworkable();
-            if (pNet == NULL)
-            {
-                PyErr_Format(g_pViperException, "Edict %d is not networkable",
-                    gamehelpers->IndexOfEdict(self->entity->edict));
-                return NULL;
-            }
-            
-            if (!gamehelpers->FindSendPropInfo(pNet->GetServerClass()->GetName(), prop, &info))
-            {
-                PyErr_Format(g_pViperException, "Property \"%s\" not found (entity %d/%s)",
-                    prop, gamehelpers->IndexOfEdict(self->entity->edict), class_name);
-                return NULL;
-            }
-            
-            bit_count = info.prop->m_nBits;
-            prop_offset = info.actual_offset;
-            
-            switch (info.prop->GetType())
-            {
-            case DPT_Int:
-                if ((void*)info.prop->GetProxyFn() == g_pSendProxy_EHandleToInt)
-                {
-                    field_type = FIELDTYPE_ENTITY;
-                    break;
-                }
-                
-                field_type = FIELDTYPE_INTEGER;
-                bit_count = info.prop->m_nBits;
-                break;
-            
-            case DPT_Float:
-                field_type = FIELDTYPE_FLOAT;
-                break;
-            
-            case DPT_Vector:
-                field_type = FIELDTYPE_VECTOR;
-                break;
-            
-            case DPT_String:
-                field_type = FIELDTYPE_STRING;
-                break;
-            
-            default:
-                PyErr_Format(g_pViperException, "Unable to autodetect the type "
-                    "of SendProp %s (type %d)", prop, info.prop->GetType());
-                return NULL;
-            }
-            
-            break;
-        }
+        
+        field_type = FIELDTYPE_INTEGER;
+        bit_count = sendprop->m_nBits;
+        break;
+    
+    case DPT_Float:
+        field_type = FIELDTYPE_FLOAT;
+        break;
+    
+    case DPT_Vector:
+        field_type = FIELDTYPE_VECTOR;
+        break;
+    
+    case DPT_String:
+        field_type = FIELDTYPE_STRING;
+        break;
+    
+    default:
+        PyErr_Format(g_pViperException, "Unable to autodetect the type "
+            "of SendProp %s[%d] (type %d)", self->array->GetName(), n,
+            sendprop->GetType());
+        return -1;
     }
     
     switch (field_type)
     {
+    case FIELDTYPE_BOOLEAN:
+    case FIELDTYPE_CHAR:
+    case FIELDTYPE_SHORT:
     case FIELDTYPE_INTEGER:
         {
-            int value;
+            if (bit_count == 1)
+            {
+                if (!PyBool_Check(setobj))
+                {
+                    PyErr_Format(PyExc_TypeError, "Expected bool, found '%s'",
+                        setobj->ob_type->tp_name);
+                    return -1;
+                }
+                
+                *(bool *)((uint8_t *)pEntity + prop_offset) = (setobj == Py_True);
+                
+                return 0;
+            }
             
             if (bit_count < 1)
                 bit_count = size * 8;
             
-            if (bit_count >= 17)
-                value = *(int32_t *)((uint8_t *)pEntity + prop_offset);
-            else if (bit_count >= 9)
-                value = *(int16_t *)((uint8_t *)pEntity + prop_offset);
-            else if (bit_count >= 2)
-                value = *(int8_t *)((uint8_t *)pEntity + prop_offset);
-            else
-                return PyBool_FromLong(*(bool *)((uint8_t *)pEntity + prop_offset) ? 1 : 0);
+            int value;
+            if (!PyInt_Check(setobj))
+            {
+                PyErr_Format(PyExc_TypeError, "Expected int (%d bits), found '%s'",
+                    bit_count, setobj->ob_type->tp_name);
+                return -1;
+            }
             
-            return PyInt_FromLong(value);
+            value = PyInt_AS_LONG(setobj);
+            
+            if (bit_count >= 17)
+                *(int32_t *)((uint8_t *)pEntity + prop_offset) = (int32_t)value;
+            else if (bit_count >= 9)
+                *(int16_t *)((uint8_t *)pEntity + prop_offset) = (int16_t)value;
+            else if (bit_count >= 2)
+                *(int8_t *)((uint8_t *)pEntity + prop_offset) = (int8_t)value;
+            
+            return 0;
         }
     
     case FIELDTYPE_FLOAT:
-        return PyFloat_FromDouble(*(float *)((uint8_t *)pEntity + prop_offset));
+        {
+            if (!PyFloat_Check(setobj))
+            {
+                PyErr_Format(PyExc_TypeError, "Expected float, found '%s'",
+                    setobj->ob_type->tp_name);
+                return -1;
+            }
+            
+            *(float *)((uint8_t *)pEntity + prop_offset) = PyFloat_AS_DOUBLE(setobj);
+            
+            return 0;
+        }
     
     case FIELDTYPE_VECTOR:
         {
-            Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
+            float x, y, z;
             
-            /* tuple(float, float, float) */
-            return PyTuple_Pack(3, PyFloat_FromDouble(vec->x),
-                PyFloat_FromDouble(vec->y), PyFloat_FromDouble(vec->z));
+            /* Unpack the tuple as three floats. */
+            if (!PyArg_ParseTuple(setobj, "fff", &x, &y, &z))
+                return -1;
+            
+            Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
+            vec->x = x;
+            vec->y = y;
+            vec->z = z;
+            
+            return 0;
         }
     
     case FIELDTYPE_STRING:
         {
-            string_t idx = *(string_t *)((uint8_t *)pEntity + prop_offset);
-            return PyString_FromString((idx == NULL_STRING) ? "" : STRING(idx));
+            PyObject *str_setobj = PyObject_Str(setobj);
+            if (str_setobj == NULL)
+            {
+                PyErr_SetString(PyExc_TypeError, "Value could not be coerced "
+                    "into a string.");
+                return -1;
+            }
+            
+            string_t str = MAKE_STRING(sm_strdup(PyString_AS_STRING(str_setobj)));
+            Py_DECREF(str_setobj);
+            
+            *(string_t *)((uint8_t *)pEntity + prop_offset) = str;
+            return 0;
         }
     
     case FIELDTYPE_ENTITY:
         {
             CBaseHandle &hndl = *(CBaseHandle *)((uint8_t *)pEntity + prop_offset);
             
-            if (!hndl.IsValid())
-                Py_RETURN_NONE;
-
-            int index = hndl.GetEntryIndex();
-
-            edict_t *pStoredEdict = gamehelpers->EdictOfIndex(index);
-            CBaseEntity *pStoredEntity = GetEntity(pStoredEdict);
-            if (pStoredEdict == NULL || pStoredEntity == NULL)
-                Py_RETURN_NONE;
-
-            IServerEntity *pSE = pStoredEdict->GetIServerEntity();
-            if (pSE == NULL || pSE->GetRefEHandle() != hndl)
-                Py_RETURN_NONE;
+            if (setobj == Py_None)
+            {
+                hndl.Set(NULL);
+                return 0;
+            }
             
-            entity__Entity *pyEntity = PyObject_New(entity__Entity, &entity__EntityType);
-            pyEntity->edict = pStoredEdict;
-                
-            Py_INCREF((PyObject*)pyEntity);
-            return (PyObject*)pyEntity;
+            if (!PyObject_IsInstance(setobj, (PyObject *)&entity__EntityType))
+            {
+                PyErr_Format(PyExc_TypeError, "Expected entity.Entity, found '%s'",
+                    setobj->ob_type->tp_name);
+                return -1;
+            }
+            
+            edict_t *edict = ((entity__Entity *)setobj)->edict;
+            hndl.Set(edict->GetIServerEntity());
+            
+            /* TODO: datamap arrays */
+            //if (self->type == Prop_Send)
+                gamehelpers->SetEdictStateChanged(self->entity->edict, prop_offset);
+            
+            return 0;
         }
     
     default:
-        Py_RETURN_NONE;    
+        PyErr_Format(g_pViperException, "Unable to set the value of the entity "
+            "property %s[%d] of type %s", self->array->GetName(), n,
+            GetTypeString(field_type));
+        return -1;
     }
+    
+    return 0;
+}
+
+static PyObject *
+entity__EntityPropsArray__item__(entity__EntityPropsArray *self, Py_ssize_t n)
+{
+    /* TODO: Datamap arrays */
+    if (n < 0 || n >= self->array->GetNumProps())
+        return PyErr_Format(PyExc_IndexError, "SendProp Array index %d out of range", n);
+    
+    size_t size = strlen(self->array->GetName()) + 12;
+    char *prop_name = new char[size];
+    UTIL_Format(prop_name, size, "%s[%d]", self->array->GetName(), n);
+    
+    PyObject *prop_value = GetEntityPropPyObject(self->entity,
+        prop_name, Prop_Send, (void *)self->array->GetProp(n),
+        self->prop_offset + self->array->GetProp(n)->GetOffset());
+    
+    delete [] prop_name;
+    
+    if (prop_value == NULL)
+        return NULL;
+    
+    return prop_value;
+}
+
+static Py_ssize_t
+entity__EntityPropsArray__len__(entity__EntityPropsArray *self)
+{
+    return self->array->GetNumProps();
+}
+
+static PyObject *
+entity__EntityPropsArray__str__(entity__EntityPropsArray *self)
+{
+    PyObject *entobj_string = PyObject_Str((PyObject*)self->entity);
+    
+    PyObject *strobj = PyString_FromFormat("<EntityPropsArray '%s' for %s>",
+        self->array->GetName(),
+        PyString_AS_STRING(entobj_string));
+    
+    Py_DECREF(entobj_string);
+    
+    return strobj;
+}
+
+PySequenceMethods entity__EntityPropsArraySequenceMethods = {
+    (lenfunc)entity__EntityPropsArray__len__,       /* sq_length */
+    0,                                              /* sq_concat */
+    0,                                              /* sq_repeat */
+    (ssizeargfunc)entity__EntityPropsArray__item__, /* sq_item */
+    0,                                              /* sq_slice */
+    (ssizeobjargproc)entity__EntityPropsArray__ass_item__,/* sq_ass_item */
+    0,                                              /* sq_ass_slice */
+//    (objobjarg)entity__EntityPropsArray__contains__,/* sq_contains */
+};
+
+PyTypeObject entity__EntityPropsArrayType = {
+    PyObject_HEAD_INIT(&PyType_Type)
+    0,                                              /*ob_size*/
+    "sourcemod.entity.EntityPropsArray",            /*tp_name*/
+    sizeof(entity__EntityPropsArray),               /*tp_basicsize*/
+    0,                                              /*tp_itemsize*/
+    (destructor)entity__EntityPropsArray__del__,    /*tp_dealloc*/
+    0,                                              /*tp_print*/
+    0,                                              /*tp_getattr*/
+    0,                                              /*tp_setattr*/
+    0,                                              /*tp_compare*/
+    0,                                              /*tp_repr*/
+    0,                                              /*tp_as_number*/
+    &entity__EntityPropsArraySequenceMethods,       /*tp_as_sequence*/
+    0,                                              /*tp_as_mapping*/
+    0,                                              /*tp_hash */
+    0,                                              /*tp_call*/
+    (reprfunc)entity__EntityPropsArray__str__,      /*tp_str*/
+    0,                                              /*tp_getattro*/
+    0,                                              /*tp_setattro*/
+    0,                                              /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,                             /*tp_flags*/
+    /* tp_doc */
+    "Retrieves data from sendprop and datamap arrays.",
+};
+
+struct entity__EntityProps {
+    PyObject_HEAD
+    
+    entity__Entity *entity;
+    ViperPropType type;
+};
+
+static PyObject *
+entity__EntityProps__subscript(entity__EntityProps *self, PyObject *pyprop)
+{
+    PyObject *pypropstring = PyObject_Str(pyprop);
+    char const *prop = PyString_AsString(pypropstring);
+    Py_DECREF(pypropstring);
+    
+    if (prop == NULL)
+    {
+        PyErr_SetString(PyExc_KeyError, "Key object passed could not be "
+            "coerced into a string.");
+        return NULL;
+    }
+    
+    if (prop[0] == '\0')
+    {
+        PyErr_SetString(g_pViperException, "Entity properties cannot be blank.");
+        return NULL;
+    }
+    
+    PyObject *prop_value = GetEntityPropPyObject(self->entity, prop, self->type,
+        NULL, -1);
+    
+    if (prop_value == NULL)
+        return NULL;
+    
+    return prop_value;
 }
 
 static int
@@ -616,6 +700,14 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
     return 0;
 }
 
+static void
+entity__EntityProps__del__(entity__EntityProps *self)
+{
+    Py_DECREF(self->entity);
+    
+    ((PyObject *)self)->ob_type->tp_free((PyObject *)self);
+}
+
 static PyObject *
 entity__EntityProps__str__(entity__EntityProps *self)
 {
@@ -642,7 +734,7 @@ PyTypeObject entity__EntityPropsType = {
     "sourcemod.entity.EntityProps",/*tp_name*/
     sizeof(entity__EntityProps),/*tp_basicsize*/
     0,                          /*tp_itemsize*/
-    0,                          /*tp_dealloc*/
+    (destructor)entity__EntityProps__del__,/*tp_dealloc*/
     0,                          /*tp_print*/
     0,                          /*tp_getattr*/
     0,                          /*tp_setattr*/
@@ -808,6 +900,7 @@ entity__Entity__datamapsget(entity__Entity *self, void *closure)
         self->datamaps->type = Prop_Data;
         
         Py_INCREF(self->datamaps);
+        Py_INCREF(self);
     }
     
     return (PyObject*)self->datamaps;
@@ -835,6 +928,7 @@ entity__Entity__sendpropsget(entity__Entity *self, void *closure)
         self->sendprops->type = Prop_Send;
         
         Py_INCREF(self->sendprops);
+        Py_INCREF(self);
     }
     
     return (PyObject*)self->sendprops;
@@ -880,7 +974,7 @@ static PyMethodDef entity__Entity__methods[] = {
 };
 
 PyTypeObject entity__EntityType = {
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(&PyType_Type)
     0,                          /*ob_size*/
     "sourcemod.entity.Entity",  /*tp_name*/
     sizeof(entity__Entity),     /*tp_basicsize*/
@@ -900,7 +994,7 @@ PyTypeObject entity__EntityType = {
     0,                          /*tp_getattro*/
     0,                          /*tp_setattro*/
     0,                          /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,/*tp_flags*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC,/*tp_flags*/
     /* tp_doc */
     "Contains methods and members to manipulate an edict and the entity it describes.",
     (traverseproc)entity__Entity__traverse__,/* tp_traverse */
@@ -955,7 +1049,8 @@ PyObject *
 initentity(void)
 {
     if (PyType_Ready(&entity__EntityType) < 0 ||
-        PyType_Ready(&entity__EntityPropsType) < 0)
+        PyType_Ready(&entity__EntityPropsType) < 0 ||
+        PyType_Ready(&entity__EntityPropsArrayType) < 0)
         return NULL;
     
     PyObject *entity = Py_InitModule3("entity", entity__methods,
@@ -963,9 +1058,268 @@ initentity(void)
     
     Py_INCREF((PyObject*)&entity__EntityType);
     Py_INCREF((PyObject*)&entity__EntityPropsType);
+    Py_INCREF((PyObject*)&entity__EntityPropsArrayType);
     PyModule_AddObject(entity, "Entity", (PyObject*)&entity__EntityType);
     PyModule_AddObject(entity, "EntityProps", (PyObject*)&entity__EntityPropsType);
+    PyModule_AddObject(entity, "EntityPropsArray", (PyObject*)&entity__EntityPropsArrayType);
     
     return entity;
+}
+
+/**
+ * Utility function to retrieve a Python object for an entity property.
+ *
+ * @param   propdata: Depending on the value of type, either a typedescription_t*
+ *                    or a SendProp*. Can be NULL to autodetect.
+ * @param   a_prop_offset: The offset from the entity that the value occurs.
+ *                         This MUST be supplied when type is Prop_Send and
+ *                         propdata is non-NULL. Should be -1 otherwise.
+ */
+PyObject *
+GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
+                      ViperPropType type, void *propdata, int a_prop_offset)
+{
+    edict_t *pEdict = pyEnt->edict;
+    int bit_count;
+    int prop_offset;
+    int size;
+    ViperFieldType field_type = FIELDTYPE_AUTODETECT;
+    CBaseEntity *pEntity = GetEntity(pEdict);
+    
+    if (pEntity == NULL)
+    {
+        PyErr_Format(g_pViperException, "Entity %d is invalid.",
+            gamehelpers->IndexOfEdict(pEdict));
+        return NULL;
+    }
+    
+    char const *class_name = pEdict->GetClassName();
+    if (class_name == NULL)
+        class_name = "";
+    
+    switch (type)
+    {
+    case Prop_Data:
+        {
+            typedescription_t *td;
+            
+            if (propdata == NULL)
+            {
+                datamap_t *pMap;
+                if ((pMap = gamehelpers->GetDataMap(pEntity)) == NULL)
+                {
+                    PyErr_SetString(g_pViperException, "Could not retrieve datamap");
+                    return NULL;
+                }
+                
+                if ((td = gamehelpers->FindInDataMap(pMap, prop)) == NULL)
+                {
+                    PyErr_Format(g_pViperException, "Property \"%s\" not found (entity %d/%s)",
+                        prop, gamehelpers->IndexOfEdict(pEdict), class_name);
+                    return NULL;
+                }
+            }
+            else
+                td = (typedescription_t *)propdata;
+            
+            if (a_prop_offset != -1)
+                prop_offset = td->fieldOffset[TD_OFFSET_NORMAL];
+            else
+                prop_offset = a_prop_offset;
+            
+            switch (td->fieldType)
+            {
+            case FIELD_TICK:
+            case FIELD_MODELINDEX:
+            case FIELD_MATERIALINDEX:
+            case FIELD_INTEGER:
+            case FIELD_COLOR32:
+                bit_count = 32;
+                field_type = FIELDTYPE_INTEGER;
+                break;
+            case FIELD_SHORT:
+                bit_count = 16;
+                field_type = FIELDTYPE_INTEGER;
+                break;
+            case FIELD_CHARACTER:
+                bit_count = 8;
+                field_type = FIELDTYPE_INTEGER;
+                break;
+            case FIELD_BOOLEAN:
+                bit_count = 1;
+                field_type = FIELDTYPE_INTEGER;
+                break;
+            
+            case FIELD_EHANDLE:
+                field_type = FIELDTYPE_ENTITY;
+                break;
+            
+            case FIELD_VECTOR:
+            case FIELD_POSITION_VECTOR:
+                field_type = FIELDTYPE_VECTOR;
+            
+            case FIELD_STRING:
+            case FIELD_MODELNAME:
+            case FIELD_SOUNDNAME:
+                field_type = FIELDTYPE_STRING;
+            
+            default:
+                PyErr_Format(g_pViperException, "Unable to autodetect the type "
+                    "of data field %s (type %d)", prop, td->fieldType);
+                return NULL;
+            }
+            
+            break;
+        }
+    case Prop_Send:
+        {
+            SendProp *sendprop;
+            
+            if (propdata == NULL)
+            {
+                sm_sendprop_info_t info;
+                
+                IServerNetworkable *pNet = pEdict->GetNetworkable();
+                if (pNet == NULL)
+                {
+                    PyErr_Format(g_pViperException, "Edict %d is not networkable",
+                        gamehelpers->IndexOfEdict(pEdict));
+                    return NULL;
+                }
+                
+                if (!gamehelpers->FindSendPropInfo(pNet->GetServerClass()->GetName(), prop, &info))
+                {
+                    PyErr_Format(g_pViperException, "Property \"%s\" not found (entity %d/%s)",
+                        prop, gamehelpers->IndexOfEdict(pEdict), class_name);
+                    return NULL;
+                }
+                
+                sendprop = info.prop;
+                prop_offset = info.actual_offset;
+            }
+            else
+            {
+                sendprop = (SendProp *)propdata;
+                prop_offset = a_prop_offset;
+            }
+            
+            bit_count = sendprop->m_nBits;
+            
+            switch (sendprop->GetType())
+            {
+            case DPT_Int:
+                if ((void*)sendprop->GetProxyFn() == g_pSendProxy_EHandleToInt)
+                {
+                    field_type = FIELDTYPE_ENTITY;
+                    break;
+                }
+                
+                field_type = FIELDTYPE_INTEGER;
+                bit_count = sendprop->m_nBits;
+                break;
+            
+            case DPT_Float:
+                field_type = FIELDTYPE_FLOAT;
+                break;
+            
+            case DPT_Vector:
+                field_type = FIELDTYPE_VECTOR;
+                break;
+            
+            case DPT_String:
+                field_type = FIELDTYPE_STRING;
+                break;
+            
+            case DPT_DataTable:
+                {
+                    /* A wild array appears! */
+                    entity__EntityPropsArray *array = PyObject_New(
+                        entity__EntityPropsArray, &entity__EntityPropsArrayType);
+                    array->array = sendprop->GetDataTable();
+                    array->prop_offset = prop_offset;
+                    array->entity = pyEnt;
+                    
+                    Py_INCREF(pyEnt);
+                    
+                    return (PyObject *)array;
+                }
+            
+            default:
+                PyErr_Format(g_pViperException, "Unable to autodetect the type "
+                    "of SendProp %s (type %d)", prop, sendprop->GetType());
+                return NULL;
+            }
+            
+            break;
+        }
+    }
+    
+    switch (field_type)
+    {
+    case FIELDTYPE_INTEGER:
+        {
+            int value;
+            
+            if (bit_count < 1)
+                bit_count = size * 8;
+            
+            if (bit_count >= 17)
+                value = *(int32_t *)((uint8_t *)pEntity + prop_offset);
+            else if (bit_count >= 9)
+                value = *(int16_t *)((uint8_t *)pEntity + prop_offset);
+            else if (bit_count >= 2)
+                value = *(int8_t *)((uint8_t *)pEntity + prop_offset);
+            else
+                return PyBool_FromLong(*(bool *)((uint8_t *)pEntity + prop_offset) ? 1 : 0);
+            
+            return PyInt_FromLong(value);
+        }
+    
+    case FIELDTYPE_FLOAT:
+        return PyFloat_FromDouble(*(float *)((uint8_t *)pEntity + prop_offset));
+    
+    case FIELDTYPE_VECTOR:
+        {
+            Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
+            
+            /* tuple(float, float, float) */
+            return PyTuple_Pack(3, PyFloat_FromDouble(vec->x),
+                PyFloat_FromDouble(vec->y), PyFloat_FromDouble(vec->z));
+        }
+    
+    case FIELDTYPE_STRING:
+        {
+            string_t idx = *(string_t *)((uint8_t *)pEntity + prop_offset);
+            return PyString_FromString((idx == NULL_STRING) ? "" : STRING(idx));
+        }
+    
+    case FIELDTYPE_ENTITY:
+        {
+            CBaseHandle &hndl = *(CBaseHandle *)((uint8_t *)pEntity + prop_offset);
+            
+            if (!hndl.IsValid())
+                Py_RETURN_NONE;
+
+            int index = hndl.GetEntryIndex();
+
+            edict_t *pStoredEdict = gamehelpers->EdictOfIndex(index);
+            CBaseEntity *pStoredEntity = GetEntity(pStoredEdict);
+            if (pStoredEdict == NULL || pStoredEntity == NULL)
+                Py_RETURN_NONE;
+
+            IServerEntity *pSE = pStoredEdict->GetIServerEntity();
+            if (pSE == NULL || pSE->GetRefEHandle() != hndl)
+                Py_RETURN_NONE;
+            
+            entity__Entity *pyEntity = PyObject_New(entity__Entity, &entity__EntityType);
+            pyEntity->edict = pStoredEdict;
+                
+            Py_INCREF((PyObject*)pyEntity);
+            return (PyObject*)pyEntity;
+        }
+    
+    default:
+        Py_RETURN_NONE;    
+    }
 }
 

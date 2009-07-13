@@ -37,6 +37,8 @@ public: //IViperPluginFunction
     virtual PyObject *Execute(PyObject *args, PyObject *keywds=NULL);
     virtual IViperPlugin *GetOwnerPlugin();
     virtual PyObject *GetFunction();
+    virtual ViperResultType ForwardCallback(PyObject *result,
+                                            IViperPluginFunction *function);
 public:
     static CPluginFunction *CreatePluginFunction(PyObject *func,
                                                  IViperPlugin *pl);
@@ -152,7 +154,7 @@ private:
     Trie *m_pProps;
 };
 
-class CPluginManager : public IViperPluginManager, public ViperGlobalClass
+class CPluginManager : public IViperPluginSys, public ViperGlobalClass
 {
     friend class CPlugin;
 
@@ -178,7 +180,7 @@ public: // IViperPluginManager
     /// Returns a plugin by its interpreter state
     CPlugin *GetPluginOfInterpreterState(PyInterpreterState *interp);
     /// Returns a plugin from its path
-    CPlugin *GetPluginByPath(char const * path);
+    CPlugin *GetPluginByPath(char const *path);
     /// Returns a plugin from an id
     CPlugin *GetPluginByOrder(int num);
     /// Finds a plugin from a console argument

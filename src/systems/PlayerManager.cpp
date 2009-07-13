@@ -120,22 +120,51 @@ ViperPlayerManager::InterceptClientConnect(int client, char *reject, size_t maxr
     return !((bool)result);
 }
 
-ViperResultType InterceptClientConnectCallback(PyObject *ret,
-                                               IViperPluginFunction *func)
+ViperResultType
+InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
+                               IViperPluginFunction *func)
 {
-    /* TODO: Accept a return value of (bool let_user_in, str reject_msg) */
+    /* Now accepts a return value of (bool let_user_in, str reject_msg) */
     /* The plug-in wants to let the player in, continue */
     if (ret == Py_None || ret == Py_True)
         return Pl_Continue;
     
+    /* The plug-in wants to kick the user with the default kick message */
+    if (ret == Py_False)
+        return Pl_Stop;
+    
+    if (!PyTuple_Check(ret))
+    {
+        PyErr_WarnEx(PyExc_RuntimeWarning, "on_client_connect callbacks should "
+            "only return either a boolean or a tuple(bool, str).", 1);
+        return Pl_Continue;
+    }
+    
+    if (PyTuple_GET_SIZE(ret) != 2)
+    {
+        PyErr_WarnEx(PyExc_RuntimeWarning, "on_client_connect callbacks should "
+            "only return either a boolean or a tuple(bool, str).", 1);
+        return Pl_Continue;
+    }
+    
+    PyObject *let_user_in = PyTuple_GET_ITEM(ret, 0);
+    PyObject *reject_msg = PyTuple_GET_ITEM(ret, 1);
+    
     /* The plug-in wants to reject the player, their return object will be used
      * as a reject message.
      */
-    PyObject *py_str = PyObject_Str(ret);
+    PyObject *py_str = PyObject_Str(reject_msg);
     PyString_AsStringAndSize(py_str, &g_RejectMsg, &g_RejectMsgLen);
     Py_DECREF(py_str);
     
-    return Pl_Stop;
+    if (let_user_in != Py_False && let_user_in != Py_True)
+    {
+        PyErr_WarnEx(PyExc_RuntimeWarning, "on_client_connect callbacks should "
+            "only return either a boolean or a tuple(bool, str).", 1);
+        return Pl_Continue;
+    }
+    
+    return (let_user_in == Py_True) ? Pl_Continue : Pl_Stop;
 }
 
 #define PY_CLIENT_FORWARD(forward) \

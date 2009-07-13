@@ -41,7 +41,7 @@ public:
     /**
      * @brief Must return a string defining the interface's unique name.
      */
-    virtual const char *GetInterfaceName() =0;
+    virtual char const *GetInterfaceName() =0;
 
     /**
      * @brief Must return whether the requested version number is backwards compatible.
