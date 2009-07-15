@@ -27,13 +27,13 @@ OBJECTS += systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventMana
 
 OBJECTS += python/py_clients.cpp python/py_events.cpp python/py_console.cpp \
            python/py_forwards.cpp python/py_sourcemod.cpp python/py_entity.cpp \
-           python/py_halflife.cpp
+           python/py_halflife.cpp python/py_keyvalues.cpp python/py_datatypes.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
 ##############################################
 
-C_OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe -fno-strict-aliasing
+C_OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe -fno-strict-aliasing -fno-threadsafe-statics
 C_DEBUG_FLAGS = -D_DEBUG -DDEBUG -g -ggdb3
 C_GCC4_FLAGS = -fvisibility=hidden
 CPP_GCC4_FLAGS = -fvisibility-inlines-hidden

@@ -27,6 +27,7 @@
 #include <sh_list.h>
 #include <sh_stack.h>
 #include <IViperForwardSys.h>
+#include <IViperPluginSys.h>
 
 struct ViperEventHook
 {

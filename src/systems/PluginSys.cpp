@@ -61,7 +61,7 @@ CPluginFunction::GetFunction()
 }
 
 ViperResultType
-CPluginFunction::ForwardCallback(PyObject *result,
+CPluginFunction::ForwardCallback(IViperForward *fwd, PyObject *result,
                                  IViperPluginFunction *fwd_function)
 {
     PyObject *args = PyTuple_Pack(2, result, fwd_function->GetFunction());

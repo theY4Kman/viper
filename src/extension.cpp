@@ -30,6 +30,12 @@
 #include "python/py_entity.h"
 #include "viper.h"
 
+#if defined __linux__
+/* I wish sawce would get out of GCC, so it wouldn't be so horrible. btw, hax */
+extern "C" int __cxa_guard_acquire(long long int *) { return 0; }
+extern "C" void __cxa_guard_release(long long int *) { return; }
+#endif
+
 ViperExtension g_ViperExt;
 SMEXT_LINK(&g_ViperExt);
 

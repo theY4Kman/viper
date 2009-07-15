@@ -263,13 +263,13 @@ static PyMethodDef events__Event__methods[] = {
         "Cancels a created event."},
     {"fire", (PyCFunction)events__Event__fire, METH_VARARGS,
         "fire([dont_broadcast=false])\n\n"
-        "Fires a created event.\n"
+        "Fires a created event.\n\n"
         "@type  dont_broadcast: bool\n"
         "@param dont_broadcast: Determines whether or not to broadcast this event to\n"
         "   the clients."},
     {"get_bool", (PyCFunction)events__Event__get_bool, METH_VARARGS,
         "get_bool(field) -> bool\n\n"
-        "Retrieves a boolean value from a game event.\n"
+        "Retrieves a boolean value from a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to access\n"
         "@rtype: bool\n"
@@ -278,7 +278,7 @@ static PyMethodDef events__Event__methods[] = {
         "   Use has_field to make sure the field exists."},
     {"get_float", (PyCFunction)events__Event__get_float, METH_VARARGS,
         "get_float(field) -> float\n\n"
-        "Retrieves a float value from a game event.\n"
+        "Retrieves a float value from a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to access\n"
         "@rtype: float\n"
@@ -287,7 +287,7 @@ static PyMethodDef events__Event__methods[] = {
         "   Use has_field to make sure the field exists."},
     {"get_int", (PyCFunction)events__Event__get_int, METH_VARARGS,
         "get_int(field) -> int\n\n"
-        "Retrieves an integer value from a game event.\n"
+        "Retrieves an integer value from a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to access\n"
         "@rtype: int\n"
@@ -296,7 +296,7 @@ static PyMethodDef events__Event__methods[] = {
         "   Use has_field to make sure the field exists."},
     {"get_string", (PyCFunction)events__Event__get_string, METH_VARARGS,
         "get_string(field) -> str\n\n"
-        "Retrieves a string value from a game event.\n"
+        "Retrieves a string value from a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to access\n"
         "@rtype: str\n"
@@ -305,35 +305,35 @@ static PyMethodDef events__Event__methods[] = {
         "   Use has_field to make sure the field exists."},
     {"has_field", (PyCFunction)events__Event__has_field, METH_VARARGS,
         "has_field(field) -> bool\n\n"
-        "Returns whether or not a field exists on an event.\n"
+        "Returns whether or not a field exists on an event.\n\n"
         "@type  field: str\n"
         "@param field: The field to check for existence\n"
         "@rtype: bool\n"
         "@return: True if the field exists, False if not."},
     {"set_bool", (PyCFunction)events__Event__set_bool, METH_VARARGS,
         "set_bool(field, value)\n\n"
-        "Sets a boolean value in a game event.\n"
+        "Sets a boolean value in a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to set\n"
         "@type  value: bool\n"
         "@param value: The boolean value to set."},
     {"set_float", (PyCFunction)events__Event__set_float, METH_VARARGS,
         "set_float(field, value)\n\n"
-        "Sets a float value in a game event.\n"
+        "Sets a float value in a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to set\n"
         "@type  value: float\n"
         "@param value: The float value to set."},
     {"set_int", (PyCFunction)events__Event__set_int, METH_VARARGS,
         "set_int(field, value)\n\n"
-        "Sets an integer value in a game event.\n"
+        "Sets an integer value in a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to set\n"
         "@type  value: int\n"
         "@param value: The int value to set."},
     {"set_string", (PyCFunction)events__Event__set_string, METH_VARARGS,
         "set_string(field, value)\n\n"
-        "Sets a string value in a game event.\n"
+        "Sets a string value in a game event.\n\n"
         "@type  field: str\n"
         "@param field: The field to set\n"
         "@type  value: str\n"

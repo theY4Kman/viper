@@ -228,16 +228,18 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
     
     case FIELDTYPE_VECTOR:
         {
-            float x, y, z;
-            
-            /* Unpack the tuple as three floats. */
-            if (!PyArg_ParseTuple(setobj, "fff", &x, &y, &z))
+            if (!PyObject_IsInstance(setobj, (PyObject *)&datatypes__VectorType))
+            {
+                PyErr_Format(PyExc_TypeError, "expected datatypes.Vector, "
+                    "found %s", setobj->ob_type->tp_name);
                 return -1;
+            }
             
+            datatypes__Vector * pyvec = (datatypes__Vector *)setobj;
             Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
-            vec->x = x;
-            vec->y = y;
-            vec->z = z;
+            vec->x = pyvec->x;
+            vec->y = pyvec->y;
+            vec->z = pyvec->z;
             
             return 0;
         }
@@ -634,16 +636,18 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
     
     case FIELDTYPE_VECTOR:
         {
-            float x, y, z;
-            
-            /* Unpack the tuple as three floats. */
-            if (!PyArg_ParseTuple(setobj, "fff", &x, &y, &z))
+            if (!PyObject_IsInstance(setobj, (PyObject *)&datatypes__VectorType))
+            {
+                PyErr_Format(PyExc_TypeError, "expected datatypes.Vector, "
+                    "found %s", setobj->ob_type->tp_name);
                 return -1;
+            }
             
+            datatypes__Vector * pyvec = (datatypes__Vector *)setobj;
             Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
-            vec->x = x;
-            vec->y = y;
-            vec->z = z;
+            vec->x = pyvec->x;
+            vec->y = pyvec->y;
+            vec->z = pyvec->z;
             
             return 0;
         }
@@ -677,7 +681,7 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
             
             if (!PyObject_IsInstance(setobj, (PyObject *)&entity__EntityType))
             {
-                PyErr_Format(PyExc_TypeError, "Expected entity.Entity, found '%s'",
+                PyErr_Format(PyExc_TypeError, "expected entity.Entity, found '%s'",
                     setobj->ob_type->tp_name);
                 return -1;
             }
@@ -772,6 +776,15 @@ entity__Entity__is_valid(entity__Entity *self)
 }
 
 static int
+entity__Entity__clear__(entity__Entity *self)
+{
+    Py_CLEAR(self->sendprops);
+    Py_CLEAR(self->datamaps);
+    
+    return 0;
+}
+
+static int
 entity__Entity__cmp__(entity__Entity *self, PyObject *other)
 {
     int isinstance = PyObject_IsInstance(other, (PyObject*)&entity__EntityType);
@@ -796,9 +809,7 @@ entity__Entity__cmp__(entity__Entity *self, PyObject *other)
 static void
 entity__Entity__del__(entity__Entity *self)
 {
-    Py_CLEAR(self->sendprops);
-    Py_CLEAR(self->datamaps);
-    
+    ((PyObject *)self)->ob_type->tp_clear((PyObject *)self);
     ((PyObject *)self)->ob_type->tp_free((PyObject *)self);
 }
 
@@ -994,11 +1005,11 @@ PyTypeObject entity__EntityType = {
     0,                          /*tp_getattro*/
     0,                          /*tp_setattro*/
     0,                          /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC,/*tp_flags*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,/*tp_flags*/
     /* tp_doc */
     "Contains methods and members to manipulate an edict and the entity it describes.",
     (traverseproc)entity__Entity__traverse__,/* tp_traverse */
-    0,                          /* tp_clear */
+    (inquiry)entity__Entity__clear__,/* tp_clear */
     0,                          /* tp_richcompare */
     0,                          /* tp_weaklistoffset */
     0,                          /* tp_iter */
@@ -1281,10 +1292,7 @@ GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
     case FIELDTYPE_VECTOR:
         {
             Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
-            
-            /* tuple(float, float, float) */
-            return PyTuple_Pack(3, PyFloat_FromDouble(vec->x),
-                PyFloat_FromDouble(vec->y), PyFloat_FromDouble(vec->z));
+            return CreatePyVector(vec);
         }
     
     case FIELDTYPE_STRING:

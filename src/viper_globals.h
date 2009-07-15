@@ -42,6 +42,7 @@
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
 #include <igameevents.h>
+#include "python/py_datatypes.h"
 
 #define HUD_PRINTTALK		3
 #define HUD_PRINTCENTER		4
@@ -99,26 +100,38 @@ typedef PyObject PyFunction;
 
 /* Utility functions from various authors */
 /* From sm_stringutils.cpp */
-extern size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...);
+size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...);
 
 /* From sm_stringutils.cpp */
-extern char *sm_strdup(char const *str);
+char *sm_strdup(char const *str);
 
 /* StrReplace by sslice. I bet he doesn't know :O */
-extern int StrReplace(char *str, char const *from, char const *to, int maxlen);
+int StrReplace(char *str, char const *from, char const *to, int maxlen);
 
 /**
  * @brief Retrieves the name of the deepest folder in a path
  */
-extern char const *GetLastFolderOfPath(char const *path);
+char const *GetLastFolderOfPath(char const *path);
 
 /**
  * @brief Retrieves all the text past the last slash in a path
  */
-extern char const *GetLastOfPath(char const *path);
+char const *GetLastOfPath(char const *path);
 
 /* From sm_stringutils.cpp */
-extern unsigned int strncopy(char *dest, char const *src, size_t count);
+unsigned int strncopy(char *dest, char const *src, size_t count);
+
+/* Utility functions for PyObject data types */
+PyObject *CreatePyVector(float x=0.0f, float y=0.0f, float z=0.0f);
+inline PyObject *CreatePyVector(Vector *vec)
+{
+    return CreatePyVector(vec->x, vec->y, vec->z);
+}
+
+inline Vector *VectorFromPyVector(datatypes__Vector *vec)
+{
+    return new Vector(vec->x, vec->y, vec->z);
+}
 
 class ViperGlobalClass
 {

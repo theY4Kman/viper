@@ -183,7 +183,7 @@ public:
      *        executing a Forward.
      */
     virtual ViperResultType ForwardCallback(IViperForward *fwd, PyObject *result,
-                                            IViperPluginFunction *fwd_function);
+                                            IViperPluginFunction *fwd_function) =0;
 };
 
 /**

@@ -102,12 +102,12 @@ static PyMethodDef halflife__methods[] = {
 #if NOT_IMPLEMENTED_YET
     {"get_engine_time", (PyCFunction)halflife__get_engine_time, METH_NOARGS,
         "get_engine_time() -> float\n\n"
-        "Returns a high-precision time value for profiling the engine.\n"
+        "Returns a high-precision time value for profiling the engine.\n\n"
         "@rtype: float\n"
         "@return: A floating point time value"},
     {"get_game_description", halflife__get_game_description, METH_VARARGS,
         "get_game_description(original=False) -> str\n\n"
-        "Returns the game description of the mod.\n"
+        "Returns the game description of the mod.\n\n"
         "@type  original: bool\n"
         "@param original: If True, retrieves the original game description, ignoring any\n"
         "    potential hooks from plug-ins.\n"
@@ -115,18 +115,18 @@ static PyMethodDef halflife__methods[] = {
         "@return: The description of the game."},
     {"get_game_time", (PyCFunction)halflife__get_game_time, METH_NOARGS,
         "get_game_time() -> float\n\n"
-        "Returns the game time based on the game tick.\n"
+        "Returns the game time based on the game tick.\n\n"
         "@rtype: float\n"
         "@return: Game tick time"},
 #endif
     {"get_current_map", (PyCFunction)halflife__get_current_map, METH_NOARGS,
         "get_current_map() -> str\n\n"
-        "Returns the current map name\n"
+        "Returns the current map name\n\n"
         "@rtype: str\n"
         "@return The map name, excluding the .bsp extension"},
     {"get_game_folder_name", (PyCFunction)halflife__get_game_folder_name, METH_NOARGS,
         "get_game_folder_name() -> str\n\n"
-        "Returns the name of the game's directory (e.g. 'cstrike', 'tf')\n"
+        "Returns the name of the game's directory (e.g. 'cstrike', 'tf')\n\n"
         "@rtype: str\n"
         "@return: The directory name."},
     {"guess_sdk_version", (PyCFunction)halflife__guess_sdk_version, METH_NOARGS,
@@ -134,17 +134,17 @@ static PyMethodDef halflife__methods[] = {
         "Guesses the SDK version a mod was compiled against. If nothing specific is\n"
         "known about the game, the engine version is used instead. The return values\n"
         "are guaranteed to increase chronologically (that is, a later release will have\n"
-        "a higher value).\n"
+        "a higher value).\n\n"
         "@rtype: SOURCE_SDK constant\n"
         "@return: A sourcemod.halflife.SOURCE_SDK_* constant."},
     {"is_dedicated_server", (PyCFunction)halflife__is_dedicated_server, METH_NOARGS,
         "is_dedicated_server() -> bool\n\n"
-        "Returns whether the server is dedicated.\n"
+        "Returns whether the server is dedicated.\n\n"
         "@rtype: bool\n"
         "@return: True if dedicated, False otherwise."},
     {"is_map_valid", halflife__is_map_valid, METH_VARARGS,
         "is_map_valid(map) -> bool\n\n"
-        "Returns whether a map is valid or not.\n"
+        "Returns whether a map is valid or not.\n\n"
         "@type  map: str\n"
         "@param map: Map name, excluding .bsp extension\n"
         "@rtype: bool\n"

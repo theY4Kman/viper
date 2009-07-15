@@ -37,7 +37,7 @@ public: //IViperPluginFunction
     virtual PyObject *Execute(PyObject *args, PyObject *keywds=NULL);
     virtual IViperPlugin *GetOwnerPlugin();
     virtual PyObject *GetFunction();
-    virtual ViperResultType ForwardCallback(PyObject *result,
+    virtual ViperResultType ForwardCallback(IViperForward *fwd, PyObject *result,
                                             IViperPluginFunction *function);
 public:
     static CPluginFunction *CreatePluginFunction(PyObject *func,

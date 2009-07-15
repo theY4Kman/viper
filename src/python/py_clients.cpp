@@ -441,6 +441,7 @@ static PyMethodDef clients__Client__methods[] = {
     
     /* TODO: All admin stuff
      * XXX: Should "user" be removed from the names?
+     *      YES! There should be a separate Privileges object containing all admin stuff
      */
     {"set_user_admin",},
     {"add_user_flags",},
