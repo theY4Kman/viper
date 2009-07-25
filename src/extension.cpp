@@ -29,6 +29,7 @@
 #include "python/init.h"
 #include "python/py_entity.h"
 #include "viper.h"
+#include <IForwardSys.h>
 
 #if defined __linux__
 /* I wish sawce would get out of GCC, so it wouldn't be so horrible. btw, hax */
@@ -46,6 +47,10 @@ ICvar *g_pCVar = NULL;
 IServerPluginHelpers *g_pServerPluginHelpers = NULL;
 IUniformRandomStream *g_pRandom = NULL;
 IGameEventManager2 *gameevents = NULL;
+IEngineSound *enginesound = NULL;
+
+SourceMod::IForward *g_pSMOnBanIdentity = NULL;
+SourceMod::IForward *g_pSMOnBanClient = NULL;
 
 #ifdef WIN32
 PyObject *Py_None = NULL;
@@ -165,6 +170,9 @@ void
 ViperExtension::SDK_OnAllLoaded()
 {
     // TODO: SourceMod natives
+    
+    g_pSMOnBanIdentity = g_pForwards->FindForward("OnBanIdentity", NULL);
+    g_pSMOnBanClient = g_pForwards->FindForward("OnBanClient", NULL);
 }
 
 bool
@@ -178,6 +186,9 @@ ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
         IServerPluginHelpers, INTERFACEVERSION_ISERVERPLUGINHELPERS);
     GET_V_IFACE_CURRENT(GetEngineFactory, gameevents, IGameEventManager2,
         INTERFACEVERSION_GAMEEVENTSMANAGER2);
+    GET_V_IFACE_CURRENT(GetEngineFactory, enginesound, IEngineSound,
+        IENGINESOUND_SERVER_INTERFACE_VERSION);
+
     
 #if SOURCE_ENGINE < SE_ORANGEBOX
     g_pCVar = icvar;

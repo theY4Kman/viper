@@ -24,6 +24,7 @@
  */
 
 #include <Python.h>
+#include <structmember.h>
 #include "viper_globals.h"
 #include "python/init.h"
 #include "viper.h"
@@ -66,23 +67,17 @@ typedef struct
     PyObject_HEAD
     
     PyObject *real_stdout;
+    int softspace;
 } sourcemod__server_out;
 
 static PyObject *
-sourcemod__server_out__write(PyObject *self, PyObject *args)
+sourcemod__server_out__write(sourcemod__server_out *self, PyObject *args)
 {
     char *arg;
     if (!PyArg_ParseTuple(args, "s", &arg))
         return NULL;
     
-    /* This is a total hack! Unless the argument passed is a newline, we append
-     * a space to the message, so that `print >> stdout, "hi", "there"` looks
-     * the same as `print "hi", "there"`
-     */
-    if (*arg != '\n')
-        g_SMAPI->ConPrintf("%s ", arg);
-    else
-        g_SMAPI->ConPrint("\n");
+    g_SMAPI->ConPrint(arg);
     
     Py_RETURN_NONE;
 }
@@ -96,8 +91,14 @@ sourcemod__server_out__del__(sourcemod__server_out *self)
     self->ob_type->tp_free((PyObject *)self);
 }
 
+static PyMemberDef sourcemod__server_out__members[] = {
+    {"softspace", T_INT, offsetof(sourcemod__server_out, softspace), 0,
+        "Flag indicating that a space needs to be printed; used by print."},
+    {NULL}
+};
+
 static PyMethodDef sourcemod__server_out__methods[] = {
-    {"write", sourcemod__server_out__write, METH_STATIC|METH_VARARGS,
+    {"write", (PyCFunction)sourcemod__server_out__write, METH_VARARGS,
         "write(msg)\n\n"
         "Prints a message to the server console.\n\n"
         "@type  msg: string\n"
@@ -106,7 +107,6 @@ static PyMethodDef sourcemod__server_out__methods[] = {
 };
 
 PyTypeObject sourcemod__server_outType = {
-    /* TODO: Fix this -- Inheriting PyFile_Type fails */
     PyObject_HEAD_INIT(NULL)
     0,                          /*ob_size*/
     "sourcemod.server_out",     /*tp_name*/
@@ -124,8 +124,8 @@ PyTypeObject sourcemod__server_outType = {
     0,                          /*tp_hash */
     0,                          /*tp_call*/
     0,                          /*tp_str*/
-    0,                          /*tp_getattro*/
-    0,                          /*tp_setattro*/
+    PyObject_GenericGetAttr,    /*tp_getattro*/
+    PyObject_GenericSetAttr,    /*tp_setattro*/
     0,                          /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,         /*tp_flags*/
     /* tp_doc */
@@ -137,7 +137,7 @@ PyTypeObject sourcemod__server_outType = {
     0,		                    /* tp_iter */
     0,		                    /* tp_iternext */
     sourcemod__server_out__methods,/* tp_methods */
-    0,                          /* tp_members */
+    sourcemod__server_out__members,/* tp_members */
     0,                          /* tp_getset */
     0,                          /* tp_base */
     0,                          /* tp_dict */
@@ -165,6 +165,10 @@ initsourcemod(void)
     PyModule_AddStringMacro("__author__", SMEXT_CONF_AUTHOR);
     PyModule_AddStringMacro("__date__", SMEXT_CONF_DATESTRING);
     PyModule_AddStringMacro("__version__", SMEXT_CONF_VERSION);
+    
+    PyModule_AddIntConstant(sourcemod, "Plugin_Continue", Pl_Continue);
+    PyModule_AddIntConstant(sourcemod, "Plugin_Stop", Pl_Stop);
+    PyModule_AddIntConstant(sourcemod, "Plugin_Handled", Pl_Handled);
     
     /* Redirect stdout to the server console */
     sourcemod__server_outType.tp_new = PyType_GenericNew;

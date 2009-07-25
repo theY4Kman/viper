@@ -18,12 +18,11 @@ PYTHON = /home/they4kman/apps/Python-2.5.4
 
 PROJECT = viper
 
-USEMETA = true
-
 OBJECTS += sdk/smsdk_ext.cpp extension.cpp viper.cpp console.cpp sourcemod/sm_trie.cpp
 
 OBJECTS += systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventManager.cpp \
-           systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp
+           systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp \
+           systems/HalfLife2.cpp
 
 OBJECTS += python/py_clients.cpp python/py_events.cpp python/py_console.cpp \
            python/py_forwards.cpp python/py_sourcemod.cpp python/py_entity.cpp \
@@ -34,7 +33,7 @@ OBJECTS += python/py_clients.cpp python/py_events.cpp python/py_console.cpp \
 ##############################################
 
 C_OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe -fno-strict-aliasing -fno-threadsafe-statics
-C_DEBUG_FLAGS = -D_DEBUG -DDEBUG -g -ggdb3
+C_DEBUG_FLAGS = -D_DEBUG -DDEBUG -DPy_DEBUG -g -ggdb3
 C_GCC4_FLAGS = -fvisibility=hidden
 CPP_GCC4_FLAGS = -fvisibility-inlines-hidden
 CPP = gcc-4.1
@@ -73,17 +72,13 @@ endif
 
 CFLAGS += -DSE_EPISODEONE=1 -DSE_DARKMESSIAH=2 -DSE_ORANGEBOX=3 -DSE_LEFT4DEAD=4
 
-ifeq "$(USEMETA)" "true"
-	LINK_HL2 = $(HL2LIB)/tier1_i486.a vstdlib_i486.so tier0_i486.so
+LINK_HL2 = $(HL2LIB)/tier1_i486.a vstdlib_i486.so tier0_i486.so
 
-	LINK += $(LINK_HL2)
+LINK += $(LINK_HL2)
 
-	INCLUDE += -I. -I.. -Isdk -I$(HL2PUB) -I$(HL2PUB)/engine -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1 \
-		-I$(HL2PUB)/vstdlib \
-		-I$(METAMOD) -I$(METAMOD)/sourcehook -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
-else
-	INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
-endif
+INCLUDE += -I. -I.. -Isdk -I$(HL2PUB) -I$(HL2PUB)/engine -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1 \
+	-I$(HL2PUB)/vstdlib \
+	-I$(METAMOD) -I$(METAMOD)/sourcehook -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
 
 LINK += -m32 -lm -ldl -Wl,--rpath,\$$ORIGIN/../viper/lib/plat-linux2 libpython2.5.so
 
@@ -106,9 +101,7 @@ else
 	CFLAGS += $(C_OPT_FLAGS)
 endif
 
-ifeq "$(USEMETA)" "true"
-	BIN_DIR := $(BIN_DIR).$(ENGINE)
-endif
+BIN_DIR := $(BIN_DIR).$(ENGINE)
 
 OS := $(shell uname -s)
 ifeq "$(OS)" "Darwin"

@@ -30,14 +30,28 @@
 static PyObject *
 console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
 {
-    char const *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message))
+    char *message;
+    Py_ssize_t len;
+    if (!PyArg_ParseTuple(args, "s#", &message, &len))
         return NULL;
     
     if (playerhelpers->GetReplyTo() == SM_REPLY_CONSOLE)
-	    g_SMAPI->ConPrintf("%s\n", message);
-	else
-	    gamehelpers->TextMsg(g_VCmds.GetCommandClient(), HUD_PRINTTALK, message);
+        g_SMAPI->ConPrintf("%s\n", message);
+    else
+    {
+        /* Max chat msg length == 192, including NULL */
+        if (len >= 191)
+        {
+            char buf[192];
+            strncpy(buf, message, 192);
+            buf[191] = '\0';
+            
+            gamehelpers->TextMsg(g_VCmds.GetCommandClient(), HUD_PRINTTALK, buf);
+            Py_RETURN_NONE;
+        }
+        
+        gamehelpers->TextMsg(g_VCmds.GetCommandClient(), HUD_PRINTTALK, message);
+    }
     
     Py_RETURN_NONE;
 }
@@ -88,12 +102,12 @@ PyTypeObject console__ConCommandReplyType = {
     Py_TPFLAGS_DEFAULT,         /*tp_flags*/
     /* tp_doc */
     "Stores information about a ConCommand when it is executed.",
-    0,		                    /* tp_traverse */
-    0,		                    /* tp_clear */
-    0,		                    /* tp_richcompare */
-    0,		                    /* tp_weaklistoffset */
-    0,		                    /* tp_iter */
-    0,		                    /* tp_iternext */
+    0,                          /* tp_traverse */
+    0,                          /* tp_clear */
+    0,                          /* tp_richcompare */
+    0,                          /* tp_weaklistoffset */
+    0,                          /* tp_iter */
+    0,                          /* tp_iternext */
     console__ConCommandReply__methods,/* tp_methods */
     console__ConCommandReply__members,/* tp_members */
     0,                          /* tp_getset */
@@ -395,12 +409,12 @@ PyTypeObject console__ConVarType = {
     0,                          /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,         /*tp_flags*/
     "Represents a ConVar.",     /* tp_doc */
-    0,		                    /* tp_traverse */
-    0,		                    /* tp_clear */
-    0,		                    /* tp_richcompare */
-    0,		                    /* tp_weaklistoffset */
-    0,		                    /* tp_iter */
-    0,		                    /* tp_iternext */
+    0,                          /* tp_traverse */
+    0,                          /* tp_clear */
+    0,                          /* tp_richcompare */
+    0,                          /* tp_weaklistoffset */
+    0,                          /* tp_iter */
+    0,                          /* tp_iternext */
     console__ConVar__methods,   /* tp_methods */
     console__ConVar__members,   /* tp_members */
     console__ConVar__getsets,   /* tp_getset */
@@ -487,16 +501,32 @@ console__create_convar(PyObject *self, PyObject *args, PyObject *keywds)
 }
 
 static PyObject *
+console__find_convar(PyObject *self, PyObject *args)
+{
+    char *name;
+    if (!PyArg_ParseTuple(args, "s", &name))
+        return NULL;
+    
+    if (!IS_STR_FILLED(name))
+    {
+        PyErr_SetString(g_pViperException, "The name passed was blank");
+        return NULL;
+    }
+    
+    return g_ConVarManager.FindConVar(name);
+}
+
+static PyObject *
 console__print_to_server(PyObject *self, PyObject *args)
 {
-	char *message;
+    char *message;
 
-	if(!PyArg_ParseTuple(args, "s", &message))
-		return NULL;
+    if(!PyArg_ParseTuple(args, "s", &message))
+        return NULL;
 
-	g_SMAPI->ConPrintf("%s\n", message);
-	
-	Py_RETURN_NONE;
+    g_SMAPI->ConPrintf("%s\n", message);
+    
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -538,31 +568,29 @@ console__reg_concmd(PyObject *self, PyObject *args, PyObject *keywds)
 static PyObject *
 console__server_command(PyObject *self, PyObject *args)
 {
-	char *command;
+    char *command;
 
-	if(!PyArg_ParseTuple(args, "s", &command))
-		return NULL;
+    if(!PyArg_ParseTuple(args, "s", &command))
+        return NULL;
     
     size_t size = strlen(command);
     char *command_newline = new char[size];
     command_newline[size-1] = '\n';
     
-	engine->ServerCommand(command_newline);
-	
-	Py_RETURN_NONE;
+    engine->ServerCommand(command_newline);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+console__server_execute(PyObject *self)
+{
+    engine->ServerExecute();
+    
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef console__methods[] = {
-#if NOT_IMPLEMENTED_YET
-    {"find_convar", console__find_convar, METH_VARARGS,
-        "find_convar(name) -> ConVar\n\n"
-        "Finds the specified ConVar.\n"
-        "@type  name: str\n"
-        "@param name: The name of the ConVar to retrieve.\n"
-        "@rtype: ConVar\n"
-        "@return: A valid ConVar object on success, or None if the ConVar could not be\n"
-        "    found"},
-#endif
     {"create_convar", (PyCFunction)console__create_convar, METH_VARARGS|METH_KEYWORDS,
         "create_convar(name, value[, description[, flags[, min[, max]]]]) -> ConVar\n\n"
         "Creates a new console variable.\n"
@@ -582,11 +610,19 @@ static PyMethodDef console__methods[] = {
         "@type  max: float\n"
         "@param max: The highest number this ConVar can be set to. Pass None to\n"
         "    ignore this field."},
-	{"print_to_server", console__print_to_server, METH_VARARGS,
-	    "print_to_server(message)\n\n"
-	    "Sends a message to the server console.\n"
-	    "@type  message: string\n"
-	    "@param message: The message to print"},
+    {"find_convar", console__find_convar, METH_VARARGS,
+        "find_convar(name) -> ConVar\n\n"
+        "Finds the specified ConVar.\n"
+        "@type  name: str\n"
+        "@param name: The name of the ConVar to retrieve.\n"
+        "@rtype: ConVar\n"
+        "@return: A valid ConVar object on success, or None if the ConVar could not be\n"
+        "    found"},
+    {"print_to_server", console__print_to_server, METH_VARARGS,
+        "print_to_server(message)\n\n"
+        "Sends a message to the server console.\n"
+        "@type  message: string\n"
+        "@param message: The message to print"},
     {"reg_concmd", (PyCFunction)console__reg_concmd, METH_VARARGS|METH_KEYWORDS,
         "reg_concmd(name, callback[, description[, flags]]) -> bool\n\n"
         "Registers a new console command or hooks an existing one.\n"
@@ -600,11 +636,15 @@ static PyMethodDef console__methods[] = {
         "@type  flags: FCVAR constants\n"
         "@param flags: (Optional) Flags that change how a ConCommand is handled.\n"
         "    Use FCVAR constants, such as FCVAR_CHEAT, etc."},
-	{"server_command", console__server_command, METH_VARARGS,
-	    "server_command(command)\n\n"
-	    "Executes a command as if it were on the server console\n"
-	    "@type  command: string\n"
-	    "@param command: Command to execute"},
+    {"server_command", console__server_command, METH_VARARGS,
+        "server_command(command)\n\n"
+        "Executes a command as if it were on the server console\n"
+        "@type  command: string\n"
+        "@param command: Command to execute"},
+    {"server_execute", (PyCFunction)console__server_execute, METH_NOARGS,
+        "server_execute()\n\n"
+        "Executes every command in the server's command buffer now, rather than once\n"
+        "per frame."},
     {NULL, NULL, 0, NULL},
 };
 
@@ -622,10 +662,6 @@ initconsole(void)
     Py_INCREF((PyObject*)&console__ConVarType);
     PyModule_AddObject(console, "ConCommandReply", (PyObject*)&console__ConCommandReplyType);
     PyModule_AddObject(console, "ConVar", (PyObject*)&console__ConVarType);
-    
-    PyModule_AddIntConstant(console, "Plugin_Continue", Pl_Continue);
-    PyModule_AddIntConstant(console, "Plugin_Stop", Pl_Stop);
-    PyModule_AddIntConstant(console, "Plugin_Handled", Pl_Handled);
     
     PyModule_AddIntMacro(console, FCVAR_NONE);
     PyModule_AddIntMacro(console, FCVAR_UNREGISTERED);

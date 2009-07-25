@@ -60,11 +60,12 @@ public:
      * @param hasMax        Boolean stating whether or not the ConVar has a maximum value
      * @param max           A float containing the maximum value of the ConVar
      */
-
     console__ConVar *CreateConVar(IViperPlugin *pl, char const *name,
                                   char const *defaultVal, char const *desc,
                                   int flags, bool hasMin, float min,
                                   bool hasMax, float max);
+    
+    PyObject *FindConVar(char const *name);
     
     void HookConVarChange(ConVar *pVar, IViperPluginFunction *pFunc);
     void UnhookConVarChange(ConVar *pVar, IViperPluginFunction *pFunc);

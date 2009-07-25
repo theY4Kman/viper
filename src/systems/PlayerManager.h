@@ -27,6 +27,10 @@
 #include "extension.h"
 #include "viper_globals.h"
 
+extern IViperForward *g_pViperOnBanClient;
+extern SourceMod::IForward *g_pSMOnBanIdentity;
+extern SourceMod::IForward *g_pSMOnBanClient;
+
 ViperResultType InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
                                                IViperPluginFunction *func);
 

@@ -39,8 +39,10 @@
 #include "sdk/smsdk_ext.h"
 #include <random.h>
 #include <eiface.h>
+#include <IEngineSound.h>
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
+#include <IGameConfigs.h>
 #include <igameevents.h>
 #include "python/py_datatypes.h"
 
@@ -54,6 +56,8 @@ extern ICvar *icvar;
 extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
 extern IServerPluginHelpers *g_pServerPluginHelpers;
 extern IGameEventManager2 *gameevents;
+extern IEngineSound *enginesound;
+extern SourceMod::IGameConfig *g_pGameConf;
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 extern ICvar *g_pCVar;
@@ -96,6 +100,8 @@ extern PyObject *g_pViperException;
     } \
 }
 
+#define SERVER_CALL(func) SH_CALL(g_pGameDLLPatch, &IServerGameDLL::func)
+
 typedef PyObject PyFunction;
 
 /* Utility functions from various authors */
@@ -123,14 +129,29 @@ unsigned int strncopy(char *dest, char const *src, size_t count);
 
 /* Utility functions for PyObject data types */
 PyObject *CreatePyVector(float x=0.0f, float y=0.0f, float z=0.0f);
-inline PyObject *CreatePyVector(Vector *vec)
+PyObject *CreatePyColor(int r=0, int g=0, int b=0, int a=0);
+inline PyObject *CreatePyVector(const Vector vec)
 {
-    return CreatePyVector(vec->x, vec->y, vec->z);
+    return CreatePyVector(vec.x, vec.y, vec.z);
+}
+inline PyObject *CreatePyVector(const QAngle ang)
+{
+    return CreatePyVector(ang.x, ang.y, ang.z);
 }
 
 inline Vector *VectorFromPyVector(datatypes__Vector *vec)
 {
     return new Vector(vec->x, vec->y, vec->z);
+}
+
+inline PyObject *CreatePyColor(Color color)
+{
+    return CreatePyColor(color[0], color[1], color[2], color[3]);
+}
+
+inline Color *ColorFromPyColor(datatypes__Color *color)
+{
+    return new Color(color->r, color->g, color->b, color->a);
 }
 
 class ViperGlobalClass

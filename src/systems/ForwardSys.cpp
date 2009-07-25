@@ -50,6 +50,9 @@ CForward::Execute(int *result, PyObject *args)
         if (!PyObject_IsInstance(PyTuple_GetItem(args, i),
             PyTuple_GetItem(m_types, i)))
         {
+            PyErr_Format(PyExc_TypeError, "expected type %s for argument %d, "
+                "found %s", PyTuple_GetItem(m_types, i)->ob_type->tp_name,
+                i, PyTuple_GetItem(args, i)->ob_type->tp_name);
             return NULL;
         }
     }
@@ -69,7 +72,7 @@ CForward::Execute(int *result, PyObject *args)
         func = (*iter);
         py_result = func->Execute(args, NULL); // Returns new reference
         
-        if (result == NULL)
+        if (py_result == NULL)
         {
             if (PyErr_Occurred())
                 PyErr_Print();

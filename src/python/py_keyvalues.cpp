@@ -21,6 +21,7 @@
 #include <Python.h>
 #include <KeyValues.h>
 #include <utlbuffer.h>
+#include <filesystem.h>
 #include "py_keyvalues.h"
 #include <sh_tinyhash.h>
 #include "viper_globals.h"
@@ -58,9 +59,7 @@ keyvalues__KeyValues__clear(keyvalues__KeyValues *self, PyObject *args,
     
     static char *keywdlist[] = {"key", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "|s", keywdlist, &key))
-    {
         return NULL;
-    }
     
     if (key != NULL)
     {
@@ -70,17 +69,36 @@ keyvalues__KeyValues__clear(keyvalues__KeyValues *self, PyObject *args,
             findkv->Clear();
             /* To make sure the key is now printed as a section, create a
              * hidden keyvalue */
-             findkv->CreateNewKey();
+            //findkv->CreateNewKey();
         }
     }
     else
     {
         self->kv->Clear();
         /* See above */
-        self->kv->CreateNewKey();
+        //self->kv->CreateNewKey();
     }
     
     Py_RETURN_NONE;
+}
+
+static PyObject *
+keyvalues__KeyValues__copy(keyvalues__KeyValues *self)
+{
+    return GetPyObjectFromKeyValues(self->kv->MakeCopy());
+}
+
+static PyObject *
+keyvalues__KeyValues__parse(keyvalues__KeyValues *self, PyObject *args)
+{
+    char *string;
+    if (!PyArg_ParseTuple(args, "s", &string))
+        return NULL;
+    
+    // Make sure the KeyValues* version and our version match
+    self->kv->UsesEscapeSequences(self->uses_escape_sequences);
+    
+    return PyBool_FromLong(self->kv->LoadFromBuffer("Viper", string));
 }
 
 /* Get/Sets */
@@ -108,12 +126,43 @@ keyvalues__KeyValues__nameset(keyvalues__KeyValues *self, PyObject *setobj)
     return 0;
 }
 
+static PyObject *
+keyvalues__KeyValues__uses_escape_sequencesget(keyvalues__KeyValues *self)
+{
+    return PyBool_FromLong(self->uses_escape_sequences);
+}
+
+static int
+keyvalues__KeyValues__uses_escape_sequencesset(keyvalues__KeyValues *self,
+                                               PyObject *setobj)
+{
+    if (!PyBool_Check(setobj))
+    {
+        PyErr_Format(PyExc_TypeError, "expected bool, found %s",
+            setobj->ob_type->tp_name);
+        return -1;
+    }
+    
+    bool b = (setobj == Py_True);
+    self->uses_escape_sequences = b;
+    self->kv->UsesEscapeSequences(b);
+    
+    return 0;
+}
+
 /* Mapping Methods */
 static Py_ssize_t
 keyvalues__KeyValues__len__(keyvalues__KeyValues *self)
 {
-    /* TODO: Loop over all first level keys */
-    return 0;
+    KeyValues *next = self->kv->GetFirstSubKey();
+    if (next == NULL)
+        return 0;
+    
+    Py_ssize_t len = 1;
+    while ((next = next->GetNextKey()) != NULL)
+        len++;
+    
+    return len;
 }
 
 static PyObject *
@@ -128,7 +177,6 @@ keyvalues__KeyValues__subscript__(keyvalues__KeyValues *self, PyObject *key)
     if (findkv == NULL)
         Py_RETURN_NONE;
     
-    /* TODO: Colors */
     if (findkv->GetFirstSubKey() == NULL &&
         findkv->GetDataType() != KeyValues::TYPE_NONE)
     {
@@ -144,6 +192,9 @@ keyvalues__KeyValues__subscript__(keyvalues__KeyValues *self, PyObject *key)
         
         case KeyValues::TYPE_UINT64:
             return PyLong_FromUnsignedLongLong(findkv->GetUint64());
+        
+        case KeyValues::TYPE_COLOR:
+            return CreatePyColor(findkv->GetColor());
         
         case KeyValues::TYPE_STRING:
         case KeyValues::TYPE_WSTRING:
@@ -176,9 +227,9 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
         return 0;
     }
     
-    /* TODO: Colors */
-    PyObject *valid_types = PyTuple_Pack(5, &keyvalues__KeyValuesType,
-        &PyString_Type, &PyInt_Type, &PyFloat_Type, &PyLong_Type);
+    PyObject *valid_types = PyTuple_Pack(6, &keyvalues__KeyValuesType,
+        &PyString_Type, &PyInt_Type, &PyFloat_Type, &PyLong_Type,
+        &datatypes__ColorType);
     
     if (!PyObject_IsInstance(value, valid_types))
     {
@@ -219,7 +270,6 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
             self->kv->RemoveSubKey(findkv);
         }
         
-        /* TODO: Colors */
         char const *strkey = PyString_AS_STRING(key);
         if (PyString_Check(value))
             self->kv->SetString(strkey, PyString_AS_STRING(value));
@@ -229,6 +279,8 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
             self->kv->SetFloat(strkey, PyFloat_AS_DOUBLE(value));
         else if (PyLong_Check(value))
             self->kv->SetUint64(strkey, PyLong_AsUnsignedLongLong(value));
+        else if (PyObject_IsInstance(value, (PyObject *)&datatypes__ColorType))
+            self->kv->SetColor(strkey, *ColorFromPyColor((datatypes__Color*)value));
         else
         {
             PyErr_SetString(g_pViperException, "DAMN YOU SAWCE! YOU HAVE "
@@ -244,15 +296,74 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
 static void
 keyvalues__KeyValues__del__(keyvalues__KeyValues *self)
 {
-    /* self->kv should be a valid KeyValues */
-    assert(self->kv != NULL);
-    
-    RemoveKeyValuesFromCache(self->kv);
-    
-    self->kv->deleteThis();
-    self->kv = NULL;
+    /* self->kv can be NULL if __init__ fails */
+    if (self->kv != NULL)
+    {
+        RemoveKeyValuesFromCache(self->kv);
+        
+        self->kv->deleteThis();
+        self->kv = NULL;
+    }
     
     ((PyObject *)self)->ob_type->tp_free((PyObject *)self);
+}
+
+static void
+RecursiveAddToKeyValuesFromDict(KeyValues *kv, PyObject *dict)
+{
+    PyObject *pykey, *pyvalue;
+    Py_ssize_t pos = 0;
+    
+    while (PyDict_Next(dict, &pos, &pykey, &pyvalue))
+    {
+        char const *key;
+        if (PyString_Check(pykey))
+            key = PyString_AS_STRING(pykey);
+        else
+        {
+            PyObject *v = PyObject_Str(pykey);
+            if (v == NULL)
+            {
+                PyErr_Clear();
+                continue;
+            }
+            
+            key = PyString_AS_STRING(v);
+            Py_DECREF(v);
+        }
+        
+        if (PyString_Check(pyvalue))
+            kv->SetString(key, PyString_AS_STRING(pyvalue));
+        else if (PyInt_Check(pyvalue))
+            kv->SetInt(key, PyInt_AS_LONG(pyvalue));
+        else if (PyFloat_Check(pyvalue))
+            kv->SetFloat(key, PyFloat_AS_DOUBLE(pyvalue));
+        else if (PyLong_Check(pyvalue))
+            kv->SetUint64(key, PyLong_AsUnsignedLongLong(pyvalue));
+        else if (PyObject_IsInstance(pyvalue, (PyObject *)&datatypes__ColorType))
+            kv->SetColor(key, *ColorFromPyColor((datatypes__Color*)pyvalue));
+        else if (PyDict_Check(pyvalue))
+        {
+            KeyValues *subkv = new KeyValues(key);
+            if (subkv == NULL)
+                continue;
+            
+            kv->AddSubKey(subkv);
+            RecursiveAddToKeyValuesFromDict(subkv, pyvalue);
+        }
+        else
+        {
+            PyObject *v = PyObject_Str(pyvalue);
+            if (v == NULL)
+            {
+                PyErr_Clear();
+                continue;
+            }
+            
+            kv->SetString(key, PyString_AS_STRING(v));
+            Py_DECREF(v);
+        }
+    }
 }
 
 static int
@@ -260,9 +371,18 @@ keyvalues__KeyValues__init__(keyvalues__KeyValues *self, PyObject *args,
                              PyObject *kwds)
 {
     char const *name;
-    static char *keywdslist[] = {"name", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s", keywdslist, &name))
+    PyObject *dict = NULL;
+    
+    static char *keywdslist[] = {"name", "dict"};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|O", keywdslist, &name, &dict))
         return -1;
+    
+    if (dict != NULL && !PyDict_Check(dict))
+    {
+        PyErr_Format(PyExc_TypeError, "argument 2 must be dict, not %s",
+            dict->ob_type->tp_name);
+        return -1;
+    }
     
     if (self->kv != NULL)
     {
@@ -272,6 +392,9 @@ keyvalues__KeyValues__init__(keyvalues__KeyValues *self, PyObject *args,
     
     self->kv = new KeyValues(name);
     AddKeyValuesToCache(self->kv, (PyObject *)self);
+    
+    if (dict != NULL)
+        RecursiveAddToKeyValuesFromDict(self->kv, dict);
     
     return 0;
 }
@@ -290,16 +413,6 @@ keyvalues__KeyValues__str__(keyvalues__KeyValues *self)
 
 static PyMethodDef keyvalues__KeyValues__methods[] = {
 #ifdef NOT_IMPLEMENTED_YET
-    {"copy", (PyCFunction)keyvalues__KeyValues__copy, METH_NOARGS,
-        "copy() -> KeyValues\n\n"
-        "Recursively copies the current KeyValues into a new KeyValues.\n\n"
-        "@rtype: KeyValues\n"
-        "@return: A new KeyValues object with the same structure as this KeyValues."},
-    {"parse", (PyCFunction)keyvalues__KeyValues__parse, METH_VARARGS,
-        "parse(string)\n\n"
-        "Parses the string for a KeyValues structure and loads it in.\n\n"
-        "@type  string: str\n"
-        "@param string: The string value to parse."},
     {"save", (PyCFunction)keyvalues__KeyValues__save, METH_VARARGS,
         "save(file) -> bool\n\n"
         "Saves this KeyValues to a file.\n\n"
@@ -315,12 +428,25 @@ static PyMethodDef keyvalues__KeyValues__methods[] = {
         "is the same as kv[key].clear().\n\n"
         "@type  key: str\n"
         "@param key: The key to clear."},
+    {"copy", (PyCFunction)keyvalues__KeyValues__copy, METH_NOARGS,
+        "copy() -> KeyValues\n\n"
+        "Recursively copies the current KeyValues into a new KeyValues.\n\n"
+        "@rtype: KeyValues\n"
+        "@return: A new KeyValues object with the same structure as this KeyValues."},
+    {"parse", (PyCFunction)keyvalues__KeyValues__parse, METH_VARARGS,
+        "parse(string)\n\n"
+        "Parses the string for a KeyValues structure and loads it in.\n\n"
+        "@type  string: str\n"
+        "@param string: The string value to parse."},
     {NULL, NULL, 0, NULL}
 };
 
 static PyGetSetDef keyvalues__KeyValues__getsets[] = {
     {"name", (getter)keyvalues__KeyValues__nameget, (setter)keyvalues__KeyValues__nameset,
         "The root section name of this KeyValues."},
+    {"uses_escape_sequences", (getter)keyvalues__KeyValues__uses_escape_sequencesget,
+                              (setter)keyvalues__KeyValues__uses_escape_sequencesset,
+        "Whether or not to parse escape sequences such as \\n or \\\"."},
     {NULL}
 };
 
@@ -372,9 +498,80 @@ PyTypeObject keyvalues__KeyValuesType = {
     &PyType_GenericNew,                                     /* tp_new */
 };
 
+
+/* Methods */
+static PyObject *
+keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    PyObject *file;
+    bool use_escape_sequences = false;
+    
+    static char *keywdlist[] = {"file", "use_escape_sequences", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|b", keywdlist, &file,
+        &use_escape_sequences))
+        return NULL;
+    
+    PyObject *read = NULL;
+    if (!PyString_Check(file) && !(read = PyObject_GetAttrString(file, "read")))
+        return PyErr_Format(PyExc_TypeError, "expected string or file-like "
+            "object, found %s", file->ob_type->tp_name);
+    
+    if (read != NULL)
+    {
+        if (!PyCallable_Check(read))
+        {
+            PyErr_SetString(PyExc_TypeError, "the read function of file is not "
+                "callable");
+            return NULL;
+        }
+        
+        PyObject *result = PyObject_CallObject(read, NULL);
+        if (result == NULL)
+            return NULL;
+        
+        if (!PyString_Check(result))
+            return PyErr_Format(PyExc_TypeError, "read() returned object of "
+                "type %s, expected string", result->ob_type->tp_name);
+        
+        KeyValues *kv = new KeyValues("");
+        kv->UsesEscapeSequences(use_escape_sequences);
+        if (!kv->LoadFromBuffer("Viper", PyString_AS_STRING(result)))
+        {
+            kv->deleteThis();
+            
+            PyObject *pystr = PyObject_Str(file);
+            char *str = PyString_AsString(pystr);
+            Py_DECREF(pystr);
+            
+            return PyErr_Format(g_pViperException, "error loading from %s", str);
+        }
+        
+        PyObject *kvpy = GetPyObjectFromKeyValues(kv);
+        ((keyvalues__KeyValues *)kvpy)->uses_escape_sequences = use_escape_sequences;
+        
+        return kvpy;
+    }
+    else
+    {
+        KeyValues *kv = new KeyValues("");
+        kv->UsesEscapeSequences(use_escape_sequences);
+        if (!kv->LoadFromFile((IBaseFileSystem *)g_SMAPI->fileSystemFactory()
+            (BASEFILESYSTEM_INTERFACE_VERSION, NULL), PyString_AS_STRING(file), NULL))
+        {
+            kv->deleteThis();
+            return PyErr_Format(g_pViperException, "error loading from \"%s\"", 
+                PyString_AS_STRING(file));
+        }
+        
+        PyObject *kvpy = GetPyObjectFromKeyValues(kv);
+        ((keyvalues__KeyValues *)kvpy)->uses_escape_sequences = use_escape_sequences;
+        
+        return kvpy;
+    }
+}
+
 static PyMethodDef keyvalues__methods[] = {
-#if NOT_IMPLEMENTED_YET
-    {"keyvalues_from_file", keyvalues__keyvalues_from_file, METH_VARARGS,
+    {"keyvalues_from_file", (PyCFunction)keyvalues__keyvalues_from_file, METH_VARARGS|METH_KEYWORDS,
         "keyvalues_from_file(file[, use_escape_sequences=False]) -> keyvalues.KeyValues\n\n"
         "Creates a new KeyValues object from a file or file-like object.\n\n"
         "@type  file: str or file\n"
@@ -386,7 +583,6 @@ static PyMethodDef keyvalues__methods[] = {
         "   \\n or \\\"."
         "@rtype: keyvalues.KeyValues\n"
         "@return: A valid KeyValues object on success, None otherwise."},
-#endif
     {NULL, NULL, 0, NULL}
 };
 
@@ -432,6 +628,9 @@ GetPyObjectFromKeyValues(KeyValues *kv)
 void
 AddKeyValuesToCache(KeyValues *kv, PyObject *kvpy)
 {
+    if (kv == NULL)
+        return;
+    
     KVPyObject &obj = g_KeyValuesCache[kv];
     
     Py_INCREF(kvpy);
@@ -447,6 +646,9 @@ AddKeyValuesToCache(KeyValues *kv, PyObject *kvpy)
 void
 RemoveKeyValuesFromCache(KeyValues *kv)
 {
+    if (kv == NULL)
+        return;
+    
     KVPyObject &obj = g_KeyValuesCache[kv];
     
     if (obj.kvpy != NULL)

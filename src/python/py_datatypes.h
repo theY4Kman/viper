@@ -24,6 +24,7 @@
 #include <Python.h>
 
 extern PyTypeObject datatypes__VectorType;
+extern PyTypeObject datatypes__ColorType;
 
 struct datatypes__Vector
 {
@@ -36,7 +37,7 @@ struct datatypes__Color
 {
     PyObject_HEAD
     
-    float r, g, b, a;
+    int r, g, b, a;
 };
 
 #endif//_INCLUDE_VIPER_PY_DATATYPES_H_

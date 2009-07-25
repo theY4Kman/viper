@@ -1,0 +1,255 @@
+#!/usr/bin/env python
+# =============================================================================
+# Viper
+#    The SCons build file
+# Copyright (C) 2009 Zach "theY4Kman" Kanzler
+# =============================================================================
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License, version 3.0, as published by the
+# Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import sys
+from SCons.Errors import UserError
+
+## Constants
+SE_EPISODEONE = 1
+SE_DARKMESSIAH = 2
+SE_ORANGEBOX = 3
+SE_LEFT4DEAD = 4
+
+##########################################
+### USER COMPILATION CONFIGURATION     ###
+##########################################
+
+## Directories
+SMSDK = "../../sourcemod-central"
+SRCDS_BASE = os.path.expanduser("~/srcds")
+HL2SDK_ORIG = "../../hl2sdk"
+HL2SDK_OB = "../../hl2sdk-ob"
+HL2SDK_L4D = "../../hl2sdk-l4d"
+MMSOURCE17 = "../../mmsource-1.7"
+PYTHON = "../../../../apps/Python-2.5.4"
+
+##########################################
+### END USER COMPILATION CONFIGURATION ###
+##########################################
+
+
+
+# Custom build variables
+env_vars = Variables()
+
+# SCons does some pretty stupid stuff. The EnumVariable class defines a
+# converter function which is supposed to take the value passed by the user for
+# this variable ("original", "orangebox", or "left4dead"), and, using the map
+# argument, turn it into one of the SE_ constants. Somewhere along the line,
+# a SCons developer decided to write the code converter(env.subst("$ENGINE")),
+# which ends up simplifying to converter(converter(user_passed_value)). So the
+# first time converter is called with a valid string argument, say "original",
+# it passes back SE_EPISODEONE or 1. The second time converter is called, it
+# now has a worthless value that doesn't exist in the |map| variable. Oh, and
+# depending on the value of |ignorecase|, it will even try to run string.lower
+# on the value, so you get the lovely AttributeError: 'int' object has no
+# attribute 'lower'
+# 
+# So, in light of that, we're going to write our own custom converter function
+# that just returns the passed value if it's not a string.
+env_var_ENGINE = EnumVariable(
+    "ENGINE", "The Source engine version to compile against",
+    None, ("original", "orangebox", "left4dead",
+           # Add the string values of the options because SCons won't shut up
+           str(SE_EPISODEONE), str(SE_ORANGEBOX), str(SE_LEFT4DEAD)),
+    map={
+        "original": SE_EPISODEONE,
+        "orangebox": SE_ORANGEBOX,
+        "left4dead": SE_LEFT4DEAD
+    },
+    # ignorecase=1 converts the user's supplied value to lowercase
+    ignorecase=1
+)
+env_var_ENGINE = env_var_ENGINE[:4] + \
+    (lambda val, conv=env_var_ENGINE[4]: val if (type(val) is not str) else conv(val),)
+
+env_vars.AddVariables(
+    env_var_ENGINE,
+    BoolVariable("DEBUG", "Generate debugging info", False)
+)
+
+## Compiling process config
+# Default environment
+env_def = Environment(
+    variables=env_vars,
+    
+    # Project info
+    NAME="Viper",
+    DESCRIPTION="A SourceMod extension that exposes the Source engine through Python.",
+
+    # Compiling/Linking stuff
+    CXX="gcc-4.1",
+    CPPDEFINES={"SE_EPISODEONE": SE_EPISODEONE,
+                "SE_DARKMESSIAH": SE_DARKMESSIAH,
+                "SE_ORANGEBOX": SE_ORANGEBOX,
+                "SE_LEFT4DEAD": SE_LEFT4DEAD,
+                "SOURCE_ENGINE": "$ENGINE",
+                
+                "SOURCEMOD_BUILD": None,
+                
+                "_LINUX": None,
+                "HAVE_STDINT_H": None,
+                
+                "stricmp": "strcasecmp",
+                "_stricmp": "strcasecmp",
+                "_strnicmp": "strncasecmp",
+                "strnicmp": "strncasecmp",
+                "_snprintf": "snprintf",
+                "_vsnprintf": "vsnprintf",
+                "_alloca": "alloca",
+                "strcmpi": "strcasecmp"},
+    CPPFLAGS="""\
+        -Wall -Werror -Wno-switch -Wno-unused -Wno-uninitialized -Wno-non-virtual-dtor \
+        -mfpmath=sse -msse -m32 \
+        -fno-exceptions -fno-rtti -fvisibility=hidden -fvisibility-inlines-hidden""",
+    CPPPATH=[".", "../public", "sdk", "systems", "sourcemod",
+             SMSDK + "/public/sourcepawn", SMSDK + "/public",
+             PYTHON, PYTHON + "/Include",
+             "$HL2PUB", "$HL2PUB/engine", "$HL2PUB/tier0", "$HL2PUB/tier1", "$HL2PUB/vstdlib",
+             "$METAMOD", "$METAMOD/sourcehook"],
+    LIBS=["m", "dl", "python2.5"],
+    LIBPATH=[PYTHON],
+    LINKFLAGS="-Wl,--rpath,\$$ORIGIN/../viper/lib/plat-linux2 " \
+              "-m32 -static-libgcc ",
+    
+    # Remove -fPIC
+    SHCCFLAGS="",
+    
+    # This is normally "lib", making the target below "libviper.so"
+    SHLIBPREFIX="",
+)
+
+env_def.Prepend(
+    # SHLIBSUFFIX already contains .so/.dll/.dylib, so we prepend .ext to make
+    # the suffix .ext.so and so on.
+    SHLIBSUFFIX=".ext",
+    
+    # Add the libraries we link to. GCC reads dependencies left to right, so
+    # these libraries _MUST_ be after the object files.
+    _LIBFLAGS="$HL2LIB/tier1_i486.a vstdlib_i486.so tier0_i486.so ",
+)
+
+# Generate the help text for the "--help" command-line option
+Help(env_vars.GenerateHelpText(env_def))
+
+# Unfortunately, SCons assumes all command-line variables are optional, so we
+# must manually check that ENGINE=xxx exists.
+if not env_def.has_key("ENGINE"):
+    if env_def.GetOption("help"):
+        # If the user is accessing the help text, define ENGINE so SCons doesn't
+        # generate a KeyError when we access env["ENGINE"] farther below
+        env_def["ENGINE"] = SE_EPISODEONE
+    else:
+        raise UserError("'ENGINE' variable not passed. Use `scons -h` for details.")
+
+## Source files
+SOURCE = Split("""
+    sdk/smsdk_ext.cpp extension.cpp viper.cpp console.cpp sourcemod/sm_trie.cpp
+    
+    systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventManager.cpp
+    systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp
+    systems/HalfLife2.cpp
+    
+    python/py_clients.cpp python/py_events.cpp python/py_console.cpp
+    python/py_forwards.cpp python/py_sourcemod.cpp python/py_entity.cpp
+    python/py_halflife.cpp python/py_keyvalues.cpp python/py_datatypes.cpp
+""")
+
+# Debug environment
+env_dbg = env_def.Clone()
+env_dbg.Append(
+    CPPDEFINES=["_DEBUG", "DEBUG", "Py_DEBUG"],
+    CPPFLAGS=" -g -ggdb3"
+)
+
+# Release environment
+env_opt = env_def.Clone()
+env_opt.Append(
+    CPPDEFINES=["NDEBUG"],
+    CPPFLAGS=" -O3 -funroll-loops -pipe -fno-strict-aliasing -fno-threadsafe-statics"
+)
+
+# Determine which environment to use
+if env_def["DEBUG"]:
+    env = env_dbg
+    env["BUILD_DIR"] = "build/debug.%s" % ARGUMENTS.get("ENGINE", "original")
+else:
+    env = env_opt
+    env["BUILD_DIR"] = "build/release.%s" % ARGUMENTS.get("ENGINE", "original")
+env.VariantDir(env["BUILD_DIR"], ".", 0)
+
+# SCons has an annoying way of specifying where to place object files. The
+# sources must refer to the build directory. Since that's confusing to the
+# reader, we'll fake it by prepending the build dir to every target. Ugh.
+SOURCE = [env["BUILD_DIR"] + "/" + target for target in SOURCE]
+
+# Set some env variables depending on the engine
+if env["ENGINE"] == SE_EPISODEONE:
+    env.Append(
+        METAMOD=MMSOURCE17 + "/core-legacy",
+        HL2PUB=HL2SDK_ORIG + "/public",
+        HL2LIB=HL2SDK_ORIG + "/linux_sdk",
+        CPPPATH=[HL2SDK_ORIG + "/public/dlls"],
+        LIBPATH=[SRCDS_BASE + "/bin"]
+    )
+elif env["ENGINE"] == SE_ORANGEBOX:
+    env.Append(
+        HL2PUB=HL2SDK_OB + "/public",
+        HL2LIB=HL2SDK_OB + "/lib/linux",
+        METAMOD=MMSOURCE17 + "/core",
+        CPPPATH=[HL2SDK_OB + "/public/game/server"],
+        LIBPATH=[SRCDS_BASE + "/orangebox/bin"]
+    )
+elif env["ENGINE"] == SE_LEFT4DEAD:
+    env.Append(
+        HL2PUB=HL2SDK_L4D + "/public",
+        HL2LIB=HL2SDK_L4D + "/lib/linux",
+        METAMOD=MMSOURCE17 + "/core",
+        CPPPATH=[HL2SDK_L4D + "/public/game/server"],
+        LIBPATH=[SRCDS_BASE + "/l4d/bin"]
+    )
+else:
+    raise ValueError("'ENGINE' variable has an invalid value.")
+
+
+if env["PLATFORM"] == "posix":
+    # SCons wants to give object files the ext ".os", so we'll fix that
+    env["SHOBJSUFFIX"] = ".o"
+    
+    # Make sure we have symlinks to the necessary Linux libs
+    for path in ["vstdlib_i486.so", "tier0_i486.so"]:
+        if os.path.lexists(path):
+            os.unlink(path)
+        if not env.GetOption("clean"):
+            os.symlink(SRCDS_BASE + "/bin/" + path, path)
+
+# By default, we just want to build the extension
+extension = env.SharedLibrary(target="$BUILD_DIR/viper", source=SOURCE)
+Default(extension)
+
+# This is just a convenience thing for theY4Kman
+install = env.Install(SRCDS_BASE + "/cstrike/addons/sourcemod/extensions/auto.1.ep1/", extension)
+env.Alias("install", install)
+
+# Packaging
+# TODO
+
+Decider("MD5-timestamp")
+

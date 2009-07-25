@@ -26,6 +26,7 @@
 #include <sh_stack.h>
 #include "ForwardSys.h"
 #include <IViperForwardSys.h>
+#include <IForwardSys.h>
 
 struct CachedCommandInfo
 {

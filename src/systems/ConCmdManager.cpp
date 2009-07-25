@@ -329,7 +329,6 @@ CConCmdManager::AddOrFindCommand(char const *name, char const *description,
      */
     if(pInfo == NULL)
     {
-        pInfo = new ConCmdInfo();
         ConCommandBase *pBase = icvar->GetCommands();
         ConCommand *pCmd = NULL;
         
@@ -346,6 +345,9 @@ CConCmdManager::AddOrFindCommand(char const *name, char const *description,
             }
             pBase = const_cast<ConCommandBase *>(pBase->GetNext());
         }
+        
+        // Make sure we have a valid command before we build a new ConCmdInfo
+        pInfo = new ConCmdInfo();
 
         if (pCmd == NULL)
         {

@@ -99,10 +99,12 @@ forwards__Forward__fire(forwards__Forward *self, PyObject *args)
     int result;
     PyObject *py_result = self->fwd->Execute(&result, args);
     
+    if (py_result == NULL && PyErr_Occurred())
+        return NULL;
+    
     switch (self->fwd->GetExecType())
     {
     case ET_Single:
-        return py_result;
     case ET_Ignore:
         Py_RETURN_NONE;
     
@@ -280,7 +282,7 @@ PyTypeObject forwards__ForwardType = {
     0,                          /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,         /*tp_flags*/
     /* tp_doc */
-    "Contains methods to manipulate this forward.",
+    "Contains methods to manipulate a forward.",
     0,		                    /* tp_traverse */
     0,		                    /* tp_clear */
     0,		                    /* tp_richcompare */
@@ -360,7 +362,7 @@ forwards__create(PyObject *self, PyObject *args)
         return PyErr_Format(PyExc_TypeError, "argument 3 must be a valid ExecType");
     
     /* Get all the arguments after et */
-    PyObject *types = PyTuple_GetSlice(args, 3, PyTuple_Size(args)-1);
+    PyObject *types = PyTuple_GetSlice(args, 3, PyTuple_Size(args));
     
     IViperPluginFunction *pFunc = NULL;
     IViperForwardCallback fwd_callback = NULL;

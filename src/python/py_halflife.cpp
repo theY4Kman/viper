@@ -20,11 +20,42 @@
 
 #include <Python.h>
 #include "extension.h"
+#include "HalfLife2.h"
+#include <metamod_wrappers.h>
+
+static PyObject *
+halflife__get_engine_time(PyObject *self)
+{
+    return PyFloat_FromDouble(engine->Time());
+}
+
+static PyObject *
+halflife__get_game_description(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    bool original = false;
+    static char *keywdlist[] = {"original", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|b", keywdlist, &original))
+        return NULL;
+    
+    char const *description;
+    if (original)
+        description = gamedll->GetGameDescription();
+    else
+        description = SERVER_CALL(GetGameDescription)();
+    
+    return PyString_FromString(description);
+}
 
 static PyObject *
 halflife__get_game_folder_name(PyObject *self)
 {
     return PyString_FromString(g_pSM->GetGameFolderName());
+}
+
+static PyObject *
+halflife__get_game_time(PyObject *self)
+{
+    return PyFloat_FromDouble(g_SMAPI->GetCGlobals()->curtime);
 }
 
 static PyObject *
@@ -74,6 +105,26 @@ halflife__is_dedicated_server(PyObject *self)
 }
 
 static PyObject *
+halflife__is_decal_precached(PyObject *self, PyObject *args)
+{
+    char const *decal;
+    if (!PyArg_ParseTuple(args, "s", &decal))
+        return NULL;
+    
+    return PyBool_FromLong(engine->IsDecalPrecached(decal));
+}
+
+static PyObject *
+halflife__is_generic_precached(PyObject *self, PyObject *args)
+{
+    char const *generic;
+    if (!PyArg_ParseTuple(args, "s", &generic))
+        return NULL;
+    
+    return PyBool_FromLong(engine->IsGenericPrecached(generic));
+}
+
+static PyObject *
 halflife__is_map_valid(PyObject *self, PyObject *args)
 {
     char *map;
@@ -86,49 +137,123 @@ halflife__is_map_valid(PyObject *self, PyObject *args)
     return ret;
 }
 
+static PyObject *
+halflife__is_model_precached(PyObject *self, PyObject *args)
+{
+    char const *model;
+    if (!PyArg_ParseTuple(args, "s", &model))
+        return NULL;
+    
+    return PyBool_FromLong(engine->IsModelPrecached(model));
+}
+
+static PyObject *
+halflife__is_sound_precached(PyObject *self, PyObject *args)
+{
+    char const *sound;
+    if (!PyArg_ParseTuple(args, "s", &sound))
+        return NULL;
+    
+    return PyBool_FromLong(enginesound->IsSoundPrecached(sound));
+}
+
+static PyObject *
+halflife__precache_decal(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    char const *decal;
+    bool preload = false;
+    static char *keywdlist[] = {"decal", "preload"};
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|b", keywdlist, &decal, &preload))
+        return NULL;
+    
+    return PyInt_FromLong(engine->PrecacheDecal(decal, preload));
+}
+
+static PyObject *
+halflife__precache_generic(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    char const *generic;
+    bool preload = false;
+    static char *keywdlist[] = {"generic", "preload"};
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|b", keywdlist, &generic, &preload))
+        return NULL;
+    
+    return PyInt_FromLong(engine->PrecacheGeneric(generic, preload));
+}
+
+static PyObject *
+halflife__precache_model(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    char const *model;
+    bool preload = false;
+    static char *keywdlist[] = {"model", "preload"};
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|b", keywdlist, &model, &preload))
+        return NULL;
+    
+    return PyInt_FromLong(engine->PrecacheModel(model, preload));
+}
+
+static PyObject *
+halflife__precache_sentence_file(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    char const *sentence_file;
+    bool preload = false;
+    static char *keywdlist[] = {"sentence_file", "preload"};
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|b", keywdlist, &sentence_file, &preload))
+        return NULL;
+    
+    return PyInt_FromLong(engine->PrecacheSentenceFile(sentence_file, preload));
+}
+
+static PyObject *
+halflife__precache_sound(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    char const *sound;
+    bool preload = false;
+    static char *keywdlist[] = {"sound", "preload"};
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|b", keywdlist, &sound, &preload))
+        return NULL;
+    
+    return PyBool_FromLong(enginesound->PrecacheSound(sound, preload));
+}
+
 static PyMethodDef halflife__methods[] = {
 #if NOT_DOCUMENTED_YET
     {"create_dialog"},
-    {"is_decal_precached"},
-    {"is_generic_precached"},
-    {"is_model_precached"},
-    {"is_sound_precached"},
-    {"precache_decal"},
-    {"precache_generic"},
-    {"precache_model"},
-    {"precache_sentence_file"},
-    {"show_vgui_panel"},
-#endif
-#if NOT_IMPLEMENTED_YET
-    {"get_engine_time", (PyCFunction)halflife__get_engine_time, METH_NOARGS,
-        "get_engine_time() -> float\n\n"
-        "Returns a high-precision time value for profiling the engine.\n\n"
-        "@rtype: float\n"
-        "@return: A floating point time value"},
-    {"get_game_description", halflife__get_game_description, METH_VARARGS,
-        "get_game_description(original=False) -> str\n\n"
-        "Returns the game description of the mod.\n\n"
-        "@type  original: bool\n"
-        "@param original: If True, retrieves the original game description, ignoring any\n"
-        "    potential hooks from plug-ins.\n"
-        "@rtype: str\n"
-        "@return: The description of the game."},
-    {"get_game_time", (PyCFunction)halflife__get_game_time, METH_NOARGS,
-        "get_game_time() -> float\n\n"
-        "Returns the game time based on the game tick.\n\n"
-        "@rtype: float\n"
-        "@return: Game tick time"},
 #endif
     {"get_current_map", (PyCFunction)halflife__get_current_map, METH_NOARGS,
         "get_current_map() -> str\n\n"
         "Returns the current map name\n\n"
         "@rtype: str\n"
         "@return The map name, excluding the .bsp extension"},
+    {"get_engine_time", (PyCFunction)halflife__get_engine_time, METH_NOARGS,
+        "get_engine_time() -> float\n\n"
+        "Returns a high-precision time value for profiling the engine.\n\n"
+        "@rtype: float\n"
+        "@return: A floating point time value"},
+    {"get_game_description", (PyCFunction)halflife__get_game_description, METH_VARARGS|METH_KEYWORDS,
+        "get_game_description([original=False]) -> str\n\n"
+        "Returns the game description of the mod.\n\n"
+        "@type  original: bool\n"
+        "@param original: If True, retrieves the original game description, ignoring any\n"
+        "    potential hooks from plug-ins.\n"
+        "@rtype: str\n"
+        "@return: The description of the game."},
     {"get_game_folder_name", (PyCFunction)halflife__get_game_folder_name, METH_NOARGS,
         "get_game_folder_name() -> str\n\n"
         "Returns the name of the game's directory (e.g. 'cstrike', 'tf')\n\n"
         "@rtype: str\n"
         "@return: The directory name."},
+    {"get_game_time", (PyCFunction)halflife__get_game_time, METH_NOARGS,
+        "get_game_time() -> float\n\n"
+        "Returns the game time based on the game tick.\n\n"
+        "@rtype: float\n"
+        "@return: Game tick time"},
     {"guess_sdk_version", (PyCFunction)halflife__guess_sdk_version, METH_NOARGS,
         "guess_sdk_version() -> int\n\n"
         "Guesses the SDK version a mod was compiled against. If nothing specific is\n"
@@ -137,11 +262,25 @@ static PyMethodDef halflife__methods[] = {
         "a higher value).\n\n"
         "@rtype: SOURCE_SDK constant\n"
         "@return: A sourcemod.halflife.SOURCE_SDK_* constant."},
+    {"is_decal_precached", halflife__is_decal_precached, METH_VARARGS,
+        "is_decal_precached(decal) -> bool\n\n"
+        "Returns if a given decal is precached.\n\n"
+        "@type  decal: str\n"
+        "@param decal: Name of the decal to check\n"
+        "@rtype: bool\n"
+        "@return: True if precached, False otherwise."},
     {"is_dedicated_server", (PyCFunction)halflife__is_dedicated_server, METH_NOARGS,
         "is_dedicated_server() -> bool\n\n"
         "Returns whether the server is dedicated.\n\n"
         "@rtype: bool\n"
         "@return: True if dedicated, False otherwise."},
+    {"is_generic_precached", halflife__is_generic_precached, METH_VARARGS,
+        "is_generic_precached(generic) -> bool\n\n"
+        "Returns if a given generic file is precached.\n\n"
+        "@type  generic: str\n"
+        "@param generic: Name of the generic to check\n"
+        "@rtype: bool\n"
+        "@return: True if precached, False otherwise."},
     {"is_map_valid", halflife__is_map_valid, METH_VARARGS,
         "is_map_valid(map) -> bool\n\n"
         "Returns whether a map is valid or not.\n\n"
@@ -149,6 +288,65 @@ static PyMethodDef halflife__methods[] = {
         "@param map: Map name, excluding .bsp extension\n"
         "@rtype: bool\n"
         "@return: True if valid, False otherwise."},
+    {"is_model_precached", halflife__is_model_precached, METH_VARARGS,
+        "is_model_precached(model) -> bool\n\n"
+        "Returns if a given model is precached.\n\n"
+        "@type  model: str\n"
+        "@param model: Name of the model to check\n"
+        "@rtype: bool\n"
+        "@return: True if precached, False otherwise."},
+    {"is_sound_precached", halflife__is_sound_precached, METH_VARARGS,
+        "is_sound_precached(sound) -> bool\n\n"
+        "Returns if a given sound is precached.\n\n"
+        "@type  sound: str\n"
+        "@param sound: Name of the sound to check\n"
+        "@rtype: bool\n"
+        "@return: True if precached, False otherwise."},
+    {"precache_decal", (PyCFunction)halflife__precache_decal, METH_VARARGS|METH_KEYWORDS,
+        "precache_decal(decal[, preload=False]) -> int\n\n"
+        "Precaches a given decal.\n\n"
+        "@type  decal: str\n"
+        "@param decal: The name of the decal to precache.\n"
+        "@type  preload: bool\n"
+        "@param preload: If True, the file will be precached before level startup.\n"
+        "@rtype: int\n"
+        "@return: A valid decal index on success, 0 otherwise."},
+    {"precache_generic", (PyCFunction)halflife__precache_generic, METH_VARARGS|METH_KEYWORDS,
+        "precache_generic(generic[, preload=False]) -> int\n\n"
+        "Precaches a given generic file.\n\n"
+        "@type  generic: str\n"
+        "@param generic: The name of the generic file to precache.\n"
+        "@type  preload: bool\n"
+        "@param preload: If True, the file will be precached before level startup.\n"
+        "@rtype: int\n"
+        "@return: A valid generic file index on success, 0 otherwise."},
+    {"precache_model", (PyCFunction)halflife__precache_model, METH_VARARGS|METH_KEYWORDS,
+        "precache_model(model[, preload=False]) -> int\n\n"
+        "Precaches a given model.\n\n"
+        "@type  model: str\n"
+        "@param model: The name of the model to precache.\n"
+        "@type  preload: bool\n"
+        "@param preload: If True, the file will be precached before level startup.\n"
+        "@rtype: int\n"
+        "@return: A valid model index on success, 0 otherwise."},
+    {"precache_sentence_file", (PyCFunction)halflife__precache_sentence_file, METH_VARARGS|METH_KEYWORDS,
+        "precache_sentence_file(sentence_file[, preload=False]) -> int\n\n"
+        "Precaches a given sentence file.\n\n"
+        "@type  sentence_file: str\n"
+        "@param sentence_file: The name of the sentence file to precache.\n"
+        "@type  preload: bool\n"
+        "@param preload: If True, the file will be precached before level startup.\n"
+        "@rtype: int\n"
+        "@return: A valid sentence file index on success, 0 otherwise."},
+    {"precache_sound", (PyCFunction)halflife__precache_sound, METH_VARARGS|METH_KEYWORDS,
+        "precache_sound(sound[, preload=False]) -> bool\n\n"
+        "Precaches a given sound.\n\n"
+        "@type  sound: str\n"
+        "@param sound: The name of the sound to precache.\n"
+        "@type  preload: bool\n"
+        "@param preload: If True, the file will be precached before level startup.\n"
+        "@rtype: bool\n"
+        "@return: True on success, False otherwise."},
     {NULL, NULL, 0, NULL}
 };
 

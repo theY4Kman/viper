@@ -31,6 +31,7 @@ struct keyvalues__KeyValues
     PyObject_HEAD
     
     KeyValues *kv;
+    bool uses_escape_sequences;
 };
 
 /* Function to retrieve cached KeyValues objects */

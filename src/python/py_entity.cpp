@@ -85,6 +85,20 @@ inline char const *GetTypeString(ViperFieldType type)
     }
 }
 
+/* Checks if an edict is valid. If not, it sets the appropriate Python error */
+inline bool IsValidEdict(edict_t *edict)
+{
+    if (edict->IsFree())
+    {
+        PyErr_SetString(g_pViperException, "invalid edict.");
+        return false;
+    }
+    
+    /* XXX: Is there anything else to add here? */
+    
+    return true;
+}
+
 struct entity__EntityPropsArray
 {
     PyObject_HEAD
@@ -108,6 +122,9 @@ static int
 entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
                                      Py_ssize_t n, PyObject *setobj)
 {
+    if (!IsValidEdict(self->entity->edict))
+        return -1;
+    
     /* TODO: Datamap arrays */
     if (n < 0 || n >= self->array->GetNumProps())
     {
@@ -301,6 +318,9 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
 static PyObject *
 entity__EntityPropsArray__item__(entity__EntityPropsArray *self, Py_ssize_t n)
 {
+    if (!IsValidEdict(self->entity->edict))
+        return NULL;
+    
     /* TODO: Datamap arrays */
     if (n < 0 || n >= self->array->GetNumProps())
         return PyErr_Format(PyExc_IndexError, "SendProp Array index %d out of range", n);
@@ -324,12 +344,18 @@ entity__EntityPropsArray__item__(entity__EntityPropsArray *self, Py_ssize_t n)
 static Py_ssize_t
 entity__EntityPropsArray__len__(entity__EntityPropsArray *self)
 {
+    if (!IsValidEdict(self->entity->edict))
+        return -1;
+    
     return self->array->GetNumProps();
 }
 
 static PyObject *
 entity__EntityPropsArray__str__(entity__EntityPropsArray *self)
 {
+    if (!IsValidEdict(self->entity->edict))
+        return NULL;
+    
     PyObject *entobj_string = PyObject_Str((PyObject*)self->entity);
     
     PyObject *strobj = PyString_FromFormat("<EntityPropsArray '%s' for %s>",
@@ -388,6 +414,9 @@ struct entity__EntityProps {
 static PyObject *
 entity__EntityProps__subscript(entity__EntityProps *self, PyObject *pyprop)
 {
+    if (!IsValidEdict(self->entity->edict))
+        return NULL;
+    
     PyObject *pypropstring = PyObject_Str(pyprop);
     char const *prop = PyString_AsString(pypropstring);
     Py_DECREF(pypropstring);
@@ -418,7 +447,9 @@ static int
 entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
                                    PyObject *setobj)
 {
-    /* TODO: ARRAYS!!! */
+    if (!IsValidEdict(self->entity->edict))
+        return -1;
+    
     PyObject *pypropstring = PyObject_Str(pyprop);
     char const *prop = PyString_AsString(pypropstring);
     Py_DECREF(pypropstring);
@@ -761,18 +792,35 @@ PyTypeObject entity__EntityPropsType = {
 static PyObject *
 entity__Entity__is_networkable(entity__Entity *self)
 {
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
     return PyBool_FromLong((self->edict->GetNetworkable() != NULL) ? 1 : 0);
 }
 
 static PyObject *
 entity__Entity__is_valid(entity__Entity *self)
 {
+    if (self->edict->IsFree())
+        Py_RETURN_FALSE;
+    
     IServerUnknown *pUnknown = self->edict->GetUnknown();
     if (pUnknown == NULL)
         Py_RETURN_FALSE;
 
     CBaseEntity *pEntity = pUnknown->GetBaseEntity();
     return PyBool_FromLong((pEntity != NULL) ? 1 : 0);
+}
+
+static PyObject *
+entity__Entity__remove(entity__Entity *self)
+{
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
+    engine->RemoveEdict(self->edict);
+    
+    Py_RETURN_NONE;
 }
 
 static int
@@ -787,6 +835,9 @@ entity__Entity__clear__(entity__Entity *self)
 static int
 entity__Entity__cmp__(entity__Entity *self, PyObject *other)
 {
+    if (!IsValidEdict(self->edict))
+        return -1;
+    
     int isinstance = PyObject_IsInstance(other, (PyObject*)&entity__EntityType);
     if (isinstance == 0)
     {
@@ -852,6 +903,13 @@ entity__Entity__new__(PyTypeObject *type, PyObject *args, PyObject *keywds)
 static PyObject *
 entity__Entity__str__(entity__Entity *self)
 {
+    if (!IsValidEdict(self->edict))
+    {
+        PyErr_Clear();
+        return PyString_FromFormat("<Invalid Entity %d at: %p>",
+            gamehelpers->IndexOfEdict(self->edict), self->edict);
+    }
+    
     const char *cls = self->edict->GetClassName();
     if (cls == NULL || cls[0] == '\0')
         return PyString_FromFormat("<Entity %d at: %p>",
@@ -873,6 +931,9 @@ entity__Entity__traverse__(entity__Entity *self, visitproc visit, void *arg)
 static PyObject *
 entity__Entity__classnameget(entity__Entity *self, void *closure)
 {
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
     const char *cls = self->edict->GetClassName();
     
     if (cls == NULL || cls[0] == '\0')
@@ -884,12 +945,18 @@ entity__Entity__classnameget(entity__Entity *self, void *closure)
 static PyObject *
 entity__Entity__edict_flagsget(entity__Entity *self, void *closure)
 {
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
     return PyInt_FromLong(self->edict->m_fStateFlags);
 }
 
 static int
 entity__Entity__edict_flagsset(entity__Entity *self, PyObject *set, void *closure)
 {
+    if (!IsValidEdict(self->edict))
+        return -1;
+    
     if (!PyInt_Check(set))
     {
         PyErr_Format(PyExc_TypeError, "Edict flags must be set to an integer. "
@@ -904,6 +971,9 @@ entity__Entity__edict_flagsset(entity__Entity *self, PyObject *set, void *closur
 static PyObject *
 entity__Entity__datamapsget(entity__Entity *self, void *closure)
 {
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
     if (self->datamaps == NULL)
     {
         self->datamaps = PyObject_New(entity__EntityProps, &entity__EntityPropsType);
@@ -920,6 +990,9 @@ entity__Entity__datamapsget(entity__Entity *self, void *closure)
 static PyObject *
 entity__Entity__netclassget(entity__Entity *self, void *closure)
 {
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
     IServerNetworkable *pNet = self->edict->GetNetworkable();
     if (pNet == NULL)
         Py_RETURN_NONE;
@@ -932,6 +1005,9 @@ entity__Entity__netclassget(entity__Entity *self, void *closure)
 static PyObject *
 entity__Entity__sendpropsget(entity__Entity *self, void *closure)
 {
+    if (!IsValidEdict(self->edict))
+        return NULL;
+    
     if (self->sendprops == NULL)
     {
         self->sendprops = PyObject_New(entity__EntityProps, &entity__EntityPropsType);
@@ -961,9 +1037,6 @@ static PyGetSetDef entity__Entity__getsets[] = {
 };
 
 static PyMethodDef entity__Entity__methods[] = {
-#if NOT_DOCUMENTED_YET
-    {"RemoveEdict",             RemoveEdict},
-#endif
 #if NOT_IMPLEMENTED_YET
     {"change_edict_state", (PyCFunction)entity__Entity__change_edict_state, METH_VARARGS,
         "change_edict_state(offset=0)\n\n"
@@ -981,6 +1054,9 @@ static PyMethodDef entity__Entity__methods[] = {
         "Returns whether or not the entity is valid.\n"
         "@rtype: bool\n"
         "@return: True if valid, false otherwise."},
+    {"remove", (PyCFunction)entity__Entity__remove, METH_NOARGS,
+        "remove()\n\n"
+        "Removes the edict from the world."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -1028,6 +1104,20 @@ PyTypeObject entity__EntityType = {
 };
 
 static PyObject *
+entity__create_edict(PyObject *self)
+{
+    edict_t *pEdict = engine->CreateEdict();
+    if (pEdict == NULL)
+        Py_RETURN_NONE;
+    
+    entity__Entity *pyEntity = PyObject_New(entity__Entity, &entity__EntityType);
+    pyEntity->edict = pEdict;
+        
+    Py_INCREF((PyObject*)pyEntity);
+    return (PyObject*)pyEntity;
+}
+
+static PyObject *
 entity__get_entity_count(PyObject *self)
 {
     return PyInt_FromLong(engine->GetEntityCount());
@@ -1040,9 +1130,11 @@ entity__get_max_entities(PyObject *self)
 }
 
 static PyMethodDef entity__methods[] = {
-#if NOT_DOCUMENTED_YET
-    {"CreateEdict",},
-#endif
+    {"create_edict", (PyCFunction)entity__create_edict, METH_NOARGS,
+        "create_edict() -> Entity\n\n"
+        "Creates a new edict (the basis of a networkable entity).\n\n"
+        "@rtype: sourcemod.entity.Entity\n"
+        "@return: A valid Entity object on success, None otherwise."},
     {"get_entity_count", (PyCFunction)entity__get_entity_count, METH_NOARGS,
         "get_entity_count() -> int\n\n"
         "Returns the number of entities in the server\n"
@@ -1090,6 +1182,9 @@ PyObject *
 GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
                       ViperPropType type, void *propdata, int a_prop_offset)
 {
+    if (!IsValidEdict(pyEnt->edict))
+        return NULL;
+    
     edict_t *pEdict = pyEnt->edict;
     int bit_count;
     int prop_offset;
@@ -1292,7 +1387,7 @@ GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
     case FIELDTYPE_VECTOR:
         {
             Vector *vec = (Vector *)((uint8_t *)pEntity + prop_offset);
-            return CreatePyVector(vec);
+            return CreatePyVector(*vec);
         }
     
     case FIELDTYPE_STRING:

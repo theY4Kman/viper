@@ -32,6 +32,8 @@
 #include "PlayerManager.h"
 #include "python/py_clients.h"
 
+IViperForward *g_pViperOnBanClient;
+
 /** Used for the OnClientConnect forward */
 char *g_RejectMsg = NULL;
 int g_RejectMsgLen = 0;
@@ -78,6 +80,15 @@ ViperPlayerManager::OnViperStartup(bool late)
     Py_DECREF(pySingleIntArgs);
     
     playerhelpers->AddClientListener(this);
+    
+    PyObject *pyBanClientArgs = PyTuple_Pack(7, &clients__ClientType,
+        &PyInt_Type, &PyInt_Type, &PyString_Type, &PyString_Type,
+        &PyString_Type, &PyInt_Type);
+    
+    g_pViperOnBanClient = g_Forwards.CreateForward("ban_client", ET_Event,
+        pyBanClientArgs, NULL);
+    
+    Py_DECREF(pyBanClientArgs);
 }
 
 void
