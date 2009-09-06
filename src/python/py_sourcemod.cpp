@@ -210,6 +210,8 @@ initsourcemod(void)
         PyModule_AddModuleMacro(halflife);
         PyModule_AddModuleMacro(keyvalues);
         PyModule_AddModuleMacro(datatypes);
+        PyModule_AddModuleMacro(usermessages);
+        PyModule_AddModuleMacro(bitbuf);
         
 #undef  PyModule_AddModuleMacro
     }
@@ -233,6 +235,8 @@ initsourcemod(void)
         PyModule_ReinitMacro(halflife);
         PyModule_ReinitMacro(keyvalues);
         PyModule_ReinitMacro(datatypes);
+        PyModule_ReinitMacro(usermessages);
+        PyModule_ReinitMacro(bitbuf);
         
 #undef  PyModule_ReinitMacro
     }

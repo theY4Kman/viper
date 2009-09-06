@@ -36,32 +36,9 @@
 #define BANFLAG_AUTHID	(1<<2)	/**< Ban by SteamID */
 #define BANFLAG_NOKICK	(1<<3)	/**< Does not kick the client */
 #define BANFLAG_NOWRITE	(1<<4)	/**< Ban is not written to SourceDS's files if permanent */
+#define BANTIME_FOREVER 0
 
 using SourceMod::IGamePlayer;
-
-#if FOR_REFERENCE_ONLY
-    {"ban", (PyCFunction)clients__Client__ban, METH_VARARGS | METH_KEYWDS,
-        "ban(time, flags, reason[, kickmsg=\"Kicked\"[, cmd=None[, source=0]]]) -> bool\n\n"
-        "Bans the client.\n\n",
-        "@type  time: int\n"
-        "@param time: Time, in minutes, to ban (0 = permanent)\n"
-        "@type  flags: sourcemod.clients.BANFLAG constant\n"
-        "@param flags: Flags for controlling the ban mechanism. If BANFLAG_AUTHID is\n"
-        "    set and no AUTHID is available, the ban will fail unless AUTO is also\n"
-        "    flagged.\n"
-        "@type  reason: str\n"
-        "@param reason: Reason to ban the client for.\n"
-        "@type  kickmsg: str\n"
-        "@param kickmsg: Message o display to the user when they're kicked.\n"
-        "@type  cmd: str\n"
-        "@param cmd: Command string to identify the source. If this is left empty,\n"
-        "    then the ban_client forward will not be called.\n"
-        "@type  source: int\n"
-        "@param source: A source value that could be interpreted as the identity of the\n"
-        "    player whom was the source of the banning (not actually checked by Core).\n"
-        "@rtype: bool\n"
-        "@return: True on success, False on failure."},
-#endif
 
 static PyObject *
 clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
@@ -96,6 +73,7 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
         return NULL;
     }
     
+#if SOURCE_ENGINE != SE_DARKMESSIAH
     /* Check how we should ban the player */
     if ((ban_flags & BANFLAG_AUTO) == BANFLAG_AUTO)
     {
@@ -123,7 +101,7 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
             ban_flags &= ~BANFLAG_IP;
         }
         else
-            Py_RETURN_NONE;
+            Py_RETURN_FALSE;
     }
     else
     {
@@ -150,6 +128,11 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
             Py_DECREF(fwd_args);
         }
     }
+#else
+	/* Dark Messiah doesn't have Steam IDs so there is only one ban method to choose */
+	ban_flags |= BANFLAG_IP;
+	ban_flags &= ~BANFLAG_AUTHID;
+#endif
     
     if (!handled)
     {
@@ -163,19 +146,46 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
             if (ptr != NULL)
                 *ptr = '\0';
             
-            char command[256];
-            UTIL_Format(command, sizeof(command), "addip %d %s\n", ban_time, ip);
+            char bancommand[256];
+            UTIL_Format(bancommand, sizeof(bancommand), "addip %d %s\n", ban_time, ip);
             
-            //if ((ban_flags & BANFLAG_NOKICK) != BANFLAG_NOKICK)
-            //    player->Kick(ban_kickmsg);
+            /* Kick... */
+            if ((ban_flags & BANFLAG_NOKICK) != BANFLAG_NOKICK)
+                player->Kick(ban_kickmsg);
+            
+            /*  ...then ban */
+            engine->ServerCommand(bancommand);
+            
+            /* Now physically write the ban to file */
+            if ((ban_time == BANTIME_FOREVER) &&
+                ((ban_flags & BANFLAG_NOWRITE) != BANFLAG_NOWRITE))
+            {
+                engine->ServerCommand("writeip\n");
+            }
         }
         else if ((ban_flags & BANFLAG_AUTHID) == BANFLAG_AUTHID)
         {
-            //identity = player->GetAuthString();
+            char bancommand[256];
+            UTIL_Format(bancommand, sizeof(bancommand), "banid %d %s\n",
+                ban_time, player->GetAuthString());
+            
+            if ((ban_flags & BANFLAG_NOKICK) != BANFLAG_NOKICK)
+                player->Kick(ban_kickmsg);
+            
+            engine->ServerCommand(bancommand);
+            
+            /* Now physically write the ban to file */
+            if ((ban_time == BANTIME_FOREVER) &&
+                ((ban_flags & BANFLAG_NOWRITE) != BANFLAG_NOWRITE))
+            {
+                engine->ServerCommand("writeid\n");
+            }
         }
     }
+    else if ((ban_flags & BANFLAG_NOKICK) != BANFLAG_NOKICK)
+        player->Kick(ban_kickmsg);
     
-    /* TODO */
+    Py_RETURN_TRUE;
 }
 
 static PyObject *
@@ -214,6 +224,49 @@ clients__Client__is_timing_out(clients__Client *self)
     INetChannelInfo *pInfo = engine->GetPlayerNetInfo(self->index);
     
     return PyBool_FromLong(pInfo->IsTimingOut());
+}
+
+static PyObject *
+clients__Client__kick(clients__Client *self, PyObject *args, PyObject *kwds)
+{
+    if (self->index < 1)
+        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    if (!player->IsConnected())
+        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+    
+    char const *msg = "";
+    bool delay = true;
+    
+    static char *kwdlist[] = {"msg", "delay"};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|sb", kwdlist, &msg, &delay))
+        return NULL;
+    
+    /* Ignore duplicate kicks */
+    if (player->IsInKickQueue())
+        Py_RETURN_NONE;
+    
+    player->MarkAsBeingKicked();
+    
+    if (player->IsFakeClient())
+    {
+        char kickcmd[48];
+        unsigned short userid = engine->GetPlayerUserId(player->GetEdict());
+        unsigned short useridsm = player->GetUserId();
+        UTIL_Format(kickcmd, sizeof(kickcmd), "kickid %d\n", userid);
+        
+        engine->ServerCommand(kickcmd);
+        
+        Py_RETURN_NONE;
+    }
+    
+    if (delay)
+        gamehelpers->AddDelayedKick(self->index, player->GetUserId(), msg);
+    else
+        player->Kick(msg);
+    
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -1083,6 +1136,16 @@ static PyMethodDef clients__Client__methods[] = {
         "Returns if the client is timing out.\n\n"
         "@rtype: bool\n"
         "@return: True if the client is timing out, False otherwise."},
+    {"kick", (PyCFunction)clients__Client__kick, METH_VARARGS|METH_KEYWORDS,
+        "kick([msg=""[, delay=True]])\n\n"
+        "Disconnects a player from a server.\n\n"
+        "@type  msg: str\n"
+        "@param msg: A message to show the user as a disconnect reason. Note that a\n"
+        "   period is automatically appended to the message by the engine.\n"
+        "@type  delay: bool\n"
+        "@param delay: If True, the client is kicked in the next game frame. If False,"
+        "   the client is kicked immediately. The delay exists to prevent accidental\n"
+        "   engine crashes."},
     {"notify_post_admin_check", (PyCFunction)clients__Client__notify_post_admin_check, METH_VARARGS,
         "notify_post_admin_check()\n\n"
         "Signals that a player has completed post-connection admin checks. Has no effect\n"
@@ -1326,6 +1389,7 @@ initclients(void)
     PyModule_AddIntMacro(clients, BANFLAG_AUTHID);
     PyModule_AddIntMacro(clients, BANFLAG_NOKICK);
     PyModule_AddIntMacro(clients, BANFLAG_NOWRITE);
+    PyModule_AddIntMacro(clients, BANTIME_FOREVER);
     
     return clients;
 }

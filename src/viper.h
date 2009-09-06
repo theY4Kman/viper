@@ -30,9 +30,9 @@
 
 struct CachedCommandInfo
 {
-	const CCommand *args;
+    const CCommand *args;
 #if SOURCE_ENGINE < SE_ORANGEBOX
-	char cmd[300];
+    char cmd[300];
 #endif
 };
 
@@ -67,11 +67,11 @@ private:
     void GameFrame(bool simulating);
     
 private:
-	SourceHook::CStack<CachedCommandInfo> m_CommandStack;
+    SourceHook::CStack<CachedCommandInfo> m_CommandStack;
 	
-	PyObject *m_SourcemodModule;
-	IViperForward *m_GameFrame;
-	PyObject *m_EmptyTuple;
+    PyObject *m_SourcemodModule;
+    IViperForward *m_GameFrame;
+    PyObject *m_EmptyTuple;
 };
 
 extern BaseViper g_Viper;

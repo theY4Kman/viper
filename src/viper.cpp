@@ -35,7 +35,6 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
     SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
     
     m_SourcemodModule = NULL;
-    m_SourcemodModule = initsourcemod();
     m_EmptyTuple = PyTuple_New(0);
     
     StartViper();
@@ -46,7 +45,12 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
 PyObject *
 BaseViper::GetSourcemodModule()
 {
-    Py_XINCREF(m_SourcemodModule);
+    if (m_SourcemodModule == NULL)
+        m_SourcemodModule = initsourcemod();
+    
+    assert(m_SourcemodModule != NULL);
+    
+    Py_INCREF(m_SourcemodModule);
     return m_SourcemodModule;
 }
 
