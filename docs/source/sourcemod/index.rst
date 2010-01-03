@@ -7,4 +7,10 @@ The **sourcemod** module
 ..  toctree::
     
     sourcemod
+    clients
     console
+    entity
+    events
+    forwards
+    halflife
+    keyvalues
