@@ -448,12 +448,6 @@ console__create_convar(PyObject *self, PyObject *args, PyObject *keywds)
         return NULL;
     }
     
-    if (!IS_STR_FILLED(sValue))
-    {
-        PyErr_SetString(g_pViperException, "The value passed was blank");
-        return NULL;
-    }
-    
     float max = 0.0f;
     bool hasMax = false;
     float min = 0.0f;
