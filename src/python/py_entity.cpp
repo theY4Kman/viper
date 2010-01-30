@@ -1120,7 +1120,8 @@ entity__create_edict(PyObject *self)
     if (pEdict == NULL)
         Py_RETURN_NONE;
     
-    entity__Entity *pyEntity = PyObject_New(entity__Entity, &entity__EntityType);
+    entity__Entity *pyEntity = (entity__Entity *)entity__EntityType.tp_new(
+        &entity__EntityType, NULL, NULL);
     pyEntity->edict = pEdict;
         
     Py_INCREF((PyObject*)pyEntity);
@@ -1436,7 +1437,8 @@ GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
             if (pSE == NULL || pSE->GetRefEHandle() != hndl)
                 Py_RETURN_NONE;
             
-            entity__Entity *pyEntity = PyObject_New(entity__Entity, &entity__EntityType);
+            entity__Entity *pyEntity = (entity__Entity *)entity__EntityType.tp_new(
+                &entity__EntityType, NULL, NULL);
             pyEntity->edict = pStoredEdict;
                 
             Py_INCREF((PyObject*)pyEntity);
