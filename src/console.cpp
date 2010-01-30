@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -35,9 +35,7 @@ ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
 void
 ViperConsole::OnViperStartup(bool late)
 {
-    CONVAR_REGISTER(this);
-    
-	g_pMenu->AddRootConsoleCommand("py", "Viper (Python) menu", this);
+    g_pMenu->AddRootConsoleCommand("py", "Viper (Python) menu", this);
 }
 
 void

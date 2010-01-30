@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -29,6 +29,7 @@ bitbuf__BitBuf__str__(bitbuf__BitBuf *self)
 }
 
 /* Get/Sets */
+#if 0
 PyObject *
 bitbuf__BitBuf__num_bytes_leftget(bitbuf__BitBuf *self)
 {
@@ -39,14 +40,17 @@ bitbuf__BitBuf__num_bytes_leftget(bitbuf__BitBuf *self)
     }
     
     if (self->read == NULL)
-        self->read = new bf_read(self->nBytes, self->buffer);
+        self->read = new bf_read(self->buffer, self->nBytes);
     
     return PyInt_FromLong();
 }
+#endif
 
 PyGetSetDef bitbuf__BitBuf__getsets[] = {
+#if NOT_IMPLEMENTED_YET
     {"num_bytes_left", (getter)bitbuf__BitBuf__num_bytes_leftget, NULL,
         "The number of bytes left in a bitbuffer."},
+#endif
     {NULL}
 };
 
@@ -65,12 +69,12 @@ PyMethodDef bitbuf__BitBuf__methods[] = {
 };
 
 PyTypeObject bitbuf__BitBufType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                                              /*ob_size*/
     "sourcemod.bitbuf.BitBuf",                      /*tp_name*/
     sizeof(bitbuf__BitBuf),                         /*tp_basicsize*/
     0,                                              /*tp_itemsize*/
-    (destructor)bitbuf__BitBuf__del__,              /*tp_dealloc*/
+0,//    (destructor)bitbuf__BitBuf__del__,              /*tp_dealloc*/
     0,                                              /*tp_print*/
     0,                                              /*tp_getattr*/
     0,                                              /*tp_setattr*/
@@ -107,6 +111,8 @@ PyTypeObject bitbuf__BitBufType = {
 PyObject *
 initbitbuf(void)
 {
+    Py_INCREF(_PyType_Type);
+    bitbuf__BitBufType.ob_type = _PyType_Type;
     if (PyType_Ready(&bitbuf__BitBufType) < 0)
         return NULL;
     

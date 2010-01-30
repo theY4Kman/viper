@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -19,6 +19,7 @@
  */
 
 #include <Python.h>
+#include "viper_metamod_wrappers.h"
 #include <KeyValues.h>
 #include <utlbuffer.h>
 #include <filesystem.h>
@@ -113,7 +114,7 @@ keyvalues__KeyValues__nameset(keyvalues__KeyValues *self, PyObject *setobj)
 {
     if (!PyString_Check(setobj))
     {
-        PyErr_Format(PyExc_TypeError, "KeyValues.name expects a string, not %s",
+        PyErr_Format(_PyExc_TypeError, "KeyValues.name expects a string, not %s",
             setobj->ob_type->tp_name);
         return -1;
     }
@@ -138,7 +139,7 @@ keyvalues__KeyValues__uses_escape_sequencesset(keyvalues__KeyValues *self,
 {
     if (!PyBool_Check(setobj))
     {
-        PyErr_Format(PyExc_TypeError, "expected bool, found %s",
+        PyErr_Format(_PyExc_TypeError, "expected bool, found %s",
             setobj->ob_type->tp_name);
         return -1;
     }
@@ -169,7 +170,7 @@ static PyObject *
 keyvalues__KeyValues__subscript__(keyvalues__KeyValues *self, PyObject *key)
 {
     if (!PyString_Check(key))
-        return PyErr_Format(PyExc_TypeError, "expected key of type string, not "
+        return PyErr_Format(_PyExc_TypeError, "expected key of type string, not "
             "%s.", key->ob_type->tp_name);
     
     KeyValues *findkv = self->kv->FindKey(PyString_AS_STRING(key));
@@ -213,7 +214,7 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
 {
     if (!PyString_Check(key))
     {
-        PyErr_Format(PyExc_TypeError, "expected key of type string, not %s.",
+        PyErr_Format(_PyExc_TypeError, "expected key of type string, not %s.",
             key->ob_type->tp_name);
         return -1;
     }
@@ -228,12 +229,12 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
     }
     
     PyObject *valid_types = PyTuple_Pack(6, &keyvalues__KeyValuesType,
-        &PyString_Type, &PyInt_Type, &PyFloat_Type, &PyLong_Type,
+        _PyString_Type, _PyInt_Type, _PyFloat_Type, _PyLong_Type,
         &datatypes__ColorType);
     
     if (!PyObject_IsInstance(value, valid_types))
     {
-        PyErr_Format(PyExc_TypeError, "unexpected value type %s. Expected "
+        PyErr_Format(_PyExc_TypeError, "unexpected value type %s. Expected "
             "string, int, long, float, KeyValues, or Color.",
             value->ob_type->tp_name);
         Py_XDECREF(valid_types);
@@ -379,7 +380,7 @@ keyvalues__KeyValues__init__(keyvalues__KeyValues *self, PyObject *args,
     
     if (dict != NULL && !PyDict_Check(dict))
     {
-        PyErr_Format(PyExc_TypeError, "argument 2 must be dict, not %s",
+        PyErr_Format(_PyExc_TypeError, "argument 2 must be dict, not %s",
             dict->ob_type->tp_name);
         return -1;
     }
@@ -513,14 +514,14 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
     
     PyObject *read = NULL;
     if (!PyString_Check(file) && !(read = PyObject_GetAttrString(file, "read")))
-        return PyErr_Format(PyExc_TypeError, "expected string or file-like "
+        return PyErr_Format(_PyExc_TypeError, "expected string or file-like "
             "object, found %s", file->ob_type->tp_name);
     
     if (read != NULL)
     {
         if (!PyCallable_Check(read))
         {
-            PyErr_SetString(PyExc_TypeError, "the read function of file is not "
+            PyErr_SetString(_PyExc_TypeError, "the read function of file is not "
                 "callable");
             return NULL;
         }
@@ -530,7 +531,7 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
             return NULL;
         
         if (!PyString_Check(result))
-            return PyErr_Format(PyExc_TypeError, "read() returned object of "
+            return PyErr_Format(_PyExc_TypeError, "read() returned object of "
                 "type %s, expected string", result->ob_type->tp_name);
         
         KeyValues *kv = new KeyValues("");
@@ -555,7 +556,7 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
     {
         KeyValues *kv = new KeyValues("");
         kv->UsesEscapeSequences(use_escape_sequences);
-        if (!kv->LoadFromFile((IBaseFileSystem *)g_SMAPI->fileSystemFactory()
+        if (!kv->LoadFromFile((IBaseFileSystem *)g_SMAPI->GetFileSystemFactory()
             (BASEFILESYSTEM_INTERFACE_VERSION, NULL), PyString_AS_STRING(file), NULL))
         {
             kv->deleteThis();
@@ -589,6 +590,8 @@ static PyMethodDef keyvalues__methods[] = {
 PyObject *
 initkeyvalues(void)
 {
+    Py_INCREF(_PyType_Type);
+    keyvalues__KeyValuesType.ob_type = _PyType_Type;
     if (PyType_Ready(&keyvalues__KeyValuesType) < 0)
         return NULL;
     

@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2008-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -24,11 +24,12 @@
  */
 
 #include "extension.h"
-#include <metamod_wrappers.h>
+#include "viper_metamod_wrappers.h"
 #include <random.h>
 #include "python/init.h"
 #include "python/py_entity.h"
 #include "viper.h"
+#include "console.h"
 #include <IForwardSys.h>
 
 #if defined __linux__
@@ -52,10 +53,29 @@ IEngineSound *enginesound = NULL;
 SourceMod::IForward *g_pSMOnBanIdentity = NULL;
 SourceMod::IForward *g_pSMOnBanClient = NULL;
 
+extern ViperConsole g_VConsole;
+
 #ifdef WIN32
 PyObject *Py_None = NULL;
-PyObject *_Py_TrueStruct = NULL;
-PyObject *_Py_ZeroStruct = NULL;
+PyObject *Py_True = NULL;
+PyObject *Py_False = NULL;
+PyObject *Py_NotImplemented = NULL;
+
+PyObject *_PyExc_TypeError = NULL;
+PyObject *_PyExc_IndexError = NULL;
+PyObject *_PyExc_IOError = NULL;
+PyObject *_PyExc_KeyError = NULL;
+PyObject *_PyExc_RuntimeError = NULL;
+PyObject *_PyExc_RuntimeWarning = NULL;
+
+PyTypeObject *_PyInt_Type = NULL;
+PyTypeObject *_PyString_Type = NULL;
+PyTypeObject *_PyFloat_Type = NULL;
+PyTypeObject *_PyType_Type = NULL;
+PyTypeObject *_PyLong_Type = NULL;
+PyTypeObject *_PyTuple_Type = NULL;
+PyTypeObject *_PyBool_Type = NULL;
+PyTypeObject *_PyDict_Type = NULL;
 #endif
 
 PyThreadState *g_pGlobalThreadState = NULL;
@@ -92,21 +112,41 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         "extensions/viper/lib/plat-win/");
     SetDllDirectory(libpath);
     
-    HMODULE python25_DLL = GetModuleHandle(_T("python25.dll"));
+    HMODULE python25_DLL = LoadLibrary("python25.dll");
     if (python25_DLL == NULL)
     {
-        strncpy(error, "Unable to load python25.dll", maxlength);
+        LPVOID errorMsg;
+        FormatMessage(
+          FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+          FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+          NULL,
+          GetLastError(),
+          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+          (LPTSTR) &errorMsg,
+          0, NULL
+        );
+        
+        size_t written = UTIL_Format(error, maxlength, "Unable to load python25.dll (0x%x): %s", GetLastError(), errorMsg);
+        error[written-2] = '\0';
         return false;
     }
     
-    Py_None = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_NoneStruct");
-    _Py_TrueStruct = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_TrueStruct");
-    _Py_ZeroStruct = (PyObject*)GetProcAddress(g_python25_DLL, "_Py_ZeroStruct");
+    Py_None = (PyObject*)GetProcAddress(python25_DLL, "_Py_NoneStruct");
+    Py_True = (PyObject*)GetProcAddress(python25_DLL, "_Py_TrueStruct");
+    Py_False = (PyObject*)GetProcAddress(python25_DLL, "_Py_ZeroStruct");
+    Py_NotImplemented = (PyObject*)GetProcAddress(python25_DLL, "_Py_NotImplementedStruct");
+    
+    _PyExc_TypeError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_TypeError"));
+    _PyExc_IndexError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_IndexError"));
+    _PyExc_IOError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_IOError"));
+    _PyExc_RuntimeError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeError"));
+    _PyExc_KeyError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_KeyError"));
+    _PyExc_RuntimeWarning = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeWarning"));
     
     g_pSendProxy_EHandleToInt = memutils->FindPattern(g_SMAPI->GetServerFactory(false),
-        "\x83\x2A\x2A\x8B\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x33\xC9\x89\x2A\x2A\x2A"
-        "\x8B\x2A\x2A\x2A\x89\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x3D\x70\xC1\x13\x22"
-        "\xC7\x2A\x2A\x5C\x4C\x44\x22", 41);
+        "\x8B\x2A\x2A\x2A\x85\x2A\x74\x2A\x8B\x2A\x83\x2A\x2A\x74\x2A\x8B\x2A\x81\x2A"
+        "\xFF\x0F", 21);
     
     if (g_pSendProxy_EHandleToInt == NULL)
     {
@@ -153,6 +193,45 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     
     InitializePython();
     
+#ifdef WIN32
+    PyObject *types = PyImport_ImportModule("types");
+    if (types == NULL)
+    {
+        strncpy(error, "Unable to import the Python types module to initialize Viper data",
+                maxlength);
+        return false;
+    }
+    
+    Py_XINCREF(_PyType_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TypeType"));
+    Py_XINCREF(_PyInt_Type = (PyTypeObject *)PyObject_GetAttrString(types, "IntType"));
+    Py_XINCREF(_PyString_Type = (PyTypeObject *)PyObject_GetAttrString(types, "StringType"));
+    Py_XINCREF(_PyFloat_Type = (PyTypeObject *)PyObject_GetAttrString(types, "FloatType"));
+    Py_XINCREF(_PyLong_Type = (PyTypeObject *)PyObject_GetAttrString(types, "LongType"));
+    Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TupleType"));
+    Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BoolType"));
+    Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(types, "DictType"));
+    
+    Py_DECREF(types);
+#endif
+    
+    /* For some reason, Python ends up with types Viper has created, but they
+     * all have null ob_types. We remedy that by instantiating all the modules
+     * with their initxxxxx() functions, which set ob_type. We can't call
+     * initsourcemod(), because it corrupts the stack (I don't know why)
+     */
+#   define SetObType(x) Py_XDECREF(init##x());
+//#   define SetObType(x) init##x();
+    SetObType(bitbuf);
+    SetObType(clients);
+    SetObType(console);
+    SetObType(datatypes);
+    SetObType(entity);
+    SetObType(events);
+    SetObType(forwards);
+    SetObType(halflife);
+    SetObType(keyvalues);
+    SetObType(usermessages);
+    
     return g_Viper.OnViperLoad(error, maxlength, late);
 }
 
@@ -190,9 +269,11 @@ ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
         IENGINESOUND_SERVER_INTERFACE_VERSION);
 
     
-#if SOURCE_ENGINE < SE_ORANGEBOX
+#if SOURCE_ENGINE >= SE_ORANGEBOX
     g_pCVar = icvar;
 #endif
+    
+    CONVAR_REGISTER(&g_VConsole);
 
     return true;
 }

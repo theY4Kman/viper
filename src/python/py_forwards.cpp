@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -180,9 +180,9 @@ static PyObject *
 forwards__Forward__item__(forwards__Forward *self, Py_ssize_t i)
 {
     /* Damn compiler complaining about signedness comparison */
-    if ((i < 0 ? 0 : i) >= self->fwd->GetFunctionCount())
+    if ((unsigned int)(i < 0 ? 0 : i) >= self->fwd->GetFunctionCount())
     {
-        PyErr_SetString(PyExc_IndexError, "list index out of range");
+        PyErr_SetString(_PyExc_IndexError, "list index out of range");
         return NULL;
     }
     
@@ -221,7 +221,7 @@ static PyMemberDef forwards__Forward__members[] = {
 static PyMethodDef forwards__Forward__methods[] = {
     {"add_function", (PyCFunction)forwards__Forward__add_function, METH_VARARGS,
         "add_function(func)\n\n"
-        "Adds a function the the forward's function list.\n"
+        "Adds a function to the the forward's function list.\n"
         "@type  func: callable\n"
         "@param func: The function to add to the list. The function should be able\n"
         "   to handle all the arguments of the forward, though that is NOT checked\n"
@@ -334,32 +334,31 @@ forwards__create(PyObject *self, PyObject *args)
 {
     char *name;
     PyObject *callback;
-    ViperExecType et;
     
     if (PyTuple_Size(args) < 3)
     {
-        PyErr_SetString(PyExc_TypeError, "forwards.create takes at least 3 arguments");
+        PyErr_SetString(_PyExc_TypeError, "forwards.create takes at least 3 arguments");
         return NULL;
     }
     
     PyObject *pyname = PyTuple_GetItem(args, 0);
     if (!PyString_Check(pyname))
-        return PyErr_Format(PyExc_TypeError, "argument 1 must be string, not %s",
+        return PyErr_Format(_PyExc_TypeError, "argument 1 must be string, not %s",
             pyname->ob_type->tp_name);
     name = PyString_AS_STRING(pyname);
     
     callback = PyTuple_GetItem(args, 1);
     if (!PyCallable_Check(callback) && callback != Py_None)
-        return PyErr_Format(PyExc_TypeError, "argument 2 must be callable");
+        return PyErr_Format(_PyExc_TypeError, "argument 2 must be callable");
     
     PyObject *pyet = PyTuple_GetItem(args, 2);
     if (!PyInt_Check(pyet))
-        return PyErr_Format(PyExc_TypeError, "argument 3 must be int, not %s",
+        return PyErr_Format(_PyExc_TypeError, "argument 3 must be int, not %s",
             pyet->ob_type->tp_name);
     int int_et = PyInt_AS_LONG(pyet);
     
     if (int_et < ET_Ignore || int_et > ET_LowEvent)
-        return PyErr_Format(PyExc_TypeError, "argument 3 must be a valid ExecType");
+        return PyErr_Format(_PyExc_TypeError, "argument 3 must be a valid ExecType");
     
     /* Get all the arguments after et */
     PyObject *types = PyTuple_GetSlice(args, 3, PyTuple_Size(args));
@@ -373,7 +372,7 @@ forwards__create(PyObject *self, PyObject *args)
         fwd_callback = ForwardCallback;
     }
     
-    IViperForward *fwd = g_Forwards.CreateForward(name, et, types, fwd_callback);
+    IViperForward *fwd = g_Forwards.CreateForward(name, (ViperExecType)int_et, types, fwd_callback);
     assert(fwd != NULL);
     
     /* Create a new Python Forward object */
@@ -407,7 +406,7 @@ static PyMethodDef forwards__methods[] = {
         "Creates a new forward. All the arguments after |et| are the types of the objects\n"
         "that will be passed to the forward's hooks. For example:\n\n"
         "   >>> myforward = create(\"\", None, ET_Ignore, int, int, str)\n"
-        "       <anonymous Forward: 0x819c12d>\n"
+        "<anonymous Forward: 0x819c12d>\n"
         "   >>> def myhook(num1, num2, name):\n"
         "   >>>     print num1, num2, name"
         "   >>>     return Plugin_Continue\n"
@@ -436,6 +435,8 @@ static PyMethodDef forwards__methods[] = {
 PyObject *
 initforwards(void)
 {
+    Py_INCREF(_PyType_Type);
+    forwards__ForwardType.ob_type = _PyType_Type;
     if (PyType_Ready((PyTypeObject*)&forwards__ForwardType) < 0)
         return NULL;
     

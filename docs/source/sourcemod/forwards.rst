@@ -33,11 +33,11 @@ Module Contents
     Creates a new forward. All the arguments after ``et`` should be the types of the objects that will be passed to the forward's hooks. For example::
         
         >>> myforward = create("", None, ET_Ignore, int, int, str)
-            <anonymous Forward: 0x819c12d>
+        <anonymous Forward: 0x819c12d>
         >>> def myhook(num1, num2, name):
-        >>>     print num1, num2, name
-        >>>     return Plugin_Continue
-        >>> 
+        ...     print num1, num2, name
+        ...     return Plugin_Continue
+        ... 
         >>> myforward.add_function(myhook)
         >>> myforward.fire(3, 1337, "elite")
         3 1337 elite

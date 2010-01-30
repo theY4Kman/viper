@@ -44,25 +44,25 @@ KeyValues objects are essentially dictionaries, and thus are accessed in the sam
 ::
 
     >>> kv['key1']
-        'value1'
+    'value1'
     >>> kv['subsection1']
-        subsection1
-        {
-            "subkey1"     "subvalue1"
-            "subkey2"     "2"
-            "subkey3"     "4.7123"
-        }
+    subsection1
+    {
+        "subkey1"     "subvalue1"
+        "subkey2"     "2"
+        "subkey3"     "4.7123"
+    }
     >>> kv['subsection1']['subkey2']
-        2
+    2
     >>> kv['subsection1']['subkey2'] = 83
-        83
+    83
     >>> kv['subsection1']
-        subsection1
-        {
-            "subkey1"     "subvalue1"
-            "subkey2"     "83"
-            "subkey3"     "4.7123"
-        }
+    subsection1
+    {
+        "subkey1"     "subvalue1"
+        "subkey2"     "83"
+        "subkey3"     "4.7123"
+    }
 
 Attributes and Methods
 ----------------------
@@ -77,7 +77,7 @@ Attributes and Methods
     
     ..  note::
         
-        The value of this is managed by Viper. It is possible for a C++ function to modify the backend value and making this value incorrect. To be safe, always set this before you parse new data.
+        The value of this is managed by Viper. It is possible for a C++ function to modify the backend value, therefore making this value incorrect. To be safe, always set this before you parse new data.
 
 ..  method:: KeyValues.clear([key])
     

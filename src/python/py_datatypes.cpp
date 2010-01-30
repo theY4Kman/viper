@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -38,7 +38,7 @@ datatypes__Color__richcmp__(datatypes__Color *self, PyObject *b, int op)
     if (!PyObject_IsInstance(b, (PyObject *)self->ob_type) &&
         (pyint = PyNumber_Int(b)) == NULL)
     {
-        return PyErr_Format(PyExc_TypeError, "expected int or Color, found %s",
+        return PyErr_Format(_PyExc_TypeError, "expected int or Color, found %s",
             b->ob_type->tp_name);
     }
     
@@ -136,7 +136,7 @@ static PyMemberDef datatypes__Color__members[] = {
 };
 
 PyTypeObject datatypes__ColorType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                                                      /*ob_size*/
     "sourcemod.datatypes.Color",                            /*tp_name*/
     sizeof(datatypes__Color),                               /*tp_basicsize*/
@@ -197,7 +197,7 @@ datatypes__Vector__richcmp__(datatypes__Vector *self, PyObject *b, int op)
     if (!PyObject_IsInstance(b, (PyObject *)self->ob_type) &&
         (pyfloat = PyNumber_Float(b)) == NULL)
     {
-        return PyErr_Format(PyExc_TypeError, "expected float or Vector, found %s",
+        return PyErr_Format(_PyExc_TypeError, "expected float or Vector, found %s",
             b->ob_type->tp_name);
     }
     
@@ -288,7 +288,7 @@ static PyMemberDef datatypes__Vector__members[] = {
 };
 
 PyTypeObject datatypes__VectorType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                                                      /*ob_size*/
     "sourcemod.datatypes.Vector",                           /*tp_name*/
     sizeof(datatypes__Vector),                              /*tp_basicsize*/
@@ -332,6 +332,11 @@ PyTypeObject datatypes__VectorType = {
 PyObject *
 initdatatypes(void)
 {
+    Py_INCREF(_PyType_Type);
+    Py_INCREF(_PyType_Type);
+    datatypes__VectorType.ob_type = _PyType_Type;
+    datatypes__ColorType.ob_type = _PyType_Type;
+    
     if (PyType_Ready(&datatypes__VectorType) < 0 ||
         PyType_Ready(&datatypes__ColorType) < 0)
         return NULL;

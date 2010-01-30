@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -29,7 +29,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"Viper"
 #define SMEXT_CONF_DESCRIPTION	"Python for SourceMod"
-#define SMEXT_CONF_VERSION		"0.0.0.0"
+#define SMEXT_CONF_VERSION		"0.8"
 #define SMEXT_CONF_AUTHOR		"Zach \"theY4Kman\" Kanzler"
 #define SMEXT_CONF_URL			"http://y4kstudios.com"
 #define SMEXT_CONF_LOGTAG		"Viper"

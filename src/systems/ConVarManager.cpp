@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -45,8 +45,8 @@ ViperConVarManager::~ViperConVarManager()
 void
 ViperConVarManager::OnViperStartup(bool late)
 {
-    m_HookParams = PyTuple_Pack(3, &console__ConVarType, &PyString_Type,
-                                &PyString_Type);
+    m_HookParams = PyTuple_Pack(3, &console__ConVarType, _PyString_Type,
+                                _PyString_Type);
     assert(m_HookParams != NULL);
 }
 
@@ -175,7 +175,7 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
     
     cvar = new ConVar(sm_strdup(name), sm_strdup(defaultVal), flags,
         sm_strdup(desc), hasMin, min, hasMax, max);
-    META_REGCVAR(cvar);
+    
     handle->pVar = cvar;
     handle->name = cvar->GetName();
     

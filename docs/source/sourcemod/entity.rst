@@ -38,9 +38,9 @@ Entity Objects
     An array-like object to access the datamaps of this entity::
         
         >>> my_entity = my_client.entity
-            <Entity 2: 'player' at: 0xB00B5>
+        <Entity 2: 'player' at: 0xB00B5>
         >>> my_entity.datamaps["a_datamap_key"]
-            "Valid datamap response!"
+        "Valid datamap response!"
 
 ..  note:: Unfortunately, there is no dependable way to determine if a datamap is an integer or a pointer, so as of yet it is impossible to handle entities stored in datamaps.
 
@@ -57,9 +57,9 @@ Entity Objects
     The send props of the entity in a nice array-like object. Viper is able to determine the type of the sendprop, and thus needs only the name of the property. For example, we can go back and forth between a gun and his owner over and over::
         
         >>> weap = my_client.entity.sendprops["m_hActiveWeapon"]
-            <Entity 632: 'weapon_ak47' at: 0xBADD06>
-        >>> if my_client is weap.sendprops["m_hOwner"]: print True
-            True
+        <Entity 632: 'weapon_ak47' at: 0xBADD06>
+        >>> if my_client.entity == weap.sendprops["m_hOwner"]: print True
+        True
 
     Snazzy, eh? It even supports arrays inside sendprops, so you can do ``my_client.entity.sendprops["m_hMyWeapons"][3]``
 

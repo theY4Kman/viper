@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -21,7 +21,7 @@
 #ifndef _INCLUDE_PYTHON_ENTITY_H_
 #define _INCLUDE_PYTHON_ENTITY_H_
 
-class edict_t;
+struct edict_t;
 struct entity__EntityProps;
 
 extern PyTypeObject entity__EntityType;

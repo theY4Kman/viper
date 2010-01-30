@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -154,7 +154,9 @@ initsourcemod(void)
     PyObject *sourcemod = Py_InitModule3("sourcemod", sourcemod__methods,
         "The standard Viper library.");
     
-    g_pViperException = PyErr_NewException("sourcemod.ViperError", NULL, NULL);
+    if (g_pViperException == NULL)
+        g_pViperException = PyErr_NewException("sourcemod.ViperError", NULL, NULL);
+    Py_INCREF(g_pViperException);
     PyModule_AddObject(sourcemod, "ViperError", g_pViperException);
 
 #define PyModule_AddStringMacro(name, string) { \
@@ -195,51 +197,24 @@ initsourcemod(void)
         
         PySys_SetObject("stdout", server_out);
     }
-    
-    if (g_Viper.GetSourcemodModule() == NULL)
-    {
-#define PyModule_AddModuleMacro(name) { \
-        PyObject *_name = init##name(); \
-        PyModule_AddObject(sourcemod, #name, _name); }
         
-        PyModule_AddModuleMacro(console);
-        PyModule_AddModuleMacro(forwards);
-        PyModule_AddModuleMacro(events);
-        PyModule_AddModuleMacro(clients);
-        PyModule_AddModuleMacro(entity);
-        PyModule_AddModuleMacro(halflife);
-        PyModule_AddModuleMacro(keyvalues);
-        PyModule_AddModuleMacro(datatypes);
-        PyModule_AddModuleMacro(usermessages);
-        PyModule_AddModuleMacro(bitbuf);
+#define PyModule_AddModuleMacro(name) { \
+    PyObject *_mod_##name = init##name(); \
+    Py_INCREF(_mod_##name); \
+    PyModule_AddObject(sourcemod, #name, _mod_##name); }
+    
+    PyModule_AddModuleMacro(console);
+    PyModule_AddModuleMacro(forwards);
+    PyModule_AddModuleMacro(events);
+    PyModule_AddModuleMacro(clients);
+    PyModule_AddModuleMacro(entity);
+    PyModule_AddModuleMacro(halflife);
+    PyModule_AddModuleMacro(keyvalues);
+    PyModule_AddModuleMacro(datatypes);
+    PyModule_AddModuleMacro(usermessages);
+    PyModule_AddModuleMacro(bitbuf);
         
 #undef  PyModule_AddModuleMacro
-    }
-    else
-    {
-        PyObject *first_sourcemod = g_Viper.GetSourcemodModule();
-        PyObject *first_sm_dict = PyModule_GetDict(first_sourcemod);
-        
-        PyObject *sm_dict = PyModule_GetDict(sourcemod);
-        
-#define PyModule_ReinitMacro(name) { \
-        PyObject *_name = PyDict_GetItemString(first_sm_dict, #name); \
-        Py_INCREF(_name); \
-        PyDict_SetItemString(sm_dict, #name, _name); }
-    
-        PyModule_ReinitMacro(console);
-        PyModule_ReinitMacro(forwards);
-        PyModule_ReinitMacro(events);
-        PyModule_ReinitMacro(clients);
-        PyModule_ReinitMacro(entity);
-        PyModule_ReinitMacro(halflife);
-        PyModule_ReinitMacro(keyvalues);
-        PyModule_ReinitMacro(datatypes);
-        PyModule_ReinitMacro(usermessages);
-        PyModule_ReinitMacro(bitbuf);
-        
-#undef  PyModule_ReinitMacro
-    }
     
     return sourcemod;
 }

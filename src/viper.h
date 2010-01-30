@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -39,11 +39,11 @@ struct CachedCommandInfo
 class BaseViper : public IBaseViper
 {
 friend class ViperExtension;
+friend PyObject *initsourcemod(void);
 public: // IBaseViper
     virtual void PushCommandStack(const CCommand *cmd);
     virtual const CCommand *PeekCommandStack();
     virtual void PopCommandStack();
-    virtual PyObject *GetSourcemodModule();
 
 private:
     /**
@@ -69,7 +69,6 @@ private:
 private:
     SourceHook::CStack<CachedCommandInfo> m_CommandStack;
 	
-    PyObject *m_SourcemodModule;
     IViperForward *m_GameFrame;
     PyObject *m_EmptyTuple;
 };

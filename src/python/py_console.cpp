@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -218,7 +218,7 @@ console__ConVar__flagsset(console__ConVar *self, PyObject *value)
     
     if (!PyInt_Check(value))
     {
-        PyErr_SetString(PyExc_TypeError, "flags must be an int");
+        PyErr_SetString(_PyExc_TypeError, "flags must be an int");
         return -1;
     }
     
@@ -260,7 +260,7 @@ console__ConVar__lower_boundset(console__ConVar *self, PyObject *value)
     
     if (!PyFloat_Check(value))
     {
-        PyErr_SetString(PyExc_TypeError, "lower_bound must be a float.");
+        PyErr_SetString(_PyExc_TypeError, "lower_bound must be a float.");
         return -1;
     }
     
@@ -301,7 +301,7 @@ console__ConVar__upper_boundset(console__ConVar *self, PyObject *value)
     
     if (!PyFloat_Check(value))
     {
-        PyErr_SetString(PyExc_TypeError, "upper_bound must be a float.");
+        PyErr_SetString(_PyExc_TypeError, "upper_bound must be a float.");
         return -1;
     }
     
@@ -377,7 +377,7 @@ static PyGetSetDef console__ConVar__getsets[] = {
         "The bitstring of FCVAR_* flags on this console variable."},
     {"lower_bound", (getter)console__ConVar__lower_boundget,
                     (setter)console__ConVar__lower_boundset,
-        "The upper bound of this ConVar."},
+        "The lower bound of this ConVar."},
     {"upper_bound", (getter)console__ConVar__upper_boundget,
                     (setter)console__ConVar__upper_boundset,
         "The upper bound of this ConVar."},
@@ -387,7 +387,7 @@ static PyGetSetDef console__ConVar__getsets[] = {
 };
 
 PyTypeObject console__ConVarType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                          /*ob_size*/
     "sourcemod.console.ConVar", /*tp_name*/
     sizeof(console__ConVar),    /*tp_basicsize*/

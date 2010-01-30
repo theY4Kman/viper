@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -126,8 +126,9 @@ CPlugin::CPlugin(char const *file)
     m_pErrorTraceback = NULL;
     
     m_pProps = sm_trie_create();
-
+    
     strncpy(m_sPath, file, sizeof(m_sPath));
+    StrReplace(m_sPath, "\\", "/", PLATFORM_MAX_PATH);
     
     m_sFolder = GetLastFolderOfPath(m_sPath);
     
@@ -269,9 +270,13 @@ CPlugin::RunPlugin()
     initsourcemod();
     
     /* Run the plug-in file */
-    FILE *fp = fopen(m_sPath, "r");
-    PyRun_File(fp, m_sPath, Py_file_input, m_pPluginDict, m_pPluginDict);
-    fclose(fp);
+    
+    // Discrepancies between CPython's FILE and Viper's FILE make PyRun_File useless.
+    //*
+    PyObject *pyfile = PyFile_FromString(m_sPath, "r");
+    PyRun_File(PyFile_AsFile(pyfile), m_sPath, Py_file_input, m_pPluginDict, m_pPluginDict);
+    Py_DECREF(pyfile);
+    //*/
     
     /* Save the error if one has occurred, and print it out to the server */
     if (PyErr_Occurred())
@@ -292,9 +297,9 @@ CPlugin::RunPlugin()
         
         pystring = PyObject_Str(errdata);
         if (errdata != NULL || pystring != NULL)
-            m_psErrorType = sm_strdup(PyString_AsString(pystring));
+            m_psError = sm_strdup(PyString_AsString(pystring));
         else
-            m_psErrorType = sm_strdup("<no exception data>");
+            m_psError = sm_strdup("<no exception data>");
         
         Py_XDECREF(pystring);
         
@@ -493,7 +498,13 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path,
         return ViperLoadRes_NeverLoad;
 
     CPlugin *pPlugin;
-    if (sm_trie_retrieve(m_trie, path, (void **)&pPlugin))
+    
+    size_t pathsize = strlen(path);
+    char *path_slashes = new char[pathsize];
+    strcpy(path_slashes, path);
+    StrReplace(path_slashes, "\\", "/", pathsize);
+    
+    if (sm_trie_retrieve(m_trie, path_slashes, (void **)&pPlugin))
     {
         if (pPlugin->GetStatus() == ViperPlugin_BadLoad)
             UnloadPlugin(pPlugin);
@@ -504,12 +515,12 @@ CPluginManager::_LoadPlugin(CPlugin **_plugin, char const *path,
         }
     }
     
-    pPlugin = CPlugin::CreatePlugin(path, error, maxlength);
+    pPlugin = CPlugin::CreatePlugin(path_slashes, error, maxlength);
     assert(pPlugin != NULL);
 
     pPlugin->m_type = ViperPluginType_MapUpdated;
 
-    sm_trie_insert(m_trie, path, pPlugin);
+    sm_trie_insert(m_trie, path_slashes, pPlugin);
     m_list.push_back(pPlugin);
 
     /* Setup Python aspects of plug-in and begin execution */
@@ -585,8 +596,12 @@ CPlugin *
 CPluginManager::GetPluginByPath(char const *path)
 {
     CPlugin *pPlugin;
+    
+    char path_slashes[PLATFORM_MAX_PATH];
+    strncopy((char*)&path_slashes, path, sizeof(path_slashes));
+    StrReplace(path_slashes, "\\", "/", sizeof(path_slashes));
 
-    if (!sm_trie_retrieve(m_trie, path, (void **)&pPlugin))
+    if (!sm_trie_retrieve(m_trie, path_slashes, (void **)&pPlugin))
     {
         if (!sm_trie_retrieve(m_trie, GetLastOfPath(path), (void **)&pPlugin))
             return NULL;
@@ -659,6 +674,8 @@ void
 CPluginManager::OnRootConsoleCommand(char const *cmdname,
     const CCommand &command)
 {
+#   define CheckLoadLock() if (m_LoadingLocked) g_pMenu->ConsolePrint("[Viper] There is a loading lock in effect. No plug-ins can be loaded.")
+
     char const *cmd = command.Arg(3);
     int argc = command.ArgC();
 
@@ -702,6 +719,8 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
             g_pMenu->ConsolePrint("[Viper] Usage: sm py plugins load <name|path>");
             return;
         }
+        
+        CheckLoadLock();
 
         char const *plstr = command.Arg(4);
         
@@ -928,6 +947,8 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
             g_pMenu->ConsolePrint("[Viper] Usage: sm py plugins info <#|name>");
             return;
         }
+        
+        CheckLoadLock();
 
         char const *plstr = command.Arg(4);
         CPlugin *pl = FindPluginByConsoleArg(plstr);
@@ -953,6 +974,8 @@ CPluginManager::OnRootConsoleCommand(char const *cmdname,
     else if (strcmp(cmd, "refresh") == 0)
     {
         // TODO: Make this code less disgusting.
+        
+        CheckLoadLock();
         
         char plugins_path[PLATFORM_MAX_PATH];
         g_pSM->BuildPath(SourceMod::Path_SM, plugins_path, sizeof(plugins_path),

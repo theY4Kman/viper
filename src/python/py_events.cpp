@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -23,6 +23,9 @@
 #include "PluginSys.h"
 #include <structmember.h>
 #include <bitbuf.h>
+
+// winbase.h defines all of these as GetPropA/W (for UNICODE)
+#undef CreateEvent
 
 /***** TODO: destroy Event object when its IGameEvent is freed ******/
 
@@ -262,7 +265,7 @@ static PyMethodDef events__Event__methods[] = {
         "cancel()\n\n"
         "Cancels a created event."},
     {"fire", (PyCFunction)events__Event__fire, METH_VARARGS,
-        "fire([dont_broadcast=false])\n\n"
+        "fire([dont_broadcast=False])\n\n"
         "Fires a created event.\n\n"
         "@type  dont_broadcast: bool\n"
         "@param dont_broadcast: Determines whether or not to broadcast this event to\n"
@@ -342,7 +345,7 @@ static PyMethodDef events__Event__methods[] = {
 };
 
 PyTypeObject events__EventType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                          /*ob_size*/
     "sourcemod.events.Event",   /*tp_name*/
     sizeof(events__Event),      /*tp_basicsize*/
@@ -492,7 +495,7 @@ events__unhook(PyObject *self, PyObject *args)
 
 static PyMethodDef events__methods[] = {
     {"create", events__create, METH_VARARGS,
-        "create(name[, force=false]) -> Event object\n\n"
+        "create(name[, force=False]) -> Event object\n\n"
         "Creates a game event.\n"
         "@type  name: str\n"
         "@param name: The name of the event to create\n"
@@ -529,6 +532,8 @@ static PyMethodDef events__methods[] = {
 PyObject *
 initevents(void)
 {
+    Py_INCREF(_PyType_Type);
+    events__EventType.ob_type = _PyType_Type;
     if (PyType_Ready(&events__EventType) < 0)
         return NULL;
     

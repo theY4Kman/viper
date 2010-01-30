@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -21,7 +21,7 @@
 #include <Python.h>
 #include "extension.h"
 #include "HalfLife2.h"
-#include <metamod_wrappers.h>
+#include "viper_metamod_wrappers.h"
 
 static PyObject *
 halflife__get_engine_time(PyObject *self)

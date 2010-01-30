@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -23,6 +23,7 @@
 
 #include <Python.h>
 #include <bitbuf.h>
+#include "viper_globals.h"
 
 extern PyTypeObject bitbuf__BitBufType;
 

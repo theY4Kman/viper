@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -50,7 +50,7 @@ CForward::Execute(int *result, PyObject *args)
         if (!PyObject_IsInstance(PyTuple_GetItem(args, i),
             PyTuple_GetItem(m_types, i)))
         {
-            PyErr_Format(PyExc_TypeError, "expected type %s for argument %d, "
+            PyErr_Format(_PyExc_TypeError, "expected type %s for argument %d, "
                 "found %s", PyTuple_GetItem(m_types, i)->ob_type->tp_name,
                 i, PyTuple_GetItem(args, i)->ob_type->tp_name);
             return NULL;
@@ -61,11 +61,12 @@ CForward::Execute(int *result, PyObject *args)
     
     SourceHook::List<IViperPluginFunction *>::iterator iter;
     IViperPluginFunction *func;
-    PyObject *py_result;
+    PyObject *py_result = Py_None;
     
     size_t failed=0, success=0;
-    int cur_result;
-    int high_result, low_result;
+    int cur_result = 0;
+    int high_result = INT_MIN;
+    int low_result = INT_MAX;
     
     for (iter=m_functions.begin(); iter!=m_functions.end(); iter++)
     {
@@ -206,7 +207,6 @@ void
 CForward::RemoveFunctionsOfPlugin(IViperPlugin *plugin)
 {
     SourceHook::List<IViperPluginFunction *>::iterator iter;
-    IViperPluginFunction *func;
     
     for (iter=m_functions.begin(); iter!=m_functions.end(); iter++)
     {

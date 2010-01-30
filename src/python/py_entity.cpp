@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -21,6 +21,7 @@
 class CBaseEntity;
 
 #include <Python.h>
+#include "viper_metamod_wrappers.h"
 #include "py_entity.h"
 #include <IPlayerHelpers.h>
 #include <edict.h>
@@ -28,6 +29,11 @@ class CBaseEntity;
 #include <server_class.h>
 #include <datamap.h>
 #include "extension.h"
+
+// winbase.h defines all of these as GetPropA/W (for UNICODE)
+#undef GetProp
+#undef GetClassName
+#undef CreateEvent
 
 using SourceMod::IGamePlayer;
 using SourceMod::sm_sendprop_info_t;
@@ -128,7 +134,7 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
     /* TODO: Datamap arrays */
     if (n < 0 || n >= self->array->GetNumProps())
     {
-        PyErr_Format(PyExc_IndexError, "SendProp Array index %d out of range", n);
+        PyErr_Format(_PyExc_IndexError, "SendProp Array index %d out of range", n);
         return -1;
     }
     
@@ -196,7 +202,7 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
             {
                 if (!PyBool_Check(setobj))
                 {
-                    PyErr_Format(PyExc_TypeError, "Expected bool, found '%s'",
+                    PyErr_Format(_PyExc_TypeError, "Expected bool, found '%s'",
                         setobj->ob_type->tp_name);
                     return -1;
                 }
@@ -206,13 +212,15 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
                 return 0;
             }
             
+            size = 1; // TODO: Fix this! I do not remember the correct value!
+            
             if (bit_count < 1)
                 bit_count = size * 8;
             
             int value;
             if (!PyInt_Check(setobj))
             {
-                PyErr_Format(PyExc_TypeError, "Expected int (%d bits), found '%s'",
+                PyErr_Format(_PyExc_TypeError, "Expected int (%d bits), found '%s'",
                     bit_count, setobj->ob_type->tp_name);
                 return -1;
             }
@@ -233,7 +241,7 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
         {
             if (!PyFloat_Check(setobj))
             {
-                PyErr_Format(PyExc_TypeError, "Expected float, found '%s'",
+                PyErr_Format(_PyExc_TypeError, "Expected float, found '%s'",
                     setobj->ob_type->tp_name);
                 return -1;
             }
@@ -247,7 +255,7 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
         {
             if (!PyObject_IsInstance(setobj, (PyObject *)&datatypes__VectorType))
             {
-                PyErr_Format(PyExc_TypeError, "expected datatypes.Vector, "
+                PyErr_Format(_PyExc_TypeError, "expected datatypes.Vector, "
                     "found %s", setobj->ob_type->tp_name);
                 return -1;
             }
@@ -266,7 +274,7 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
             PyObject *str_setobj = PyObject_Str(setobj);
             if (str_setobj == NULL)
             {
-                PyErr_SetString(PyExc_TypeError, "Value could not be coerced "
+                PyErr_SetString(_PyExc_TypeError, "Value could not be coerced "
                     "into a string.");
                 return -1;
             }
@@ -290,7 +298,7 @@ entity__EntityPropsArray__ass_item__(entity__EntityPropsArray *self,
             
             if (!PyObject_IsInstance(setobj, (PyObject *)&entity__EntityType))
             {
-                PyErr_Format(PyExc_TypeError, "Expected entity.Entity, found '%s'",
+                PyErr_Format(_PyExc_TypeError, "Expected entity.Entity, found '%s'",
                     setobj->ob_type->tp_name);
                 return -1;
             }
@@ -323,7 +331,7 @@ entity__EntityPropsArray__item__(entity__EntityPropsArray *self, Py_ssize_t n)
     
     /* TODO: Datamap arrays */
     if (n < 0 || n >= self->array->GetNumProps())
-        return PyErr_Format(PyExc_IndexError, "SendProp Array index %d out of range", n);
+        return PyErr_Format(_PyExc_IndexError, "SendProp Array index %d out of range", n);
     
     size_t size = strlen(self->array->GetName()) + 12;
     char *prop_name = new char[size];
@@ -379,7 +387,7 @@ PySequenceMethods entity__EntityPropsArraySequenceMethods = {
 };
 
 PyTypeObject entity__EntityPropsArrayType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                                              /*ob_size*/
     "sourcemod.entity.EntityPropsArray",            /*tp_name*/
     sizeof(entity__EntityPropsArray),               /*tp_basicsize*/
@@ -423,7 +431,7 @@ entity__EntityProps__subscript(entity__EntityProps *self, PyObject *pyprop)
     
     if (prop == NULL)
     {
-        PyErr_SetString(PyExc_KeyError, "Key object passed could not be "
+        PyErr_SetString(_PyExc_KeyError, "Key object passed could not be "
             "coerced into a string.");
         return NULL;
     }
@@ -618,7 +626,7 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
             {
                 if (!PyBool_Check(setobj))
                 {
-                    PyErr_Format(PyExc_TypeError, "Expected bool, found '%s'",
+                    PyErr_Format(_PyExc_TypeError, "Expected bool, found '%s'",
                         setobj->ob_type->tp_name);
                     return -1;
                 }
@@ -628,13 +636,15 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
                 return 0;
             }
             
+            size = 1; // TODO: Fix this! I do not remember the correct value!
+            
             if (bit_count < 1)
                 bit_count = size * 8;
             
             int value;
             if (!PyInt_Check(setobj))
             {
-                PyErr_Format(PyExc_TypeError, "Expected int (%d bits), found '%s'",
+                PyErr_Format(_PyExc_TypeError, "Expected int (%d bits), found '%s'",
                     bit_count, setobj->ob_type->tp_name);
                 return -1;
             }
@@ -655,7 +665,7 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
         {
             if (!PyFloat_Check(setobj))
             {
-                PyErr_Format(PyExc_TypeError, "Expected float, found '%s'",
+                PyErr_Format(_PyExc_TypeError, "Expected float, found '%s'",
                     setobj->ob_type->tp_name);
                 return -1;
             }
@@ -669,7 +679,7 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
         {
             if (!PyObject_IsInstance(setobj, (PyObject *)&datatypes__VectorType))
             {
-                PyErr_Format(PyExc_TypeError, "expected datatypes.Vector, "
+                PyErr_Format(_PyExc_TypeError, "expected datatypes.Vector, "
                     "found %s", setobj->ob_type->tp_name);
                 return -1;
             }
@@ -688,7 +698,7 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
             PyObject *str_setobj = PyObject_Str(setobj);
             if (str_setobj == NULL)
             {
-                PyErr_SetString(PyExc_TypeError, "Value could not be coerced "
+                PyErr_SetString(_PyExc_TypeError, "Value could not be coerced "
                     "into a string.");
                 return -1;
             }
@@ -712,7 +722,7 @@ entity__EntityProps__ass_subscript(entity__EntityProps *self, PyObject *pyprop,
             
             if (!PyObject_IsInstance(setobj, (PyObject *)&entity__EntityType))
             {
-                PyErr_Format(PyExc_TypeError, "expected entity.Entity, found '%s'",
+                PyErr_Format(_PyExc_TypeError, "expected entity.Entity, found '%s'",
                     setobj->ob_type->tp_name);
                 return -1;
             }
@@ -764,7 +774,7 @@ PyMappingMethods entity__EntityPropsMappingMethods = {
 };
 
 PyTypeObject entity__EntityPropsType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                          /*ob_size*/
     "sourcemod.entity.EntityProps",/*tp_name*/
     sizeof(entity__EntityProps),/*tp_basicsize*/
@@ -841,7 +851,7 @@ entity__Entity__cmp__(entity__Entity *self, PyObject *other)
     int isinstance = PyObject_IsInstance(other, (PyObject*)&entity__EntityType);
     if (isinstance == 0)
     {
-        PyErr_Format(PyExc_TypeError, "Comparison using wrong type '%s'",
+        PyErr_Format(_PyExc_TypeError, "Comparison using wrong type '%s'",
             other->ob_type->tp_name);
         return -1;
     }
@@ -959,7 +969,7 @@ entity__Entity__edict_flagsset(entity__Entity *self, PyObject *set, void *closur
     
     if (!PyInt_Check(set))
     {
-        PyErr_Format(PyExc_TypeError, "Edict flags must be set to an integer. "
+        PyErr_Format(_PyExc_TypeError, "Edict flags must be set to an integer. "
             "Found type '%s'", set->ob_type->tp_name);
         return -1;
     }
@@ -1061,7 +1071,7 @@ static PyMethodDef entity__Entity__methods[] = {
 };
 
 PyTypeObject entity__EntityType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                          /*ob_size*/
     "sourcemod.entity.Entity",  /*tp_name*/
     sizeof(entity__Entity),     /*tp_basicsize*/
@@ -1126,7 +1136,7 @@ entity__get_entity_count(PyObject *self)
 static PyObject *
 entity__get_max_entities(PyObject *self)
 {
-    return PyInt_FromLong(g_SMAPI->pGlobals()->maxEntities);
+    return PyInt_FromLong(g_SMAPI->GetCGlobals()->maxEntities);
 }
 
 static PyMethodDef entity__methods[] = {
@@ -1151,6 +1161,14 @@ static PyMethodDef entity__methods[] = {
 PyObject *
 initentity(void)
 {
+    Py_INCREF(_PyType_Type);
+    Py_INCREF(_PyType_Type);
+    Py_INCREF(_PyType_Type);
+    
+    entity__EntityType.ob_type = _PyType_Type;
+    entity__EntityPropsType.ob_type = _PyType_Type;
+    entity__EntityPropsArrayType.ob_type = _PyType_Type;
+    
     if (PyType_Ready(&entity__EntityType) < 0 ||
         PyType_Ready(&entity__EntityPropsType) < 0 ||
         PyType_Ready(&entity__EntityPropsArrayType) < 0)
@@ -1228,7 +1246,7 @@ GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
             else
                 td = (typedescription_t *)propdata;
             
-            if (a_prop_offset != -1)
+            if (a_prop_offset == -1)
                 prop_offset = td->fieldOffset[TD_OFFSET_NORMAL];
             else
                 prop_offset = a_prop_offset;
@@ -1263,11 +1281,13 @@ GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
             case FIELD_VECTOR:
             case FIELD_POSITION_VECTOR:
                 field_type = FIELDTYPE_VECTOR;
+                break;
             
             case FIELD_STRING:
             case FIELD_MODELNAME:
             case FIELD_SOUNDNAME:
                 field_type = FIELDTYPE_STRING;
+                break;
             
             default:
                 PyErr_Format(g_pViperException, "Unable to autodetect the type "
@@ -1365,6 +1385,8 @@ GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
     case FIELDTYPE_INTEGER:
         {
             int value;
+            
+            size = 1; // TODO: Fix this! I do not remember the correct value!
             
             if (bit_count < 1)
                 bit_count = size * 8;

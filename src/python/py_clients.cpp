@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -199,7 +199,7 @@ clients__Client__fake_command(clients__Client *self, PyObject *args)
         return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
     
     char *cmd;
-    if (!PyArg_ParseTuple(args, "s", cmd))
+    if (!PyArg_ParseTuple(args, "s", &cmd))
         return NULL;
     
     g_pServerPluginHelpers->ClientCommand(player->GetEdict(), cmd);
@@ -239,13 +239,13 @@ clients__Client__kick(clients__Client *self, PyObject *args, PyObject *kwds)
     char const *msg = "";
     bool delay = true;
     
-    static char *kwdlist[] = {"msg", "delay"};
+    static char *kwdlist[] = {"msg", "delay", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|sb", kwdlist, &msg, &delay))
         return NULL;
     
     /* Ignore duplicate kicks */
     if (player->IsInKickQueue())
-        Py_RETURN_NONE;
+        Py_RETURN_FALSE;
     
     player->MarkAsBeingKicked();
     
@@ -253,12 +253,11 @@ clients__Client__kick(clients__Client *self, PyObject *args, PyObject *kwds)
     {
         char kickcmd[48];
         unsigned short userid = engine->GetPlayerUserId(player->GetEdict());
-        unsigned short useridsm = player->GetUserId();
         UTIL_Format(kickcmd, sizeof(kickcmd), "kickid %d\n", userid);
         
         engine->ServerCommand(kickcmd);
         
-        Py_RETURN_NONE;
+        Py_RETURN_TRUE;
     }
     
     if (delay)
@@ -266,7 +265,7 @@ clients__Client__kick(clients__Client *self, PyObject *args, PyObject *kwds)
     else
         player->Kick(msg);
     
-    Py_RETURN_NONE;
+    Py_RETURN_TRUE;
 }
 
 static PyObject *
@@ -636,7 +635,7 @@ clients__Client__teamset(clients__Client *self, PyObject *setobj)
 {
     if (!PyInt_Check(setobj))
     {
-        PyErr_Format(PyExc_TypeError, "expected object of type int, found %s",
+        PyErr_Format(_PyExc_TypeError, "expected object of type int, found %s",
             setobj->ob_type->tp_name);
         return -1;
     }
@@ -687,7 +686,8 @@ clients__Client__useridget(clients__Client *self)
         return NULL;
     }
     
-    return PyInt_FromLong(player->GetUserId());
+    return PyInt_FromLong(player->IsFakeClient() ? engine->GetPlayerUserId(player->GetEdict())
+                           : player->GetUserId());
 }
 
 enum clients__client__getsets_t
@@ -889,7 +889,9 @@ clients__Client__str__(clients__Client *self)
         if (player->IsConnected())
         {
             return PyString_FromFormat("<Client %d (%d)::%s::%s::%s>",
-                self->index, player->GetUserId(), player->GetName(),
+                self->index, player->IsFakeClient() ?
+                engine->GetPlayerUserId(player->GetEdict())
+                : player->GetUserId(), player->GetName(),
                 player->GetAuthString(), player->GetIPAddress());
         }
     }
@@ -1143,7 +1145,7 @@ static PyMethodDef clients__Client__methods[] = {
         "@param msg: A message to show the user as a disconnect reason. Note that a\n"
         "   period is automatically appended to the message by the engine.\n"
         "@type  delay: bool\n"
-        "@param delay: If True, the client is kicked in the next game frame. If False,"
+        "@param delay: If True, the client is kicked in the next game frame. If False,\n"
         "   the client is kicked immediately. The delay exists to prevent accidental\n"
         "   engine crashes."},
     {"notify_post_admin_check", (PyCFunction)clients__Client__notify_post_admin_check, METH_VARARGS,
@@ -1194,7 +1196,7 @@ static PyMethodDef clients__Client__methods[] = {
 };
 
 PyTypeObject clients__ClientType = {
-    PyObject_HEAD_INIT(&PyType_Type)
+    PyObject_HEAD_INIT(_PyType_Type)
     0,                          /*ob_size*/
     "sourcemod.clients.Client", /*tp_name*/
     sizeof(clients__Client),    /*tp_basicsize*/
@@ -1374,6 +1376,8 @@ static PyMethodDef clients__methods[] = {
 PyObject *
 initclients(void)
 {
+    Py_INCREF(_PyType_Type);
+    clients__ClientType.ob_type = _PyType_Type;
     if (PyType_Ready(&clients__ClientType) < 0)
         return NULL;
     

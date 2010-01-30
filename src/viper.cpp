@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -34,24 +34,11 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
     g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
     SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
     
-    m_SourcemodModule = NULL;
     m_EmptyTuple = PyTuple_New(0);
     
     StartViper();
     
     return true;
-}
-
-PyObject *
-BaseViper::GetSourcemodModule()
-{
-    if (m_SourcemodModule == NULL)
-        m_SourcemodModule = initsourcemod();
-    
-    assert(m_SourcemodModule != NULL);
-    
-    Py_INCREF(m_SourcemodModule);
-    return m_SourcemodModule;
 }
 
 void
@@ -104,7 +91,6 @@ BaseViper::OnViperUnload()
         pBase = pBase->m_pGlobalClassNext;
     }
     
-    Py_DECREF(m_SourcemodModule);
     Py_DECREF(m_EmptyTuple);
 }
 

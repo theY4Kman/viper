@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -49,8 +49,8 @@ ViperPlayerManager::OnViperStartup(bool late)
     memset(m_Clients, 0, sizeof(PyObject*) * (ABSOLUTE_PLAYER_LIMIT + 1));
     
     PyObject *pySingleClientArgs = PyTuple_Pack(1, &clients__ClientType);
-    PyObject *pyClientStringArgs = PyTuple_Pack(2, &clients__ClientType, &PyString_Type);
-    PyObject *pySingleIntArgs = PyTuple_Pack(1, &PyInt_Type);
+    PyObject *pyClientStringArgs = PyTuple_Pack(2, &clients__ClientType, _PyString_Type);
+    PyObject *pySingleIntArgs = PyTuple_Pack(1, _PyInt_Type);
     
     m_OnClientConnect = g_Forwards.CreateForward("client_connect",
         ET_Hook, pySingleClientArgs, InterceptClientConnectCallback);
@@ -82,8 +82,8 @@ ViperPlayerManager::OnViperStartup(bool late)
     playerhelpers->AddClientListener(this);
     
     PyObject *pyBanClientArgs = PyTuple_Pack(7, &clients__ClientType,
-        &PyInt_Type, &PyInt_Type, &PyString_Type, &PyString_Type,
-        &PyString_Type, &PyInt_Type);
+        _PyInt_Type, _PyInt_Type, _PyString_Type, _PyString_Type,
+        _PyString_Type, _PyInt_Type);
     
     g_pViperOnBanClient = g_Forwards.CreateForward("ban_client", ET_Event,
         pyBanClientArgs, NULL);
@@ -128,7 +128,7 @@ ViperPlayerManager::InterceptClientConnect(int client, char *reject, size_t maxr
     Py_DECREF(args);
     
     /* result comes directly from InterceptClientConnectCallback */
-    return !((bool)result);
+    return !result;
 }
 
 ViperResultType
@@ -146,14 +146,14 @@ InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
     
     if (!PyTuple_Check(ret))
     {
-        PyErr_WarnEx(PyExc_RuntimeWarning, "on_client_connect callbacks should "
+        PyErr_WarnEx(_PyExc_RuntimeWarning, "on_client_connect callbacks should "
             "only return either a boolean or a tuple(bool, str).", 1);
         return Pl_Continue;
     }
     
     if (PyTuple_GET_SIZE(ret) != 2)
     {
-        PyErr_WarnEx(PyExc_RuntimeWarning, "on_client_connect callbacks should "
+        PyErr_WarnEx(_PyExc_RuntimeWarning, "on_client_connect callbacks should "
             "only return either a boolean or a tuple(bool, str).", 1);
         return Pl_Continue;
     }
@@ -170,7 +170,7 @@ InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
     
     if (let_user_in != Py_False && let_user_in != Py_True)
     {
-        PyErr_WarnEx(PyExc_RuntimeWarning, "on_client_connect callbacks should "
+        PyErr_WarnEx(_PyExc_RuntimeWarning, "on_client_connect callbacks should "
             "only return either a boolean or a tuple(bool, str).", 1);
         return Pl_Continue;
     }
@@ -210,7 +210,7 @@ ViperPlayerManager::OnClientPreAdminCheck(int client)
     m_OnClientPreAdminCheck->Execute(&result, args);
     Py_DECREF(args);
     
-    return (bool)result;
+    return !!result;
 }
 void
 ViperPlayerManager::OnServerActivate(int clientMax)

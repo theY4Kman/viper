@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -39,7 +39,7 @@ ViperEventManager::~ViperEventManager()
 void
 ViperEventManager::OnViperStartup(bool late)
 {
-    m_HookParams = PyTuple_Pack(2, &events__EventType, &PyString_Type);
+    m_HookParams = PyTuple_Pack(2, &events__EventType, _PyString_Type);
 }
 
 void

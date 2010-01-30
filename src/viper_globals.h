@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2009 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2008-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -30,11 +30,11 @@
 
 #include <Python.h>
 #if SOURCE_ENGINE == SE_LEFT4DEAD
-#include "convar_sm_l4d.h"
+#   include "convar_sm_l4d.h"
 #elif SOURCE_ENGINE == SE_ORANGEBOX
-#include "convar_sm_ob.h"
+#   include "convar_sm_ob.h"
 #else
-#include "convar_sm.h"
+#   include "convar_sm.h"
 #endif
 #include "sdk/smsdk_ext.h"
 #include <random.h>
@@ -45,6 +45,7 @@
 #include <IGameConfigs.h>
 #include <igameevents.h>
 #include "python/py_datatypes.h"
+#include "python_delay_data.h"
 
 #define HUD_PRINTTALK		3
 #define HUD_PRINTCENTER		4
@@ -63,29 +64,17 @@ extern SourceMod::IGameConfig *g_pGameConf;
 extern ICvar *g_pCVar;
 #endif
 
-#ifdef WIN32
-/* When delay loading in Windows, data variables are unavailable, so we must
- * define them ourselves.
- */
-#undef Py_None
-#undef _Py_TrueStruct;
-#undef _Py_ZeroStruct;
-extern PyObject *Py_None;
-extern PyObject *_Py_TrueStruct;
-extern PyObject *_Py_ZeroStruct;
-#endif
-
 extern PyThreadState *g_pGlobalThreadState;
 extern PyObject *g_pViperException;
 
 #if SOURCE_ENGINE < SE_ORANGEBOX
-#define GetEngineFactory engineFactory
+#   define GetEngineFactory engineFactory
 #endif
 
 #define IS_STR_FILLED(str) ((str) != NULL && (str)[0] != '\0')
 
 #ifndef PyModule_AddIntMacro
-#define PyModule_AddIntMacro(module, constant) PyModule_AddIntConstant(module, #constant, constant)
+#   define PyModule_AddIntMacro(module, constant) PyModule_AddIntConstant(module, #constant, constant)
 #endif
 
 /* Retrieve the plug-in of the current thread state. */

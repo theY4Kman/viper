@@ -97,6 +97,8 @@ Client Objects
     :param  msg: A message to show the user as a disconnect reason. Note that a period is automatically appended to the message by the engine.
     :type   delay: bool
     :param  delay: If True, the client is kicked in the next game frame. If False, the client is kicked immediately. The delay exists to prevent accidental engine crashes.
+    :rtype: bool
+    :returns: True on successful kick, False if the player is already in the kick queue.
 
 ..  method:: Client.notify_post_admin_check()
     

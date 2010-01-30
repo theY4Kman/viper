@@ -18,32 +18,6 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file python/init.h
- * @brief Holds the declarations of the Python module initialization functions
- */
-
-#ifndef _INCLUDE_VIPER_PYTHON_INIT_H_
-#define _INCLUDE_VIPER_PYTHON_INIT_H_
-
-/**
- * Initializes the standard Viper library module, `sourcemod`,
- * as well as initializes and adds submodules, such as `console` and `clients`
- */
-PyObject *initsourcemod(void);
-
-/** Initializes the module and returns it. */
-PyObject *initconsole(void);
-PyObject *initfiles(void);
-PyObject *initforwards(void);
-PyObject *initevents(void);
-PyObject *initclients(void);
-PyObject *initentity(void);
-PyObject *inithalflife(void);
-PyObject *initkeyvalues(void);
-PyObject *initdatatypes(void);
-PyObject *initusermessages(void);
-PyObject *initbitbuf(void);
-
-#endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
-
+#ifndef METAMOD_PLAPI_NAME
+#   include <metamod_wrappers.h>
+#endif
