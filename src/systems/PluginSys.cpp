@@ -266,17 +266,19 @@ CPlugin::RunPlugin()
     m_pPluginDict = PyModule_GetDict(__main__);
     Py_DECREF(__main__);
     
+    /* Add __file__ to the plug-in */
+    PyDict_SetItemString(m_pPluginDict, "__file__", PyString_FromString(m_sPath));
+    
     /* Initialize the sourcemod Python module. */
     initsourcemod();
     
-    /* Run the plug-in file */
-    
-    // Discrepancies between CPython's FILE and Viper's FILE make PyRun_File useless.
-    //*
+    /* Run the plug-in file.
+     * We use Python's File object so that the underlying C FILE object will always match
+     * the one used when Python was compiled.
+     */
     PyObject *pyfile = PyFile_FromString(m_sPath, "r");
     PyRun_File(PyFile_AsFile(pyfile), m_sPath, Py_file_input, m_pPluginDict, m_pPluginDict);
     Py_DECREF(pyfile);
-    //*/
     
     /* Save the error if one has occurred, and print it out to the server */
     if (PyErr_Occurred())

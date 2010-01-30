@@ -1,5 +1,7 @@
 import unittest
 from sourcemod import *
+  
+# :TODO: create a netprops array test
 
 class EntityModuleTestCase(unittest.TestCase):
   def setUp(self):
@@ -55,3 +57,18 @@ class WorldEntityTestCase(unittest.TestCase):
     def invaliddatamap():
       self.world.datamaps['invalid datamap name']
     self.assertRaises(ViperError, invaliddatamap)
+  
+  def testsendprops(self):
+    '''World has sendprops'''
+    self.assertTrue(self.world.sendprops, 'World has no sendprops')
+  
+  def testsendpropsvalid(self):
+    '''World sendprops["m_nModelIndex"] == 1'''
+    self.assertEqual(self.world.sendprops['m_nModelIndex'], 1,
+      'm_nModelIndex sendprop has incorrect value')
+  
+  def testsendpropsinvalid(self):
+    '''World sendprops["invalid sendprop name"] raises exception'''
+    def invalidsendprop():
+      self.world.sendprops['invalid sendprop name']
+    self.assertRaises(ViperError, invalidsendprop)

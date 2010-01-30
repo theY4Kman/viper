@@ -353,7 +353,7 @@ static PyMethodDef halflife__methods[] = {
 PyObject *
 inithalflife(void)
 {
-    PyObject *halflife = Py_InitModule3("halflife", NULL,
+    PyObject *halflife = Py_InitModule3("halflife", halflife__methods,
         "Generic Source engine functions and objects.");
     
     PyModule_AddIntConstant(halflife, "SOURCE_SDK_UNKNOWN", 0);
