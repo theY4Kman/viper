@@ -42,8 +42,6 @@ Entity Objects
         >>> my_entity.datamaps["a_datamap_key"]
         "Valid datamap response!"
 
-..  note:: Unfortunately, there is no dependable way to determine if a datamap is an integer or a pointer, so as of yet it is impossible to handle entities stored in datamaps.
-
 ..  data:: Entity.edict_flags
     
     The flags of the edict. These are *not* the same as entity flags.
