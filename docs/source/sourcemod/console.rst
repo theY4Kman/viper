@@ -197,6 +197,10 @@ ConVar Objects
 ConCommandReply Objects
 =======================
 
+..  attribute:: ConCommandReply.name
+    
+    The name of the ConCommand.
+
 ..  attribute:: ConCommandReply.args
     
     The arguments passed when the ConCommand was executed, as a list.
