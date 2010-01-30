@@ -22,9 +22,9 @@ Module Contents
     * - ..  data:: ET_Single
       - This is no longer used and will act like ET_Ignore
     * - ..  data:: ET_Event
-      - Acts as an event, allowing callbacks to return :ref:`Plugin result types <result-types>`. Mid-stops are not allowed, meaning returning :data:`Plugin_Stop <sourcemod.console.Plugin_Stop>` will not stop the forward. Returns the highest number value returned.
+      - Acts as an event, allowing callbacks to return :ref:`Plugin result types <result-types>`. Mid-stops are not allowed, meaning returning :data:`Plugin_Stop <sourcemod.Plugin_Stop>` will not stop the forward. Returns the highest number value returned.
     * - ..  data:: ET_Hook
-      - Acts as a hook, allowing callbacks to return :ref:`Plugin result types <result-types>`. Mid-stops are allowed, meaning returning :data:`Plugin_Stop <sourcemod.console.Plugin_Stop>` will stop the forward. Returns the highest number value returned.
+      - Acts as a hook, allowing callbacks to return :ref:`Plugin result types <result-types>`. Mid-stops are allowed, meaning returning :data:`Plugin_Stop <sourcemod.Plugin_Stop>` will stop the forward. Returns the highest number value returned.
     * - ..  data:: ET_LowEvent
       - Same as ET_Event, except that it returns the lowest number value returned.
 

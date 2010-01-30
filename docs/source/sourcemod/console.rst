@@ -8,14 +8,6 @@
 Module Contents
 ===============
 
-..  _result-types:
-
-..  data:: Plugin_Continue
-           Plugin_Stop
-           Plugin_Handled
-    
-    These are frequently used as return values in callback functions to instruct Viper how to handle a situation. Generally, `Plugin_Continue` means to continue processing other callbacks, `Plugin_Stop` means to stop whatever processing is going on, and `Plugin_Handled` means to stop processing because we've done our job.
-
 ..  function:: create_convar(name, value[, description[, flags[, min[, max]]]])
     
     Creates a new console variable.
