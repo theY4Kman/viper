@@ -51,8 +51,8 @@ CForward::Execute(int *result, PyObject *args)
             PyTuple_GetItem(m_types, i)))
         {
             PyErr_Format(_PyExc_TypeError, "expected type %s for argument %d, "
-                "found %s", PyTuple_GetItem(m_types, i)->ob_type->tp_name,
-                i, PyTuple_GetItem(args, i)->ob_type->tp_name);
+                "found %s", ((PyTypeObject*)PyTuple_GetItem(m_types, i))->tp_name,
+                 i+1, PyTuple_GetItem(args, i)->ob_type->tp_name);
             return NULL;
         }
     }
@@ -380,7 +380,7 @@ CForwardManager::CreateForward(char const *name, ViperExecType et,
     m_ForwardsList.push_back(fwd);
     
     if (IS_STR_FILLED(name))
-        sm_trie_insert(m_Forwards, name, fwd);
+        sm_trie_replace(m_Forwards, name, fwd);
     
     return fwd;
 }

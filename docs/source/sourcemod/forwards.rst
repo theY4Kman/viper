@@ -51,7 +51,7 @@ Module Contents
     :type   name: str
     :param  name: The name of the new forward.
     :type   callback: callable
-    :param  callback: A function that will be called every time a callback registered to this forward returns when it is fired. This callable should allow one parameter: the return value of the registered callback. Pass None to ignore this parameter.
+    :param  callback: A function that will be called every time a callback registered to this forward returns when it is fired. This callable should have two parameters: the return value of the registered callback, and the actual registered callback function object -- in that order. Pass None to ignore this parameter.
     :type   et: :ref:`ET constant <exec-types>`
     :param  et: How return values of registered callbacks should be handled when the forward is fired.
     :param  ...: The types of the parameters that will be passed to all the registered callbacks when the forward is fired.

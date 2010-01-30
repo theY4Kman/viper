@@ -75,7 +75,12 @@ CPluginFunction::ForwardCallback(IViperForward *fwd, PyObject *result,
     
     /* Damn it, sawce, stop causing errors in callbacks */
     if (pyresult == NULL && PyErr_Occurred())
+    {
         PyErr_Print();
+        
+        // Don't stop executing callbacks because one had an error
+        return Pl_Continue;
+    }
     
     PyThreadState_Swap(_save);
     
@@ -395,6 +400,11 @@ void
 CPluginManager::OnViperShutdown()
 {
     SourceHook::List<CPlugin *>::iterator iter;
+    
+    // m_list can often become corrupt at this time, so iterating it would be baaad
+    if (m_list.empty())
+        return;
+    
     for (iter=m_list.begin(); iter!=m_list.end(); iter++)
     {
         UnloadPlugin((*iter));
