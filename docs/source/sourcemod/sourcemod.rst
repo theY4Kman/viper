@@ -19,6 +19,14 @@ This is the standard library provided by Viper. It is all written in C, and shou
     
     These are frequently used as return values in callback functions to instruct Viper how to handle a situation. Generally, `Plugin_Continue` means to continue processing other callbacks, `Plugin_Stop` means to stop whatever processing is going on, and `Plugin_Handled` means to stop processing because we've done our job.
 
+..  function:: get_game_path()
+    
+    Returns the full path to the game directory.
+    
+..  function:: get_sourcemod_path([path=""])
+    
+    Returns the full path to SourceMod. The ``path`` argument should be a string, and is appended to the SourceMod path that is returned. This is for convenience and readability.
+
 ..  class:: server_out
     
     Writes to the server console. An instance of this class is used to overwrite `sys.stdout` in order to provide `print` redirection.

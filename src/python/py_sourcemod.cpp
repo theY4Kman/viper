@@ -32,19 +32,27 @@
 static PyObject *
 sourcemod__get_game_path(PyObject *self, PyObject *args)
 {
-	PyObject *gamePath = PyString_FromString(g_pSM->GetGamePath());
-	Py_INCREF(gamePath);
-	
-	return gamePath;
+    static PyObject *gamePath = PyString_FromString(g_pSM->GetGamePath());
+    Py_INCREF(gamePath);
+    
+    return gamePath;
 }
 
 static PyObject *
-sourcemod__get_sourcemod_path(PyObject *self, PyObject *args)
+sourcemod__get_sourcemod_path(PyObject *self, PyObject *args, PyObject *keywds)
 {
-	PyObject *smPath = PyString_FromString(g_pSM->GetSourceModPath());
-	Py_INCREF(smPath);
-	
-	return smPath;
+    char *path = NULL;
+    static char *kwdlist[] = {"path", NULL};
+    
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "|s", kwdlist, &path))
+        return NULL;
+
+    const char *smpath = g_pSM->GetSourceModPath();
+    
+    if (path == NULL)
+        return PyString_FromString(smpath);
+    else
+        return PyString_FromFormat("%s%s", smpath, path);
 }
 
 static PyMethodDef sourcemod__methods[] = {
@@ -53,9 +61,11 @@ static PyMethodDef sourcemod__methods[] = {
         "Returns the full path to the game directory.\n\n"
         "@rtype: string\n"
         "@return: Returns the path to the game directory"},
-    {"get_sourcemod_path", sourcemod__get_sourcemod_path, METH_NOARGS,
-        "get_sourcemod_path() -> str\n\n"
+    {"get_sourcemod_path", (PyCFunction)sourcemod__get_sourcemod_path, METH_VARARGS|METH_KEYWORDS,
+        "get_sourcemod_path([path=""]) -> str\n\n"
         "Returns the full path to SourceMod.\n\n"
+        "@type  path: str\n"
+        "@param path: A path to append to the SourceMod path\n"
         "@rtype: string\n"
         "@return: Returns the path to SourceMod"},
     {NULL, NULL, 0, NULL},
@@ -130,12 +140,12 @@ PyTypeObject sourcemod__server_outType = {
     Py_TPFLAGS_DEFAULT,         /*tp_flags*/
     /* tp_doc */
     "Redirects stdout to the server console.",
-    0,		                    /* tp_traverse */
-    0,		                    /* tp_clear */
-    0,		                    /* tp_richcompare */
-    0,		                    /* tp_weaklistoffset */
-    0,		                    /* tp_iter */
-    0,		                    /* tp_iternext */
+    0,                            /* tp_traverse */
+    0,                            /* tp_clear */
+    0,                            /* tp_richcompare */
+    0,                            /* tp_weaklistoffset */
+    0,                            /* tp_iter */
+    0,                            /* tp_iternext */
     sourcemod__server_out__methods,/* tp_methods */
     sourcemod__server_out__members,/* tp_members */
     0,                          /* tp_getset */
