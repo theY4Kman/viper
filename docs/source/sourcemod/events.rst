@@ -33,6 +33,8 @@ Module Contents
 ..  function:: hook(event, callback[, mode=EventHookMode_Post])
     
     Hooks a game event. This raises a :exc:`ViperError <sourcemod.ViperError>` if the game event does not exist. ``mode`` expects an :ref:`EventHookMode constant <event-hook-modes>`.
+    
+    ``callback`` should be a callable that accepts two arguments: an :ref:`event object <event-objects>`, and the event name as a string -- in that order.
 
 ..  function:: unhook(event, callback[, mode=EventHookMode_Post])
     
