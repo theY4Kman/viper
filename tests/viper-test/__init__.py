@@ -25,7 +25,7 @@ class TestCoreFunctions(unittest.TestCase):
 viper_suite = unittest.TestLoader().loadTestsFromTestCase(TestCoreFunctions)
 
 # Load all test modules
-for mod in ['testentity','testhalflife', 'testforwards']:
+for mod in ['testentity','testhalflife', 'testforwards', 'testconsole']:
   viper_suite.addTest(unittest.TestLoader().loadTestsFromName(mod))
 
 unittest.TextTestRunner(verbosity=2).run(viper_suite)

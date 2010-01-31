@@ -10,9 +10,11 @@ class ForwardModuleTestCase(unittest.TestCase):
   def testforwardfunctions(self):
     '''sourcemod.forwards functions exist'''
     self.assert_(hasattr(forwards, 'create') and
-                 callable(forwards.create), 'forwards.create does not exist')
+                 callable(forwards.create), 'forwards.create does not exist or'
+                 ' is not callable')
     self.assert_(hasattr(forwards, 'register') and
-                 callable(forwards.register), 'forwards.register does not exist')
+                 callable(forwards.register), 'forwards.register does not exist'
+                 ' or is not callable')
 
 
 class AnonymousForwardTestCase(unittest.TestCase):
