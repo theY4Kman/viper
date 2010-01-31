@@ -56,7 +56,7 @@ events__Event__fire(events__Event *self, PyObject *args)
     }
     
     bool dont_broadcast = false;
-    if (!PyArg_ParseTuple(args, "b", &dont_broadcast))
+    if (!PyArg_ParseTuple(args, "|b", &dont_broadcast))
         return NULL;
     
     gameevents->FireEvent(self->event, dont_broadcast);
