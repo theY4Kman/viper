@@ -220,7 +220,6 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
      * initsourcemod(), because it corrupts the stack (I don't know why)
      */
 #   define SetObType(x) Py_XDECREF(init##x());
-//#   define SetObType(x) init##x();
     SetObType(bitbuf);
     SetObType(clients);
     SetObType(console);

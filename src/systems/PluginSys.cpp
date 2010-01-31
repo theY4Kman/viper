@@ -400,12 +400,7 @@ void
 CPluginManager::OnViperShutdown()
 {
     SourceHook::List<CPlugin *>::iterator iter;
-    
-    // m_list can often become corrupt at this time, so iterating it would be baaad
-    if (m_list.empty())
-        return;
-    
-    for (iter=m_list.begin(); iter!=m_list.end(); iter++)
+    for (iter=m_list.begin(); !m_list.empty() && iter!=m_list.end(); iter++)
     {
         UnloadPlugin((*iter));
     }

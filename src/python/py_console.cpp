@@ -568,8 +568,10 @@ console__server_command(PyObject *self, PyObject *args)
         return NULL;
     
     size_t size = strlen(command);
-    char *command_newline = new char[size];
-    command_newline[size-1] = '\n';
+    char *command_newline = new char[size+2];
+    strncpy(command_newline, command, size);
+    command_newline[size] = '\n';
+    command_newline[size+1] = '\0';
     
     engine->ServerCommand(command_newline);
     
