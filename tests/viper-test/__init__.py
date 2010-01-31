@@ -9,10 +9,16 @@ myinfo = {
   'version': "1.0"
 }
 
+print '''
+-------------------------------------------------------------------------------
+=  The Viper Test Suite Plug-in! Run after map_start, and GOOD LUCK!          =
+-------------------------------------------------------------------------------
+'''
+
 '''Tests the core functions and data necessary to start the other tests'''
 class TestCoreFunctions(unittest.TestCase):
   def testsourcemodmodule(self):
-    '''"sourcemod" module exists'''
+    '''sourcemod module exists'''
     self.failUnless(__import__('sourcemod'), 'sourcemod module not found')
   
   def testsyspath(self):
@@ -25,7 +31,8 @@ class TestCoreFunctions(unittest.TestCase):
 viper_suite = unittest.TestLoader().loadTestsFromTestCase(TestCoreFunctions)
 
 # Load all test modules
-for mod in ['testentity','testhalflife', 'testforwards', 'testconsole']:
+for mod in ['testentity','testhalflife', 'testforwards', 'testconsole',
+            'testevents']:
   viper_suite.addTest(unittest.TestLoader().loadTestsFromName(mod))
 
 unittest.TextTestRunner(verbosity=2).run(viper_suite)
