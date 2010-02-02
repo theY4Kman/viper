@@ -208,7 +208,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     Py_XINCREF(_PyFloat_Type = (PyTypeObject *)PyObject_GetAttrString(types, "FloatType"));
     Py_XINCREF(_PyLong_Type = (PyTypeObject *)PyObject_GetAttrString(types, "LongType"));
     Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TupleType"));
-    Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BoolType"));
+    Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BooleanType"));
     Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(types, "DictType"));
     
     Py_DECREF(types);

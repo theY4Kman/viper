@@ -26,6 +26,7 @@
 #include "py_keyvalues.h"
 #include <sh_tinyhash.h>
 #include "viper_globals.h"
+#include "python_delay_data.h"
 
 struct KVPyObject
 {
