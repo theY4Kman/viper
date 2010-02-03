@@ -36,6 +36,10 @@
 #else
 #   include "convar_sm.h"
 #endif
+
+// Both winnt.h and tier0/commonmacros.h define this, so we'll let Valve win the battle
+#undef ARRAYSIZE
+
 #include "sdk/smsdk_ext.h"
 #include <random.h>
 #include <eiface.h>

@@ -23,7 +23,6 @@
 #include "py_datatypes.h"
 #include "viper_globals.h"
 
-
 static PyObject *
 datatypes__Color__repr__(datatypes__Color *self)
 {
