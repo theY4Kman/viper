@@ -20,10 +20,9 @@
 
 #include <Python.h>
 #include "viper_metamod_wrappers.h"
-#include <KeyValues.h>
+#include "py_keyvalues.h"
 #include <utlbuffer.h>
 #include <filesystem.h>
-#include "py_keyvalues.h"
 #include <sh_tinyhash.h>
 #include "viper_globals.h"
 #include "python_delay_data.h"
@@ -97,9 +96,6 @@ keyvalues__KeyValues__parse(keyvalues__KeyValues *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &string))
         return NULL;
     
-    // Make sure the KeyValues* version and our version match
-    self->kv->UsesEscapeSequences(self->uses_escape_sequences);
-    
     return PyBool_FromLong(self->kv->LoadFromBuffer("Viper", string));
 }
 
@@ -131,7 +127,7 @@ keyvalues__KeyValues__nameset(keyvalues__KeyValues *self, PyObject *setobj)
 static PyObject *
 keyvalues__KeyValues__uses_escape_sequencesget(keyvalues__KeyValues *self)
 {
-    return PyBool_FromLong(self->uses_escape_sequences);
+    return PyBool_FromLong(self->kv->IsUsingEscapeSequences());
 }
 
 static int
@@ -146,7 +142,6 @@ keyvalues__KeyValues__uses_escape_sequencesset(keyvalues__KeyValues *self,
     }
     
     bool b = (setobj == Py_True);
-    self->uses_escape_sequences = b;
     self->kv->UsesEscapeSequences(b);
     
     return 0;
@@ -549,7 +544,6 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
         }
         
         PyObject *kvpy = GetPyObjectFromKeyValues(kv);
-        ((keyvalues__KeyValues *)kvpy)->uses_escape_sequences = use_escape_sequences;
         
         return kvpy;
     }
@@ -566,7 +560,6 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
         }
         
         PyObject *kvpy = GetPyObjectFromKeyValues(kv);
-        ((keyvalues__KeyValues *)kvpy)->uses_escape_sequences = use_escape_sequences;
         
         return kvpy;
     }

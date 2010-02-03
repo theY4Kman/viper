@@ -74,10 +74,6 @@ Attributes and Methods
 ..  data:: KeyValues.uses_escape_sequences
     
     Whether or not to parse escape sequences such as ``\n`` or ``\\``
-    
-    ..  note::
-        
-        The value of this is managed by Viper. It is possible for a C++ function to modify the backend value, therefore making this value incorrect. To be safe, always set this before you parse new data.
 
 ..  method:: KeyValues.clear([key])
     

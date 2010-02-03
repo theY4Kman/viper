@@ -22,7 +22,7 @@
 #define _INCLUDE_PYTHON_KEYVALUES_H_
 
 #include <Python.h>
-#include <KeyValues.h>
+#include <viper_keyvalues.h>
 
 extern PyTypeObject keyvalues__KeyValuesType;
 
@@ -31,7 +31,6 @@ struct keyvalues__KeyValues
     PyObject_HEAD
     
     KeyValues *kv;
-    bool uses_escape_sequences;
 };
 
 /* Function to retrieve cached KeyValues objects */

@@ -637,6 +637,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\viper_keyvalues.h"
+			>
+		</File>
+		<File
 			RelativePath="..\viper_metamod_wrappers.h"
 			>
 		</File>
