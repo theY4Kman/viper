@@ -90,6 +90,17 @@ keyvalues__KeyValues__copy(keyvalues__KeyValues *self)
 }
 
 static PyObject *
+keyvalues__KeyValues__has_key(keyvalues__KeyValues *self, PyObject *args)
+{
+    char *key;
+    if (!PyArg_ParseTuple(args, "s", &key))
+        return NULL;
+    
+    KeyValues *findkv = self->kv->FindKey(key);
+    return PyBool_FromLong(findkv != NULL);
+}
+
+static PyObject *
 keyvalues__KeyValues__parse(keyvalues__KeyValues *self, PyObject *args)
 {
     char *string;
@@ -172,7 +183,7 @@ keyvalues__KeyValues__subscript__(keyvalues__KeyValues *self, PyObject *key)
     KeyValues *findkv = self->kv->FindKey(PyString_AS_STRING(key));
     
     if (findkv == NULL)
-        Py_RETURN_NONE;
+        return PyErr_Format(_PyExc_KeyError, "%s", PyString_AS_STRING(key));
     
     if (findkv->GetFirstSubKey() == NULL &&
         findkv->GetDataType() != KeyValues::TYPE_NONE)
@@ -370,7 +381,7 @@ keyvalues__KeyValues__init__(keyvalues__KeyValues *self, PyObject *args,
     char const *name;
     PyObject *dict = NULL;
     
-    static char *keywdslist[] = {"name", "dict"};
+    static char *keywdslist[] = {"name", "dict", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|O", keywdslist, &name, &dict))
         return -1;
     
@@ -430,6 +441,13 @@ static PyMethodDef keyvalues__KeyValues__methods[] = {
         "Recursively copies the current KeyValues into a new KeyValues.\n\n"
         "@rtype: KeyValues\n"
         "@return: A new KeyValues object with the same structure as this KeyValues."},
+    {"has_key", (PyCFunction)keyvalues__KeyValues__has_key, METH_VARARGS,
+        "has_key(key) -> bool\n\n"
+        "Checks if the KeyValues object has the specified key.\n\n"
+        "@type  key: str\n"
+        "@param key: The key to check for\n"
+        "@rtype: bool\n"
+        "@return: True if exists, False if it doesn't."},
     {"parse", (PyCFunction)keyvalues__KeyValues__parse, METH_VARARGS,
         "parse(string)\n\n"
         "Parses the string for a KeyValues structure and loads it in.\n\n"
