@@ -17,6 +17,60 @@ class KeyValuesModuleTestCase(unittest.TestCase):
 
 
 class KeyValuesTestCase(unittest.TestCase):
+  def setUp(self):
+    self.kv_dict = {
+      'key1': 'value1',
+      'escape': r'\\\n',
+      'subsection1':
+      {
+        'subkey1': 'subvalue1',
+        'subkey2': 2,
+        'subkey3': 4.7123,
+      }
+    }
+    self.kv = keyvalues.KeyValues('root_section_name', self.kv_dict)
+  
+  def recursive_dict_check(self, d, kv):
+    for key,value in d.items():
+      self.assertTrue(key in kv, 'KV key "%s" does not exist' % key)
+      
+      if type(value) is dict:
+        self.recursive_dict_check(value, kv[key])
+      else:
+        if type(value) == type(kv[key]) and type(value) is float:
+          # The value stored in the dict retains the same amount of decimal
+          # digits, but the value stored in the KeyValues object loses this
+          # information and becomes 4.71229982376, instead of 4.7123, so we
+          # must round before checking equality.
+          self.assertAlmostEqual(value, kv[key], 4, 'KV key "%s" differs with'
+              ' dict (expected "%s", found "%s")' % (key, value, kv[key]))
+        else:
+          self.assertEqual(value, kv[key], 'KV key "%s" differs with dict '
+              '(expected "%s", found "%s")' % (key, value, kv[key]))
+  
+  def test_validity(self):
+    '''KeyValues object was created correctly'''
+    self.assertTrue(self.kv, 'could not create KeyValues')
+    
+    self.assertEqual(self.kv.name, 'root_section_name', 'the root section name of '
+        'the KeyValues object differs from the file (expected "root_section_name",'
+        ' found "%s")' % self.kv.name)
+    self.recursive_dict_check(self.kv_dict, self.kv)
+    
+  
+  def test_has_key(self):
+    '''KeyValues has_key finds key'''
+    self.assertTrue(self.kv.has_key('key1'), 'has_key could not find the key')
+
+
+class KeyValuesFileTestCase(KeyValuesTestCase):
+  def setUp(self):
+    # Save old KV object
+    super(KeyValuesFileTestCase, self).setUp()
+    self._kv = self.kv
+    
+    self.kv = keyvalues.keyvalues_from_file(sys.path[0]+'/keyvalues_example.cfg')
+  
   def test_example_file_is_unchanged(self):
     '''KeyValues file has been unchanged'''
     fp = open(sys.path[0]+'/keyvalues_example.cfg', 'r')
@@ -24,20 +78,3 @@ class KeyValuesTestCase(unittest.TestCase):
     fp.close()
     self.assertEqual(crc32(contents), 0x1d6d0eb2, 'the KeyValues test file, '
         '"keyvalues_example.cfg", has been changed, rendering the test useless.')
-  
-  def test_from_file(self):
-    '''KeyValues creation from file'''
-    kv = keyvalues.keyvalues_from_file(sys.path[0]+'/keyvalues_example.cfg')
-    self.assertTrue(kv, 'could not create KeyValues from file')
-  
-  def test_from_file_validity(self):
-    '''KeyValues object matches file'''
-    kv = keyvalues.keyvalues_from_file(sys.path[0]+'/keyvalues_example.cfg')
-    self.assertTrue(kv, 'could not create KeyValues from file')
-    
-    self.assertEqual(kv.name, 'root_section_name', 'the root section name of '
-        'the KeyValues object differs from the file (expected "root_section_name",'
-        ' found "%s")' % kv.name)
-    kv.uses_escape_sequences = True
-    # TODO: create kv object from string and compare it to file
-    # TODO: write comparison functions for KeyValues object in C++
