@@ -301,6 +301,25 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
 }
 
 /* Magic Methods */
+static int
+forwards__Forward__contains__(keyvalues__KeyValues *self, PyObject *pykey)
+{
+    if (!PyString_Check(pykey))
+    {
+        PyErr_Format(_PyExc_TypeError, "key must be a string, found type \"%s\"",
+            pykey->ob_type->tp_name);
+        return 0;
+    }
+    
+    return (self->kv->FindKey(PyString_AS_STRING(pykey)) != NULL);
+}
+
+static int
+keyvalues__KeyValues__cmp__(keyvalues__KeyValues *self, keyvalues__KeyValues *other)
+{
+    return self->kv - other->kv;
+}
+
 static void
 keyvalues__KeyValues__del__(keyvalues__KeyValues *self)
 {
@@ -443,7 +462,7 @@ static PyMethodDef keyvalues__KeyValues__methods[] = {
         "@return: A new KeyValues object with the same structure as this KeyValues."},
     {"has_key", (PyCFunction)keyvalues__KeyValues__has_key, METH_VARARGS,
         "has_key(key) -> bool\n\n"
-        "Checks if the KeyValues object has the specified key.\n\n"
+        "Checks if the KeyValues object contains `key`. Equivalent to `key in kv`\n\n"
         "@type  key: str\n"
         "@param key: The key to check for\n"
         "@rtype: bool\n"
@@ -471,6 +490,17 @@ static PyMappingMethods keyvalues__KeyValuesMappingMethods = {
     (objobjargproc)keyvalues__KeyValues__ass_subscript__    /*mp_ass_subscript*/
 };
 
+static PySequenceMethods keyvalues__KeyValuesSequenceType = {
+	0,                                                        /*sq_length*/
+	0,                                                        /*sq_concat*/
+	0,                                                        /*sq_repeat*/
+	0,                                                        /*sq_item*/
+	0,                                                        /*sq_slice*/
+	0,                                                        /*sq_ass_item*/
+	0,                                                        /*sq_ass_slice*/
+	(objobjproc)forwards__Forward__contains__,                /*sq_contains*/
+};
+
 PyTypeObject keyvalues__KeyValuesType = {
     PyObject_HEAD_INIT(NULL)
     0,                                                      /*ob_size*/
@@ -481,10 +511,10 @@ PyTypeObject keyvalues__KeyValuesType = {
     0,                                                      /*tp_print*/
     0,                                                      /*tp_getattr*/
     0,                                                      /*tp_setattr*/
-    0,//(cmpfunc)keyvalues__KeyValues__cmp__,                   /*tp_compare*/
+    (cmpfunc)keyvalues__KeyValues__cmp__,                   /*tp_compare*/
     0,                                                      /*tp_repr*/
     0,                                                      /*tp_as_number*/
-    0,                                                      /*tp_as_sequence*/
+    &keyvalues__KeyValuesSequenceType,                      /*tp_as_sequence*/
     &keyvalues__KeyValuesMappingMethods,                    /*tp_as_mapping*/
     0,                                                      /*tp_hash */
     0,                                                      /*tp_call*/
