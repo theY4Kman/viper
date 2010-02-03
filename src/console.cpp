@@ -39,6 +39,12 @@ ViperConsole::OnViperStartup(bool late)
 }
 
 void
+ViperConsole::OnViperAllShutdown()
+{
+    g_pMenu->RemoveRootConsoleCommand("py", this);
+}
+
+void
 ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 {
 	char const *cmd = command.Arg(2);

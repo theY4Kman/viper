@@ -91,6 +91,13 @@ BaseViper::OnViperUnload()
         pBase = pBase->m_pGlobalClassNext;
     }
     
+    pBase = ViperGlobalClass::head;
+    while (pBase)
+    {
+        pBase->OnViperAllShutdown();
+        pBase = pBase->m_pGlobalClassNext;
+    }
+    
     Py_DECREF(m_EmptyTuple);
 }
 

@@ -35,6 +35,7 @@ public: // IRootConsoleCommand
 	virtual void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
 public: // ViperGlobalClass
 	virtual void OnViperStartup(bool late);
+	virtual void OnViperAllShutdown();
 public: // IConCommandBaseAccessor
     bool RegisterConCommandBase(ConCommandBase *pCommand);
 };
