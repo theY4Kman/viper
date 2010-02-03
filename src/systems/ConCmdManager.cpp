@@ -329,21 +329,15 @@ CConCmdManager::AddOrFindCommand(char const *name, char const *description,
      */
     if(pInfo == NULL)
     {
-        ConCommandBase *pBase = icvar->GetCommands();
+        ConCommandBase *pBase = FindCommandBase(name);
         ConCommand *pCmd = NULL;
-        
-        while (pBase)
+        if (pBase != NULL)
         {
-            if (strcmp(pBase->GetName(), name) == 0)
-            {
-                /* Don't want to return convar with same name */
-                if (!pBase->IsCommand())
-                    return NULL;
-
-                pCmd = (ConCommand *)pBase;
-                break;
-            }
-            pBase = const_cast<ConCommandBase *>(pBase->GetNext());
+            // Don't create a command with the same name as a convar
+            if (!pBase->IsCommand())
+                return NULL;
+            
+            pCmd = static_cast<ConCommand*>(pBase);
         }
         
         // Make sure we have a valid command before we build a new ConCmdInfo

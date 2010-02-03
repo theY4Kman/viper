@@ -28,10 +28,14 @@
 
 /* Jesus, sawce, this file is horrendous. Clean up your room. */
 
+#if SOURCE_ENGINE >= SE_LEFT4DEAD
+#define gpGlobals g_SMAPI->GetCGlobals()
+#endif
+
 #include <Python.h>
-#if SOURCE_ENGINE == SE_LEFT4DEAD
+#if SOURCE_ENGINE >= SE_LEFT4DEAD
 #   include "convar_sm_l4d.h"
-#elif SOURCE_ENGINE == SE_ORANGEBOX
+#elif SOURCE_ENGINE >= SE_ORANGEBOX
 #   include "convar_sm_ob.h"
 #else
 #   include "convar_sm.h"

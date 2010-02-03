@@ -26,7 +26,13 @@
 static PyObject *
 halflife__get_engine_time(PyObject *self)
 {
-    return PyFloat_FromDouble(engine->Time());
+#if SOURCE_ENGINE == SE_LEFT4DEAD2
+    float fTime = Plat_FloatTime();
+#else
+    float fTime = engine->Time();
+#endif
+    
+    return PyFloat_FromDouble(fTime);
 }
 
 static PyObject *

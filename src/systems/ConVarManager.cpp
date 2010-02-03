@@ -158,14 +158,8 @@ ViperConVarManager::CreateConVar(IViperPlugin *pl, char const *name,
         return handle;
     }
     
-    ConCommandBase *pBase = icvar->GetCommands();
-    while (pBase != NULL)
-    {
-        if (pBase->IsCommand() && strcmp(pBase->GetName(), name) == 0)
-            return NULL;
-        
-        pBase = const_cast<ConCommandBase *>(pBase->GetNext());
-    }
+    if (FindCommand(name) != NULL)
+        return NULL;
     
     handle = PyObject_New(console__ConVar, &console__ConVarType);
     assert(handle != NULL);
