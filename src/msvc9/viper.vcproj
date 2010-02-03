@@ -17,7 +17,7 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug - Orange Box|Win32"
+			Name="Debug - Orange Box Valve|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
@@ -30,7 +30,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				CommandLine="copy &quot;$(OutDir)\viper.ext.2.ep2v.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll&quot;&#x0D;&#x0A;"
-				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep2\viper.ext.dll&quot;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -43,7 +43,577 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_LEFT4DEAD=4 /D SOURCE_ENGINE=3"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4"
+				Optimization="0"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKOBVALVE)\public&quot;;&quot;$(HL2SDKOBVALVE)\public\game\server\&quot;;&quot;$(HL2SDKOBVALVE)\public\engine&quot;;&quot;$(HL2SDKOBVALVE)\public\tier0&quot;;&quot;$(HL2SDKOBVALVE)\public\tier1&quot;;&quot;$(HL2SDKOBVALVE)\public\vstdlib&quot;;&quot;$(HL2SDKOBVALVE)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;"
+				GeneratePreprocessedFile="0"
+				KeepComments="false"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
+				AdditionalDependencies="$(HL2SDKOBVALVE)\lib\public\tier0.lib $(HL2SDKOBVALVE)\lib\public\tier1.lib $(HL2SDKOBVALVE)\lib\public\vstdlib.lib $(HL2SDKOBVALVE)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Debug\python25_d.lib"
+				OutputFile="$(OutDir)\viper.ext.2.ep2v.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="python25_d.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy output to SRCDS"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release - Orange Box Valve|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.ep2v.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll&quot;"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4"
+				Optimization="0"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKOBVALVE)\public&quot;;&quot;$(HL2SDKOBVALVE)\public\game\server\&quot;;&quot;$(HL2SDKOBVALVE)\public\engine&quot;;&quot;$(HL2SDKOBVALVE)\public\tier0&quot;;&quot;$(HL2SDKOBVALVE)\public\tier1&quot;;&quot;$(HL2SDKOBVALVE)\public\vstdlib&quot;;&quot;$(HL2SDKOBVALVE)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;"
+				GeneratePreprocessedFile="0"
+				KeepComments="false"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
+				AdditionalDependencies="$(HL2SDKOBVALVE)\lib\public\tier0.lib $(HL2SDKOBVALVE)\lib\public\tier1.lib $(HL2SDKOBVALVE)\lib\public\vstdlib.lib $(HL2SDKOBVALVE)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Release\python25.lib"
+				OutputFile="$(OutDir)\viper.ext.2.ep2v.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="python25.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy output to SRCDS"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug - Left 4 Dead|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.l4d.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d.dll&quot;"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=5"
+				Optimization="0"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKL4D)\public&quot;;&quot;$(HL2SDKL4D)\public\game\server\&quot;;&quot;$(HL2SDKL4D)\public\engine&quot;;&quot;$(HL2SDKL4D)\public\tier0&quot;;&quot;$(HL2SDKL4D)\public\tier1&quot;;&quot;$(HL2SDKL4D)\public\vstdlib&quot;;&quot;$(HL2SDKL4D)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;"
+				GeneratePreprocessedFile="0"
+				KeepComments="false"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
+				AdditionalDependencies="$(HL2SDKL4D)\lib\public\tier0.lib $(HL2SDKL4D)\lib\public\tier1.lib $(HL2SDKL4D)\lib\public\vstdlib.lib $(HL2SDKL4D)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Debug\python25_d.lib"
+				OutputFile="$(OutDir)\viper.ext.2.l4d.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="python25_d.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy output to SRCDS"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release - Left 4 Dead|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.l4d.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d.dll&quot;"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=5"
+				Optimization="0"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKL4D)\public&quot;;&quot;$(HL2SDKL4D)\public\game\server\&quot;;&quot;$(HL2SDKL4D)\public\engine&quot;;&quot;$(HL2SDKL4D)\public\tier0&quot;;&quot;$(HL2SDKL4D)\public\tier1&quot;;&quot;$(HL2SDKL4D)\public\vstdlib&quot;;&quot;$(HL2SDKL4D)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;"
+				GeneratePreprocessedFile="0"
+				KeepComments="false"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
+				AdditionalDependencies="$(HL2SDKL4D)\lib\public\tier0.lib $(HL2SDKL4D)\lib\public\tier1.lib $(HL2SDKL4D)\lib\public\vstdlib.lib $(HL2SDKL4D)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Release\python25.lib"
+				OutputFile="$(OutDir)\viper.ext.2.l4d.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="python25.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy output to SRCDS"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug - Left 4 Dead 2|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.l4d2.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d2.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d2.dll&quot;"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=6"
+				Optimization="0"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKL4D2)\public&quot;;&quot;$(HL2SDKL4D2)\public\game\server\&quot;;&quot;$(HL2SDKL4D2)\public\engine&quot;;&quot;$(HL2SDKL4D2)\public\tier0&quot;;&quot;$(HL2SDKL4D2)\public\tier1&quot;;&quot;$(HL2SDKL4D2)\public\vstdlib&quot;;&quot;$(HL2SDKL4D2)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;"
+				GeneratePreprocessedFile="0"
+				KeepComments="false"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
+				AdditionalDependencies="$(HL2SDKL4D2)\lib\public\tier0.lib $(HL2SDKL4D2)\lib\public\tier1.lib $(HL2SDKL4D2)\lib\public\vstdlib.lib $(HL2SDKL4D2)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Debug\python25_d.lib"
+				OutputFile="$(OutDir)\viper.ext.2.l4d2.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="python25_d.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy output to SRCDS"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release - Left 4 Dead 2|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.l4d2.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d2.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.l4d2.dll&quot;"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=6"
+				Optimization="0"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKL4D2)\public&quot;;&quot;$(HL2SDKL4D2)\public\game\server\&quot;;&quot;$(HL2SDKL4D2)\public\engine&quot;;&quot;$(HL2SDKL4D2)\public\tier0&quot;;&quot;$(HL2SDKL4D2)\public\tier1&quot;;&quot;$(HL2SDKL4D2)\public\vstdlib&quot;;&quot;$(HL2SDKL4D2)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;"
+				GeneratePreprocessedFile="0"
+				KeepComments="false"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="BINARY_NAME=\&quot;$(TargetFileName)\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
+				AdditionalDependencies="$(HL2SDKL4D2)\lib\public\tier0.lib $(HL2SDKL4D2)\lib\public\tier1.lib $(HL2SDKL4D2)\lib\public\vstdlib.lib $(HL2SDKL4D2)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Release\python25.lib"
+				OutputFile="$(OutDir)\viper.ext.2.l4d2.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="python25.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy output to SRCDS"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug - Orange Box|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.ep2.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2.dll&quot;"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=3"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\game\server\&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
@@ -74,7 +644,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
 				AdditionalDependencies="$(HL2SDKOB)\lib\public\tier0.lib $(HL2SDKOB)\lib\public\tier1.lib $(HL2SDKOB)\lib\public\vstdlib.lib $(HL2SDKOB)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Debug\python25_d.lib"
-				OutputFile="$(OutDir)\viper.ext.2.ep2v.dll"
+				OutputFile="$(OutDir)\viper.ext.2.ep2.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
 				IgnoreDefaultLibraryNames=""
@@ -124,8 +694,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(OutDir)\viper.ext.2.ep2v.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll&quot;&#x0D;&#x0A;"
-				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\auto.2.ep2\viper.ext.dll&quot;"
+				CommandLine="copy &quot;$(OutDir)\viper.ext.2.ep2.dll&quot; &quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2.dll&quot;&#x0D;&#x0A;"
+				Outputs="&quot;$(InputDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2.dll&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -138,7 +708,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_LEFT4DEAD=4 /D SOURCE_ENGINE=3"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=3"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\game\server\&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(MMSOURCE17)\core&quot;;&quot;$(MMSOURCE17)\core\sourcemm&quot;;&quot;$(MMSOURCE17)\core\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
@@ -169,7 +739,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib\delayimp.lib&quot;"
 				AdditionalDependencies="$(HL2SDKOB)\lib\public\tier0.lib $(HL2SDKOB)\lib\public\tier1.lib $(HL2SDKOB)\lib\public\vstdlib.lib $(HL2SDKOB)\lib\public\mathlib.lib D:\Programming\python-2.5.4\PCbuild8\Win32Release\python25.lib"
-				OutputFile="$(OutDir)\viper.ext.2.ep2v.dll"
+				OutputFile="$(OutDir)\viper.ext.2.ep2.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;D:\Program Files\Microsoft Visual Studio 9.0\VC\lib&quot;;&quot;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\&quot;"
 				IgnoreDefaultLibraryNames=""
@@ -233,7 +803,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_LEFT4DEAD=4 /D SOURCE_ENGINE=1"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=1"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls\&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(MMSOURCE17)\core-legacy&quot;;&quot;$(MMSOURCE17)\core-legacy\sourcemm&quot;;&quot;$(MMSOURCE17)\core-legacy\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
@@ -328,7 +898,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_LEFT4DEAD=4 /D SOURCE_ENGINE=1"
+				AdditionalOptions="/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=1"
 				Optimization="0"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..;&quot;$(SOURCEMOD)\public&quot;;&quot;$(SOURCEMOD)\public\sourcepawn&quot;;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls\&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(MMSOURCE17)\core-legacy&quot;;&quot;$(MMSOURCE17)\core-legacy\sourcemm&quot;;&quot;$(MMSOURCE17)\core-legacy\sourcehook&quot;;&quot;$(PYTHON)&quot;;&quot;$(PYTHON)\Include&quot;;&quot;$(PYTHON)\PC&quot;;../../public;../systems;../sourcemod"
