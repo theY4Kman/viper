@@ -35,4 +35,4 @@ for mod in ['testsourcemod', 'testentity','testhalflife', 'testforwards',
             'testconsole', 'testevents', 'testclients', 'testkeyvalues']:
   viper_suite.addTest(unittest.TestLoader().loadTestsFromName(mod))
 
-unittest.TextTestRunner(verbosity=2).run(viper_suite)
+unittest.TextTestRunner(verbosity=2, stream=sys.stdout).run(viper_suite)
