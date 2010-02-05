@@ -194,24 +194,47 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     InitializePython();
     
 #ifdef WIN32
+    // The types module is easy and fast, so we'll try to use it first.
     PyObject *types = PyImport_ImportModule("types");
     if (types == NULL)
     {
-        strncpy(error, "Unable to import the Python types module to initialize Viper data",
-                maxlength);
-        return false;
+        // If we can't use it, we have to grab the types from __main__
+        PyObject *builtin = PyImport_ImportModule("__builtin__");
+        
+        Py_XINCREF(_PyType_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "type"));
+        Py_XINCREF(_PyInt_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "int"));
+        Py_XINCREF(_PyString_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "str"));
+        Py_XINCREF(_PyFloat_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "float"));
+        Py_XINCREF(_PyLong_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "long"));
+        Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "tuple"));
+        Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "bool"));
+        Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "dict"));
+    }
+    else
+    {
+        Py_XINCREF(_PyType_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TypeType"));
+        Py_XINCREF(_PyInt_Type = (PyTypeObject *)PyObject_GetAttrString(types, "IntType"));
+        Py_XINCREF(_PyString_Type = (PyTypeObject *)PyObject_GetAttrString(types, "StringType"));
+        Py_XINCREF(_PyFloat_Type = (PyTypeObject *)PyObject_GetAttrString(types, "FloatType"));
+        Py_XINCREF(_PyLong_Type = (PyTypeObject *)PyObject_GetAttrString(types, "LongType"));
+        Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TupleType"));
+        Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BooleanType"));
+        Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(types, "DictType"));
+        
+        Py_DECREF(types);
     }
     
-    Py_XINCREF(_PyType_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TypeType"));
-    Py_XINCREF(_PyInt_Type = (PyTypeObject *)PyObject_GetAttrString(types, "IntType"));
-    Py_XINCREF(_PyString_Type = (PyTypeObject *)PyObject_GetAttrString(types, "StringType"));
-    Py_XINCREF(_PyFloat_Type = (PyTypeObject *)PyObject_GetAttrString(types, "FloatType"));
-    Py_XINCREF(_PyLong_Type = (PyTypeObject *)PyObject_GetAttrString(types, "LongType"));
-    Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TupleType"));
-    Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BooleanType"));
-    Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(types, "DictType"));
-    
-    Py_DECREF(types);
+#   define TYPE_IS_NULL(type) (_Py##type##_Type == NULL)
+    if (TYPE_IS_NULL(Type) && TYPE_IS_NULL(Int) && TYPE_IS_NULL(String)
+        && TYPE_IS_NULL(Float) && TYPE_IS_NULL(Long) && TYPE_IS_NULL(Tuple)
+        && TYPE_IS_NULL(Bool) && TYPE_IS_NULL(Dict))
+    {
+        strncpy(error, "Unable to initialize Python data types -- cannot run Viper.",
+            maxlength);
+        return false;
+    }
+#   undef TYPE_IS_NULL
+
 #endif
     
     /* For some reason, Python ends up with types Viper has created, but they
