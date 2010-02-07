@@ -23,6 +23,7 @@
 #include "ConCmdManager.h"
 #include "python/init.h"
 #include "viper.h"
+#include <string.h>
 
 CPluginFunction::~CPluginFunction()
 {
@@ -189,8 +190,30 @@ CPlugin::~CPlugin()
         
         if (GetStatus() == ViperPlugin_Running)
         {
+            /* If the plug-in has enabled threads (by using any sort of threading),
+             * we must kill the threads before destroying the interpreter */
+            if (PyEval_ThreadsInitialized())
+            {
+                // Loop through all threads in the current interpreter and raise SystemExit
+                PyThreadState *curstate = m_pInterpState->tstate_head;
+                while (curstate != NULL && curstate->interp == m_pInterpState)
+                {
+                    PyThreadState_Swap(curstate);
+                    
+                    PyThreadState_SetAsyncExc(curstate->thread_id, _PyExc_SystemExit);
+                    curstate = curstate->next;
+                    
+                    PyThreadState_Swap(NULL);
+                }
+                
+                /* This is very much frowned upon in Py_EndInterpreter, but this little
+                 * hack makes Python happy. I don't know the consequences of this line,
+                 * but until I do, I won't feel guilty >_> */
+                m_pInterpState->tstate_head = m_pThreadState;
+            }
+            
+            PyThreadState_Swap(m_pThreadState);
             Py_EndInterpreter(m_pThreadState);
-            PyThreadState_Swap(_swap);
         }
         else
         {
@@ -198,6 +221,8 @@ CPlugin::~CPlugin()
             PyThreadState_Clear(m_pThreadState);
             PyThreadState_Delete(m_pThreadState);
         }
+        
+        PyThreadState_Swap(NULL);
     }
 }
 
@@ -570,6 +595,16 @@ bool CPluginManager::ReloadPlugin(CPlugin *plugin)
 bool
 CPluginManager::UnloadPlugin(CPlugin *plugin)
 {
+    if (plugin->GetStatus() == ViperPlugin_Running)
+    {
+        // Before calling listeners, tell the plug-in we're unloading
+        PyObject *unload = PyDict_GetItemString(plugin->m_pPluginDict, "plugin_unload");
+        if (unload != NULL && PyCallable_Check(unload))
+        {
+            PyObject_CallObject(unload, NULL);
+        }
+    }
+    
     SourceHook::List<IViperPluginsListener *>::iterator iter;
     for (iter=m_Listeners.begin(); iter!=m_Listeners.end(); iter++)
     {

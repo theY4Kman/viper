@@ -67,6 +67,7 @@ PyObject *_PyExc_IOError = NULL;
 PyObject *_PyExc_KeyError = NULL;
 PyObject *_PyExc_RuntimeError = NULL;
 PyObject *_PyExc_RuntimeWarning = NULL;
+PyObject *_PyExc_SystemExit = NULL;
 
 PyTypeObject *_PyInt_Type = NULL;
 PyTypeObject *_PyString_Type = NULL;
@@ -143,6 +144,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     _PyExc_RuntimeError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeError"));
     _PyExc_KeyError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_KeyError"));
     _PyExc_RuntimeWarning = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeWarning"));
+    _PyExc_SystemExit = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_SystemExit"));
     
     g_pSendProxy_EHandleToInt = memutils->FindPattern(g_SMAPI->GetServerFactory(false),
         "\x8B\x2A\x2A\x2A\x85\x2A\x74\x2A\x8B\x2A\x83\x2A\x2A\x74\x2A\x8B\x2A\x81\x2A"

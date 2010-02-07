@@ -71,7 +71,7 @@ BaseViper::StartViper()
     }
     
     /* Setup the game frame hook */
-    m_GameFrame = g_Forwards.CreateForward("GameFrame", ET_Ignore,
+    m_GameFrame = g_Forwards.CreateForward("game_frame", ET_Ignore,
         m_EmptyTuple, NULL);
     
     /* Load the plugins */
