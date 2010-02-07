@@ -524,7 +524,7 @@ console__print_to_server(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-console__reg_concmd(PyObject *self, PyObject *args, PyObject *keywds)
+PyRegConCommand(PyObject *args, PyObject *keywds, CmdType type)
 {
     char const *sName = NULL;
     char const *sDescription = "";
@@ -553,10 +553,22 @@ console__reg_concmd(PyObject *self, PyObject *args, PyObject *keywds)
     
     GET_THREAD_PLUGIN();
     
-    if (!g_VCmds.AddCommand(pPlugin, pFunc, Cmd_Console, sName, sDescription, flags))
+    if (!g_VCmds.AddCommand(pPlugin, pFunc, type, sName, sDescription, flags))
         Py_RETURN_FALSE;
     
     Py_RETURN_TRUE;
+}
+
+static PyObject *
+console__reg_concmd(PyObject *self, PyObject *args, PyObject *keywds)
+{
+    return PyRegConCommand(args, keywds, Cmd_Console);
+}
+
+static PyObject *
+console__reg_srvcmd(PyObject *self, PyObject *args, PyObject *keywds)
+{
+    return PyRegConCommand(args, keywds, Cmd_Server);
 }
 
 static PyObject *
@@ -622,6 +634,19 @@ static PyMethodDef console__methods[] = {
     {"reg_concmd", (PyCFunction)console__reg_concmd, METH_VARARGS|METH_KEYWORDS,
         "reg_concmd(name, callback[, description[, flags]]) -> bool\n\n"
         "Registers a new console command or hooks an existing one.\n"
+        "@type  name: string\n"
+        "@param name: Name of the ConCommand\n"
+        "@type  callback: callable\n"
+        "@param callback: A function to call when the ConCommand is executed.\n"
+        "    The function should receive one argument: a console.ConCommandReply object.\n"
+        "@type  description: string\n"
+        "@param description: (Optional) Description of the ConCommand\n"
+        "@type  flags: FCVAR constants\n"
+        "@param flags: (Optional) Flags that change how a ConCommand is handled.\n"
+        "    Use FCVAR constants, such as FCVAR_CHEAT, etc."},
+    {"reg_srvcmd", (PyCFunction)console__reg_concmd, METH_VARARGS|METH_KEYWORDS,
+        "reg_srvcmd(name, callback[, description[, flags]]) -> bool\n\n"
+        "Registers a new server console command or hooks an existing one.\n"
         "@type  name: string\n"
         "@param name: Name of the ConCommand\n"
         "@type  callback: callable\n"

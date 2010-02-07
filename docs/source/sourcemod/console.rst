@@ -59,6 +59,11 @@ Module Contents
     *callback* is the function to call when the console command is executed. This callback should have one parameter: a :ref:`ConCommandReply <concommandreply-objects>` object.
 
 
+..  function:: reg_srvcmd(name, callback[, description="", flags=0])
+    
+    This command is the same as :ref:`reg_concmd <sourcemod.console.reg_concmd>`, except that the command can only be called by the server console or RCON.    
+
+
 ..  function:: server_command(command)
     
     Executes a command is if it were run on the server console.
