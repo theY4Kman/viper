@@ -76,6 +76,92 @@ typedef struct
 {
     PyObject_HEAD
     
+    PyObject *real_stderr;
+    int softspace;
+} sourcemod__server_err;
+
+static PyObject *
+sourcemod__server_err__write(sourcemod__server_err *self, PyObject *args)
+{
+    char *arg;
+    if (!PyArg_ParseTuple(args, "s", &arg))
+        return NULL;
+    
+    g_pSM->LogError(myself, "%s", arg);
+    g_SMAPI->ConPrint(arg);
+    
+    Py_RETURN_NONE;
+}
+
+static void
+sourcemod__server_err__del__(sourcemod__server_err *self)
+{
+    PySys_SetObject("stderr", self->real_stderr);
+    Py_DECREF(self->real_stderr);
+    
+    self->ob_type->tp_free((PyObject *)self);
+}
+
+static PyMemberDef sourcemod__server_err__members[] = {
+    {"softspace", T_INT, offsetof(sourcemod__server_err, softspace), 0,
+        "Flag indicating that a space needs to be printed; used by print."},
+    {NULL}
+};
+
+static PyMethodDef sourcemod__server_err__methods[] = {
+    {"write", (PyCFunction)sourcemod__server_err__write, METH_VARARGS,
+        "write(msg)\n\n"
+        "Prints an error message to the server console.\n\n"
+        "@type  msg: string\n"
+        "@param msg: The message to print."},
+    {NULL, NULL, 0, NULL},
+};
+
+PyTypeObject sourcemod__server_errType = {
+    PyObject_HEAD_INIT(NULL)
+    0,                          /*ob_size*/
+    "sourcemod.server_err",     /*tp_name*/
+    sizeof(sourcemod__server_err),/*tp_basicsize*/
+    0,                          /*tp_itemsize*/
+    (destructor)sourcemod__server_err__del__,/*tp_dealloc*/
+    0,                          /*tp_print*/
+    0,                          /*tp_getattr*/
+    0,                          /*tp_setattr*/
+    0,                          /*tp_compare*/
+    0,                          /*tp_repr*/
+    0,                          /*tp_as_number*/
+    0,                          /*tp_as_sequence*/
+    0,                          /*tp_as_mapping*/
+    0,                          /*tp_hash */
+    0,                          /*tp_call*/
+    0,                          /*tp_str*/
+    PyObject_GenericGetAttr,    /*tp_getattro*/
+    PyObject_GenericSetAttr,    /*tp_setattro*/
+    0,                          /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,         /*tp_flags*/
+    /* tp_doc */
+    "Redirects stderr to the server console.",
+    0,                            /* tp_traverse */
+    0,                            /* tp_clear */
+    0,                            /* tp_richcompare */
+    0,                            /* tp_weaklistoffset */
+    0,                            /* tp_iter */
+    0,                            /* tp_iternext */
+    sourcemod__server_err__methods,/* tp_methods */
+    sourcemod__server_err__members,/* tp_members */
+    0,                          /* tp_getset */
+    0,                          /* tp_base */
+    0,                          /* tp_dict */
+    0,                          /* tp_descr_get */
+    0,                          /* tp_descr_set */
+    0,                          /* tp_dictoffset */
+};
+
+/* A class that redirects stdout to the srcds server console */
+typedef struct 
+{
+    PyObject_HEAD
+    
     PyObject *real_stdout;
     int softspace;
 } sourcemod__server_out;
@@ -184,9 +270,11 @@ initsourcemod(void)
     
     /* Redirect stdout to the server console */
     sourcemod__server_outType.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&sourcemod__server_outType) < 0)
+    sourcemod__server_errType.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&sourcemod__server_outType) < 0 ||
+        PyType_Ready(&sourcemod__server_errType) < 0)
     {
-        g_pSM->LogError(myself, "stdout to server console redirection failed."
+        g_pSM->LogError(myself, "stdout/err to server console redirection failed."
             " `print` will output to stdout.");
         
         if (PyErr_Occurred())
@@ -206,6 +294,20 @@ initsourcemod(void)
         PyModule_AddObject(sourcemod, "server_out", server_out);
         
         PySys_SetObject("stdout", server_out);
+        
+        // Now repeat for stderr
+        PyObject *py_stderr = PySys_GetObject("stderr");
+        PyObject *server_err = sourcemod__server_errType.tp_new(
+            (PyTypeObject *)&sourcemod__server_errType, NULL, NULL);
+        
+        Py_INCREF(py_stderr);
+        ((sourcemod__server_err *)server_err)->real_stderr = py_stderr;
+        
+        PyModule_AddObject(sourcemod, "stderr", py_stderr);
+        Py_INCREF(server_err);
+        PyModule_AddObject(sourcemod, "server_err", server_err);
+        
+        PySys_SetObject("stderr", server_err);
     }
         
 #define PyModule_AddModuleMacro(name) { \
