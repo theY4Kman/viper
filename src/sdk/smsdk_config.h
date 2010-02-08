@@ -29,7 +29,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"Viper"
 #define SMEXT_CONF_DESCRIPTION	"Python for SourceMod"
-#define SMEXT_CONF_VERSION		"0.8"
+#define SMEXT_CONF_VERSION		"0.8.1"
 #define SMEXT_CONF_AUTHOR		"Zach \"theY4Kman\" Kanzler"
 #define SMEXT_CONF_URL			"http://y4kstudios.com"
 #define SMEXT_CONF_LOGTAG		"Viper"
