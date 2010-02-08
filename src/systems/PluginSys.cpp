@@ -602,6 +602,8 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
         if (unload != NULL && PyCallable_Check(unload))
         {
             PyObject_CallObject(unload, NULL);
+            if (PyErr_Occurred())
+                PyErr_Print();
         }
     }
     
