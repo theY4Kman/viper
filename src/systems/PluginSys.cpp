@@ -595,6 +595,11 @@ bool CPluginManager::ReloadPlugin(CPlugin *plugin)
 bool
 CPluginManager::UnloadPlugin(CPlugin *plugin)
 {
+    // If an error has occurred, the thread state may contain a bad exception,
+    // causing the PyDict_GetItemString call to crash.
+    if (PyErr_Occurred())
+        PyErr_Clear();
+    
     if (plugin->GetStatus() == ViperPlugin_Running)
     {
         // Before calling listeners, tell the plug-in we're unloading
