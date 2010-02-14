@@ -56,7 +56,48 @@ class KeyValuesTestCase(unittest.TestCase):
         'the KeyValues object differs from the file (expected "root_section_name",'
         ' found "%s")' % self.kv.name)
     self.recursive_dict_check(self.kv_dict, self.kv)
-    
+  
+  def test_iter_funcs_exist(self):
+    '''KeyValues iter functions exist'''
+    self.assertTrue(self.kv.iteritems(), 'iteritems returned None')
+    self.assertTrue(self.kv.iterkeys(), 'iterkeys returned None')
+    self.assertTrue(self.kv.itervalues(), 'itervalues returned None')
+  
+  def test_itervalues(self):
+    '''KeyValues itervalues iterates correct information'''
+    dvalues = self.kv_dict.values()
+    for value in self.kv.itervalues():
+      if type(value) is keyvalues.KeyValues:
+        # TODO: test subsections
+        self.assertTrue(True, 'KeyValues subsection not found in dict')
+      else:
+        self.assert_(value in dvalues, 'value not found in dict (looking for '
+            '"%s")' % str(value))
+  
+  def test_iterkeys(self):
+    '''KeyValues iterkeys iterates correct information'''
+    keys = []
+    for key in self.kv.iterkeys():
+      keys.append(key)
+    for key in self.kv_dict.iterkeys():
+      self.assert_(key in keys, 'KeyValues iterkeys does not include all info '
+          'from the dict (looking for "%s")' % key)
+  
+  def test_iteritems(self):
+    '''KeyValues iteritems iterates correct information'''
+    dvalues = self.kv_dict.values()
+    keys = []
+    for key,value in self.kv.iteritems():
+      keys.append(key)
+      if type(value) is keyvalues.KeyValues:
+        # TODO: test subsections
+        self.assertTrue(True, 'KeyValues subsection not found in dict')
+      else:
+        self.assert_(value in dvalues, 'value not found in dict (looking for '
+            '"%s")' % str(value))
+    for key in self.kv_dict.iterkeys():
+      self.assert_(key in keys, 'KeyValues iteritems does not include all keys'
+          ' from the dict (looking for "%s")' % key)
   
   def test_has_key(self):
     '''KeyValues has_key finds key'''

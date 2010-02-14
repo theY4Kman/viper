@@ -68,6 +68,7 @@ PyObject *_PyExc_KeyError = NULL;
 PyObject *_PyExc_RuntimeError = NULL;
 PyObject *_PyExc_RuntimeWarning = NULL;
 PyObject *_PyExc_SystemExit = NULL;
+PyObject *_PyExc_StopIteration = NULL;
 
 PyTypeObject *_PyInt_Type = NULL;
 PyTypeObject *_PyString_Type = NULL;
@@ -145,6 +146,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     _PyExc_KeyError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_KeyError"));
     _PyExc_RuntimeWarning = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeWarning"));
     _PyExc_SystemExit = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_SystemExit"));
+    _PyExc_StopIteration = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_StopIteration"));
     
     g_pSendProxy_EHandleToInt = memutils->FindPattern(g_SMAPI->GetServerFactory(false),
         "\x8B\x2A\x2A\x2A\x85\x2A\x74\x2A\x8B\x2A\x83\x2A\x2A\x74\x2A\x8B\x2A\x81\x2A"
@@ -276,6 +278,8 @@ ViperExtension::SDK_OnAllLoaded()
     
     g_pSMOnBanIdentity = g_pForwards->FindForward("OnBanIdentity", NULL);
     g_pSMOnBanClient = g_pForwards->FindForward("OnBanClient", NULL);
+    
+    
 }
 
 bool

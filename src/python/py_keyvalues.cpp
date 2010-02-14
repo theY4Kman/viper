@@ -51,6 +51,225 @@ namespace SourceHook
     }
 }
 
+struct keyvalues__KeyValuesIterator
+{
+    PyObject_HEAD
+    
+    KeyValues *kv;
+    KeyValues *next;
+};
+
+static PyObject *
+create_KeyValues_iter(keyvalues__KeyValues *self, PyTypeObject *type)
+{
+    keyvalues__KeyValuesIterator *iter = PyObject_New(keyvalues__KeyValuesIterator, type);
+    iter->kv = self->kv;
+    iter->next = NULL;
+    
+    return (PyObject*)iter;
+}
+
+static PyObject *
+keyvalues__KeyValuesItemsIterator__iternext__(keyvalues__KeyValuesIterator *self)
+{
+    if (self->next == NULL)
+        self->next = self->kv->GetFirstSubKey();
+    else
+        self->next = self->next->GetNextKey();
+    
+    if (self->next == NULL)
+    {
+        PyErr_SetNone(_PyExc_StopIteration);
+        return NULL;
+    }
+    
+    PyObject *value;
+    if (self->next->GetFirstSubKey() == NULL &&
+        self->next->GetDataType() != KeyValues::TYPE_NONE)
+    {
+        /* A key-value pair */
+        switch (self->next->GetDataType())
+        {
+        case KeyValues::TYPE_FLOAT:
+            value = PyFloat_FromDouble(self->next->GetFloat());
+        
+        case KeyValues::TYPE_INT:
+        case KeyValues::TYPE_PTR:
+            value = PyInt_FromLong(self->next->GetInt());
+        
+        case KeyValues::TYPE_UINT64:
+            value = PyLong_FromUnsignedLongLong(self->next->GetUint64());
+        
+        case KeyValues::TYPE_COLOR:
+            value = CreatePyColor(self->next->GetColor());
+        
+        case KeyValues::TYPE_STRING:
+        case KeyValues::TYPE_WSTRING:
+        default:
+            value = PyString_FromString(self->next->GetString());
+        }
+    }
+    else
+        /* A section */
+        value = GetPyObjectFromKeyValues(self->next);
+    
+    return PyTuple_Pack(2, PyString_FromString(self->next->GetName()), value);
+}
+
+PyTypeObject keyvalues__KeyValuesIterItemsType = {
+    PyObject_HEAD_INIT(_PyType_Type)
+    0,                                                      /*ob_size*/
+    "sourcemod.keyvalues.KeyValuesItemsIterator",           /*tp_name*/
+    sizeof(keyvalues__KeyValuesIterator),                   /*tp_basicsize*/
+    0,                                                      /*tp_itemsize*/
+    (destructor)PyObject_Del,                               /*tp_dealloc*/
+    0,                                                      /*tp_print*/
+    0,                                                      /*tp_getattr*/
+    0,                                                      /*tp_setattr*/
+    0,                                                      /*tp_compare*/
+    0,                                                      /*tp_repr*/
+    0,                                                      /*tp_as_number*/
+    0,                                                      /*tp_as_sequence*/
+    0,                                                      /*tp_as_mapping*/
+    0,                                                      /*tp_hash */
+    0,                                                      /*tp_call*/
+    0,                                                      /*tp_str*/
+    PyObject_GenericGetAttr,                                /*tp_getattro*/
+    0,                                                      /*tp_setattro*/
+    0,                                                      /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,                                     /*tp_flags*/
+    "Iterates key/value pairs in the Valve KeyValues class.",/* tp_doc */
+    0,                                                      /* tp_traverse */
+    0,                                                      /* tp_clear */
+    0,                                                      /* tp_richcompare */
+    0,                                                      /* tp_weaklistoffset */
+    PyObject_SelfIter,                                      /* tp_iter */
+    (iternextfunc)keyvalues__KeyValuesItemsIterator__iternext__,/* tp_iternext */
+};
+
+static PyObject *
+keyvalues__KeyValuesKeysIterator__iternext__(keyvalues__KeyValuesIterator *self)
+{
+    if (self->next == NULL)
+        self->next = self->kv->GetFirstSubKey();
+    else
+        self->next = self->next->GetNextKey();
+    
+    if (self->next == NULL)
+    {
+        PyErr_SetNone(_PyExc_StopIteration);
+        return NULL;
+    }
+    
+    return PyString_FromString(self->next->GetName());
+}
+
+PyTypeObject keyvalues__KeyValuesIterKeysType = {
+    PyObject_HEAD_INIT(_PyType_Type)
+    0,                                                      /*ob_size*/
+    "sourcemod.keyvalues.KeyValuesKeysIterator",            /*tp_name*/
+    sizeof(keyvalues__KeyValuesIterator),                   /*tp_basicsize*/
+    0,                                                      /*tp_itemsize*/
+    (destructor)PyObject_Del,                               /*tp_dealloc*/
+    0,                                                      /*tp_print*/
+    0,                                                      /*tp_getattr*/
+    0,                                                      /*tp_setattr*/
+    0,                                                      /*tp_compare*/
+    0,                                                      /*tp_repr*/
+    0,                                                      /*tp_as_number*/
+    0,                                                      /*tp_as_sequence*/
+    0,                                                      /*tp_as_mapping*/
+    0,                                                      /*tp_hash */
+    0,                                                      /*tp_call*/
+    0,                                                      /*tp_str*/
+    PyObject_GenericGetAttr,                                /*tp_getattro*/
+    0,                                                      /*tp_setattro*/
+    0,                                                      /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,                                     /*tp_flags*/
+    "Iterates keys in the Valve KeyValues class.",          /* tp_doc */
+    0,                                                      /* tp_traverse */
+    0,                                                      /* tp_clear */
+    0,                                                      /* tp_richcompare */
+    0,                                                      /* tp_weaklistoffset */
+    PyObject_SelfIter,                                      /* tp_iter */
+    (iternextfunc)keyvalues__KeyValuesKeysIterator__iternext__,/* tp_iternext */
+};
+
+static PyObject *
+keyvalues__KeyValuesValuesIterator__iternext__(keyvalues__KeyValuesIterator *self)
+{
+    if (self->next == NULL)
+        self->next = self->kv->GetFirstValue();
+    else
+        self->next = self->next->GetNextValue();
+    
+    if (self->next == NULL)
+    {
+        PyErr_SetNone(_PyExc_StopIteration);
+        return NULL;
+    }
+    
+    if (self->next->GetFirstSubKey() == NULL &&
+        self->next->GetDataType() != KeyValues::TYPE_NONE)
+    {
+        /* A key-value pair */
+        switch (self->next->GetDataType())
+        {
+        case KeyValues::TYPE_FLOAT:
+            return PyFloat_FromDouble(self->next->GetFloat());
+        
+        case KeyValues::TYPE_INT:
+        case KeyValues::TYPE_PTR:
+            return PyInt_FromLong(self->next->GetInt());
+        
+        case KeyValues::TYPE_UINT64:
+            return PyLong_FromUnsignedLongLong(self->next->GetUint64());
+        
+        case KeyValues::TYPE_COLOR:
+            return CreatePyColor(self->next->GetColor());
+        
+        case KeyValues::TYPE_STRING:
+        case KeyValues::TYPE_WSTRING:
+        default:
+            return PyString_FromString(self->next->GetString());
+        }
+    }
+    else
+        /* A section */
+        return GetPyObjectFromKeyValues(self->next);
+}
+
+PyTypeObject keyvalues__KeyValuesIterValuesType = {
+    PyObject_HEAD_INIT(_PyType_Type)
+    0,                                                      /*ob_size*/
+    "sourcemod.keyvalues.KeyValuesValuesIterator",          /*tp_name*/
+    sizeof(keyvalues__KeyValuesIterator),                   /*tp_basicsize*/
+    0,                                                      /*tp_itemsize*/
+    (destructor)PyObject_Del,                               /*tp_dealloc*/
+    0,                                                      /*tp_print*/
+    0,                                                      /*tp_getattr*/
+    0,                                                      /*tp_setattr*/
+    0,                                                      /*tp_compare*/
+    0,                                                      /*tp_repr*/
+    0,                                                      /*tp_as_number*/
+    0,                                                      /*tp_as_sequence*/
+    0,                                                      /*tp_as_mapping*/
+    0,                                                      /*tp_hash */
+    0,                                                      /*tp_call*/
+    0,                                                      /*tp_str*/
+    PyObject_GenericGetAttr,                                /*tp_getattro*/
+    0,                                                      /*tp_setattro*/
+    0,                                                      /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,                                     /*tp_flags*/
+    "Iterates values in the Valve KeyValues class.",        /* tp_doc */
+    0,                                                      /* tp_traverse */
+    0,                                                      /* tp_clear */
+    0,                                                      /* tp_richcompare */
+    0,                                                      /* tp_weaklistoffset */
+    PyObject_SelfIter,                                      /* tp_iter */
+    (iternextfunc)keyvalues__KeyValuesValuesIterator__iternext__,/* tp_iternext */
+};
+
 /* Methods */
 static PyObject *
 keyvalues__KeyValues__clear(keyvalues__KeyValues *self, PyObject *args,
@@ -90,6 +309,29 @@ keyvalues__KeyValues__copy(keyvalues__KeyValues *self)
 }
 
 static PyObject *
+keyvalues__KeyValues__subscript__(keyvalues__KeyValues *self, PyObject *key);
+
+static PyObject *
+keyvalues__KeyValues__get(keyvalues__KeyValues *self, PyObject *args, PyObject *keywds)
+{
+    PyObject *key = NULL;
+    PyObject *default_obj = Py_None;
+    
+    static char *keywdlist[] = {"key", "default", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "S|O", keywdlist, &key, &default_obj))
+        return NULL;
+    
+    PyObject *result = keyvalues__KeyValues__subscript__(self, key);
+    if (result == NULL && PyErr_Occurred() && PyErr_ExceptionMatches(_PyExc_KeyError))
+    {
+        PyErr_Clear();
+        return default_obj;
+    }
+    
+    return result;
+}
+
+static PyObject *
 keyvalues__KeyValues__has_key(keyvalues__KeyValues *self, PyObject *args)
 {
     char *key;
@@ -101,6 +343,88 @@ keyvalues__KeyValues__has_key(keyvalues__KeyValues *self, PyObject *args)
 }
 
 static PyObject *
+keyvalues__KeyValues__items(keyvalues__KeyValues *self)
+{
+    PyObject *list = PyList_New(0);
+    KeyValues *head = self->kv->GetFirstSubKey();
+    if (head == NULL)
+        return list;
+    
+    do
+    {
+        PyObject *value;
+        if (head->GetFirstSubKey() == NULL &&
+            head->GetDataType() != KeyValues::TYPE_NONE)
+        {
+            /* A key-value pair */
+            switch (head->GetDataType())
+            {
+            case KeyValues::TYPE_FLOAT:
+                value = PyFloat_FromDouble(head->GetFloat());
+            
+            case KeyValues::TYPE_INT:
+            case KeyValues::TYPE_PTR:
+                value = PyInt_FromLong(head->GetInt());
+            
+            case KeyValues::TYPE_UINT64:
+                value = PyLong_FromUnsignedLongLong(head->GetUint64());
+            
+            case KeyValues::TYPE_COLOR:
+                value = CreatePyColor(head->GetColor());
+            
+            case KeyValues::TYPE_STRING:
+            case KeyValues::TYPE_WSTRING:
+            default:
+                value = PyString_FromString(head->GetString());
+            }
+        }
+        else
+            /* A section */
+            value = GetPyObjectFromKeyValues(head);
+        
+        PyObject *tuple = PyTuple_Pack(2, PyString_FromString(head->GetName()),
+            value);
+        PyList_Append(list, tuple);
+    } while ((head = head->GetNextKey()) != NULL);
+    
+    return list;
+}
+
+static PyObject *
+keyvalues__KeyValues__iteritems(keyvalues__KeyValues *self)
+{
+    return create_KeyValues_iter(self, &keyvalues__KeyValuesIterItemsType);
+}
+
+static PyObject *
+keyvalues__KeyValues__iterkeys(keyvalues__KeyValues *self)
+{
+    return create_KeyValues_iter(self, &keyvalues__KeyValuesIterKeysType);
+}
+
+static PyObject *
+keyvalues__KeyValues__itervalues(keyvalues__KeyValues *self)
+{
+    return create_KeyValues_iter(self, &keyvalues__KeyValuesIterValuesType);
+}
+
+static PyObject *
+keyvalues__KeyValues__keys(keyvalues__KeyValues *self)
+{
+    PyObject *list = PyList_New(0);
+    KeyValues *head = self->kv->GetFirstSubKey();
+    if (head == NULL)
+        return list;
+    
+    do
+    {
+        PyList_Append(list, PyString_FromString(head->GetName()));
+    } while ((head = head->GetNextKey()) != NULL);
+    
+    return list;
+}
+
+static PyObject *
 keyvalues__KeyValues__parse(keyvalues__KeyValues *self, PyObject *args)
 {
     char *string;
@@ -108,6 +432,52 @@ keyvalues__KeyValues__parse(keyvalues__KeyValues *self, PyObject *args)
         return NULL;
     
     return PyBool_FromLong(self->kv->LoadFromBuffer("Viper", string));
+}
+
+static PyObject *
+keyvalues__KeyValues__values(keyvalues__KeyValues *self)
+{
+    PyObject *list = PyList_New(0);
+    KeyValues *head = self->kv->GetFirstValue();
+    if (head == NULL)
+        return list;
+    
+    do
+    {
+        PyObject *value;
+        if (head->GetFirstSubKey() == NULL &&
+            head->GetDataType() != KeyValues::TYPE_NONE)
+        {
+            /* A key-value pair */
+            switch (head->GetDataType())
+            {
+            case KeyValues::TYPE_FLOAT:
+                value = PyFloat_FromDouble(head->GetFloat());
+            
+            case KeyValues::TYPE_INT:
+            case KeyValues::TYPE_PTR:
+                value = PyInt_FromLong(head->GetInt());
+            
+            case KeyValues::TYPE_UINT64:
+                value = PyLong_FromUnsignedLongLong(head->GetUint64());
+            
+            case KeyValues::TYPE_COLOR:
+                value = CreatePyColor(head->GetColor());
+            
+            case KeyValues::TYPE_STRING:
+            case KeyValues::TYPE_WSTRING:
+            default:
+                value = PyString_FromString(head->GetString());
+            }
+        }
+        else
+            /* A section */
+            value = GetPyObjectFromKeyValues(head);
+        
+        PyList_Append(list, value);
+    } while ((head = head->GetNextValue()) != NULL);
+    
+    return list;
 }
 
 /* Get/Sets */
@@ -427,6 +797,12 @@ keyvalues__KeyValues__init__(keyvalues__KeyValues *self, PyObject *args,
 }
 
 static PyObject *
+keyvalues__KeyValues__iter__(keyvalues__KeyValues *self)
+{
+    return create_KeyValues_iter(self, &keyvalues__KeyValuesIterKeysType);
+}
+
+static PyObject *
 keyvalues__KeyValues__str__(keyvalues__KeyValues *self)
 {
     CUtlBuffer buf(0, 0, CUtlBuffer::TEXT_BUFFER);
@@ -460,6 +836,15 @@ static PyMethodDef keyvalues__KeyValues__methods[] = {
         "Recursively copies the current KeyValues into a new KeyValues.\n\n"
         "@rtype: KeyValues\n"
         "@return: A new KeyValues object with the same structure as this KeyValues."},
+    {"get", (PyCFunction)keyvalues__KeyValues__get, METH_VARARGS|METH_KEYWORDS,
+        "get(key[, default=None]) -> object\n\n"
+        "If the key exists, returns its value. Otherwise, returns `default`.\n\n"
+        "@type  key: str\n"
+        "@param key: The key to lookup\n"
+        "@type  default: object\n"
+        "@param default: An object to return in key does not exist.\n"
+        "@rtype: object\n"
+        "@return: kv[key] on success, default if key does not exist."},
     {"has_key", (PyCFunction)keyvalues__KeyValues__has_key, METH_VARARGS,
         "has_key(key) -> bool\n\n"
         "Checks if the KeyValues object contains `key`. Equivalent to `key in kv`\n\n"
@@ -467,11 +852,30 @@ static PyMethodDef keyvalues__KeyValues__methods[] = {
         "@param key: The key to check for\n"
         "@rtype: bool\n"
         "@return: True if exists, False if it doesn't."},
+    {"items", (PyCFunction)keyvalues__KeyValues__items, METH_NOARGS,
+        "items() -> list\n\n"
+        "Returns a list of the tuple(key,value) pairs in the KeyValues."},
+    {"iteritems", (PyCFunction)keyvalues__KeyValues__iteritems, METH_NOARGS,
+        "iteritems() -> KeyValuesItemsIterator\n\n"
+        "Returns an iterator that iterates over all the key/value pairs in the KeyValues."},
+    {"iterkeys", (PyCFunction)keyvalues__KeyValues__iterkeys, METH_NOARGS,
+        "iterkeys() -> KeyValuesKeysIterator\n\n"
+        "Returns an iterator that iterates over all the keys in the KeyValues. This is\n"
+        "the same as `for key in kv`"},
+    {"itervalues", (PyCFunction)keyvalues__KeyValues__itervalues, METH_NOARGS,
+        "itervalues() -> KeyValuesValuesIterator\n\n"
+        "Returns an iterator that iterates over all the values in the KeyValues."},
+    {"keys", (PyCFunction)keyvalues__KeyValues__keys, METH_NOARGS,
+        "keys() -> list\n\n"
+        "Returns a list of all the keys in the KeyValues."},
     {"parse", (PyCFunction)keyvalues__KeyValues__parse, METH_VARARGS,
         "parse(string)\n\n"
         "Parses the string for a KeyValues structure and loads it in.\n\n"
         "@type  string: str\n"
         "@param string: The string value to parse."},
+    {"values", (PyCFunction)keyvalues__KeyValues__values, METH_NOARGS,
+        "values() -> list\n\n"
+        "Returns a list of all the values in the KeyValues."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -528,8 +932,8 @@ PyTypeObject keyvalues__KeyValuesType = {
     0,                                                      /* tp_clear */
     0,                                                      /* tp_richcompare */
     0,                                                      /* tp_weaklistoffset */
-    0,//(getiterfunc)keyvalues__KeyValues__iter__,              /* tp_iter */
-    0,//(iternextfunc)keyvalues__KeyValues__iternext__,         /* tp_iternext */
+    (getiterfunc)keyvalues__KeyValues__iter__,              /* tp_iter */
+    0,                                                      /* tp_iternext */
     keyvalues__KeyValues__methods,                          /* tp_methods */
     0,                                                      /* tp_members */
     keyvalues__KeyValues__getsets,                          /* tp_getset */

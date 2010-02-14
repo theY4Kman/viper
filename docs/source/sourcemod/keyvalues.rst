@@ -106,3 +106,50 @@ Attributes and Methods
     :param  file: A filename to save to, or a file-like object (must have a ``write()`` method)
     :rtype: bool
     :returns: True on successful save, False otherwise.    
+
+
+The KeyValues object supports the dict object protocol, so almost everything you can do with a dict, you can do with a KeyValues.
+
+..  method:: KeyValues.iteritems()
+             KeyValues.iterkeys()
+             KeyValues.itervalues()
+    
+    Iterators for items (key and value in a tuple), keys, or values.
+
+..  method:: KeyValues.items()
+             KeyValues.keys()
+             KeyValues.values()
+    
+    Returns a list of items (key and value in a tuple), keys, or values.
+
+..  method:: KeyValues.get(key[, default=None])
+    
+    If key exists in the KeyValues, this returns that value. If it does not exist, it returns what is passed to ``default``. The benefit of this function is that it never raises a KeyError.
+
+..  describe:: len(kv)
+    
+    Returns the number of items in the KeyValues *kv*
+
+..  describe:: kv[key]
+    
+    Returns the value of key *key* from KeyValues *kv*
+
+..  describe:: kv[key] = value
+    
+    Set ``kv[key]`` to *value*.
+
+..  describe:: del kv[key]
+    
+    Remove ``kv[key]`` from *kv*. Raises a KeyError if *key* is not in the KeyValues.
+
+..  describe:: key in kv
+    
+    Return ``True`` if *kv* has a key *key*, else ``False``
+
+..  describe:: key not in kv
+    
+    Equivalent to ``not key in kv``
+
+..  describe:: iter(kv)
+    
+    Return an iterator over the keys of the KeyValues. This is a shortcut for :meth:`iterkeys <keyvalues.KeyValues.iterkeys>`

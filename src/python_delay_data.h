@@ -65,4 +65,5 @@
     extern PyObject *_PyExc_KeyError;
     extern PyObject *_PyExc_RuntimeWarning;
     extern PyObject *_PyExc_SystemExit;
+    extern PyObject *_PyExc_StopIteration;
 #endif
