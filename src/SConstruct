@@ -32,13 +32,13 @@ SE_LEFT4DEAD = 4
 ##########################################
 
 ## Directories
-SMSDK = "../../sourcemod-central"
-SRCDS_BASE = os.path.expanduser("~/srcds")
-HL2SDK_ORIG = "../../hl2sdk"
-HL2SDK_OB = "../../hl2sdk-ob"
-HL2SDK_L4D = "../../hl2sdk-l4d"
-MMSOURCE17 = "../../mmsource-1.7"
-PYTHON = "../../../../apps/Python-2.5.4"
+SMSDK = os.environ.get("SMSDK", "../../sourcemod-central")
+SRCDS_BASE = os.environ.get("SRCDS", os.path.expanduser("~/srcds"))
+HL2SDK_ORIG = os.environ.get("HL2SDK", "../../hl2sdk")
+HL2SDK_OB = os.environ.get("HL2SDKOB", "../../hl2sdk-ob")
+HL2SDK_L4D = os.environ.get("HL2SDKL4D", "../../hl2sdk-l4d")
+MMSOURCE17 = os.environ.get("MMSOURCE17", "../../mmsource-1.7")
+PYTHON = os.environ.get("PYTHONSOURCE", "../../../../apps/Python-2.5.4")
 
 ##########################################
 ### END USER COMPILATION CONFIGURATION ###
