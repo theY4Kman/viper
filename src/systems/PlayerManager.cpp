@@ -29,8 +29,17 @@
  * @brief   Registers and creates forwards for the SM client listener
  */
 
+#include <IPlayerHelpers.h>
 #include "PlayerManager.h"
+#include "ConCmdManager.h"
 #include "python/py_clients.h"
+#include "viper.h"
+
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
+#else
+SH_DECL_HOOK1_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *);
+#endif
 
 IViperForward *g_pViperOnBanClient;
 
@@ -79,8 +88,6 @@ ViperPlayerManager::OnViperStartup(bool late)
     Py_DECREF(pyClientStringArgs);
     Py_DECREF(pySingleIntArgs);
     
-    playerhelpers->AddClientListener(this);
-    
     PyObject *pyBanClientArgs = PyTuple_Pack(7, &clients__ClientType,
         _PyInt_Type, _PyInt_Type, _PyString_Type, _PyString_Type,
         _PyString_Type, _PyInt_Type);
@@ -89,6 +96,11 @@ ViperPlayerManager::OnViperStartup(bool late)
         pyBanClientArgs, NULL);
     
     Py_DECREF(pyBanClientArgs);
+    
+    SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, serverClients,
+        this, &ViperPlayerManager::OnClientCommand, false);
+    
+    playerhelpers->AddClientListener(this);
 }
 
 void
@@ -108,6 +120,9 @@ ViperPlayerManager::OnViperShutdown()
     
     g_Forwards.ReleaseForward(m_OnServerActivate);
     g_Forwards.ReleaseForward(m_OnMapStart);
+    
+    SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientCommand, serverClients,
+        this, &ViperPlayerManager::OnClientCommand, false);
     
     for (unsigned int i=0; i<sizeof(m_Clients); i++)
         Py_XDECREF(m_Clients[i]);
@@ -129,6 +144,38 @@ ViperPlayerManager::InterceptClientConnect(int client, char *reject, size_t maxr
     
     /* result comes directly from InterceptClientConnectCallback */
     return !result;
+}
+
+void
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+ViperPlayerManager::OnClientCommand(edict_t *pEntity, const CCommand &args)
+{
+#else
+ViperPlayerManager::OnClientCommand(edict_t *pEntity)
+{
+    CCommand args;
+#endif
+    int client = IndexOfEdict(pEntity);
+    SourceMod::IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(client);
+    
+    if (!pPlayer->IsConnected())
+        return;
+    
+    g_Viper.PushCommandStack(&args);
+    
+    int argcount = args.ArgC() - 1;
+    char const *cmd = g_Viper.CurrentCommandName();
+    
+    ViperResultType res = Pl_Continue;
+    
+    /* TODO: OnClientCommand forward */
+    
+    res = g_VCmds.DispatchClientCommand(client, cmd, argcount, res);
+    
+    g_Viper.PopCommandStack();
+    
+    if (res >= Pl_Handled)
+        RETURN_META(MRES_SUPERCEDE);
 }
 
 ViperResultType

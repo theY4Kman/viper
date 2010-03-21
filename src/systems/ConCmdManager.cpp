@@ -376,10 +376,35 @@ CConCmdManager::InternalDispatch(const CCommand &command)
     char const *cmd = command.Arg(0);
 
     ConCmdInfo **temp = m_pCmds.retrieve(cmd);
-    if(temp == NULL)
-        return;
+    ConCmdInfo *pInfo;
+    if (temp != NULL)
+        pInfo = (*temp);
+    
+    if (temp == NULL || pInfo == NULL)
+    {
+        /* Unfortunately, we now have to do a slow lookup because Valve made client commands 
+         * case-insensitive.  We can't even use our sortedness.
+         */
+        if (client == 0 && !engine->IsDedicatedServer())
+            return;
 
-    ConCmdInfo *pInfo = (*temp);
+        SourceHook::List<ConCmdInfo *>::iterator iter;
+
+        pInfo = NULL;
+        iter = m_CmdList.begin();
+        while (iter != m_CmdList.end())
+        {
+            if (strcasecmp((*iter)->pCmd->GetName(), cmd) == 0)
+            {
+                pInfo = (*iter);
+                break;
+            }
+            iter++;
+        }
+
+        if (pInfo == NULL)
+            return;
+    }
     
     ViperResultType result = Pl_Continue;
     SourceHook::List<CmdHook *>::iterator iter;
@@ -542,6 +567,145 @@ CConCmdManager::InternalDispatch(const CCommand &command)
         if (!pInfo->byViper)
             RETURN_META(MRES_SUPERCEDE);
     }
+}
+
+ViperResultType
+CConCmdManager::DispatchClientCommand(int client, const char *cmd, int args, ViperResultType type)
+{
+    ConCmdInfo **temp = m_pCmds.retrieve(cmd);
+    ConCmdInfo *pInfo;
+    if (temp != NULL)
+        pInfo = (*temp);
+    
+    if (temp == NULL || pInfo == NULL)
+    {
+        /* Unfortunately, we now have to do a slow lookup because Valve made client commands 
+         * case-insensitive.  We can't even use our sortedness.
+         */
+        if (client == 0 && !engine->IsDedicatedServer())
+            return type;
+
+        SourceHook::List<ConCmdInfo *>::iterator iter;
+
+        pInfo = NULL;
+        iter = m_CmdList.begin();
+        while (iter != m_CmdList.end())
+        {
+            if (strcasecmp((*iter)->pCmd->GetName(), cmd) == 0)
+            {
+                pInfo = (*iter);
+                break;
+            }
+            iter++;
+        }
+
+        if (pInfo == NULL)
+            return type;
+    }
+    
+    SetCommandClient(client);
+    
+    ViperResultType result = Pl_Continue;
+    SourceHook::List<CmdHook *>::iterator iter;
+    CmdHook *pHook;
+    
+    PyThreadState *_save = PyThreadState_Get();
+    
+    /* Build the sourcemod.console.ConCommand object */
+    PyObject *args_list = PyList_New(args-1);
+    
+    const CCommand *command = g_Viper.PeekCommandStack();
+    int i;
+    for (i=1; i<args; i++)
+        PyList_SetItem(args_list, i-1, PyString_FromString(command->Arg(i)));
+    
+    /* Creates a new ConCommandReply object */
+    console__ConCommandReply *py_cmd = PyObject_New(console__ConCommandReply,
+        &console__ConCommandReplyType);
+    
+    py_cmd->args = (PyListObject*)args_list;
+    py_cmd->argstring = command->ArgS();
+    py_cmd->name = cmd;
+    py_cmd->client = g_Players.GetPythonClient(client);
+    assert(py_cmd->client != NULL);
+    
+    PyObject *argslist = PyTuple_Pack(1, (PyObject*)py_cmd);
+    
+    if (pInfo->conhooks.size())
+    {
+        ViperResultType tempres = result;
+        for (iter = pInfo->conhooks.begin();
+            iter != pInfo->conhooks.end();
+            iter++)
+        {
+            pHook = (*iter);
+
+            if(!PyCallable_Check(pHook->pf))
+                continue;
+
+#if SAWCE != RUKIA
+            /**
+             * TODO: Admin commands
+             */
+            if (client 
+                && pHook->pAdmin
+                && !CheckAccess(client, cmd, pHook->pAdmin))
+            {
+                if (result < Pl_Handled)
+                {
+                    result = Pl_Handled;
+                }
+                continue;
+            }
+
+            /* On a listen server, sometimes the server host's client index can be set as 0.
+             * So index 1 is passed to the command callback to correct this potential problem.
+             * 
+             * TODO: Write in support for this
+             */
+            if (!engine->IsDedicatedServer())
+                client = g_Players.ListenClient();
+#endif
+
+            PyThreadState_Swap(pInfo->pl->GetThreadState());
+            
+            PyObject *pyres = PyObject_CallObject(pHook->pf, argslist);
+
+            if(pyres == NULL)
+            {
+                if (PyErr_Occurred())
+                    PyErr_Print();
+                
+                PyThreadState_Swap(_save);
+                continue;
+            }
+            
+            if(pyres == Py_None || !PyInt_Check(pyres))
+            {
+                Py_DECREF(pyres);
+
+                PyThreadState_Swap(_save);
+                continue;
+            }
+            
+            tempres = (ViperResultType)PyInt_AsLong(pyres);
+            Py_DECREF(pyres);
+
+            if(tempres > result)
+                result = tempres;
+            if(result == Pl_Stop)
+            {
+                PyThreadState_Swap(_save);
+                break;
+            }
+        }
+    }
+    
+    Py_DECREF(argslist);
+    
+    type = result;
+    
+    return type;
 }
 
 CConCmdManager g_VCmds;

@@ -40,6 +40,11 @@ class ViperPlayerManager :
 {
 public:
     ViperPlayerManager();
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+    void OnClientCommand(edict_t *pEntity, const CCommand &args);
+#else
+    void OnClientCommand(edict_t *pEntity);
+#endif
 public: // ViperGlobalClass
     virtual void OnViperStartup(bool late);
     virtual void OnViperShutdown();

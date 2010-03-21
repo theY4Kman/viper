@@ -64,6 +64,7 @@ extern SourceMod::IRootConsole *g_pMenu;
 extern ICvar *icvar;
 extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
 extern IServerPluginHelpers *g_pServerPluginHelpers;
+extern IServerGameClients *serverClients;
 extern IGameEventManager2 *gameevents;
 extern IEngineSound *enginesound;
 extern SourceMod::IGameConfig *g_pGameConf;

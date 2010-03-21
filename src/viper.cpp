@@ -117,6 +117,16 @@ BaseViper::PushCommandStack(const CCommand *cmd)
     m_CommandStack.push(info);
 }
 
+char const *
+BaseViper::CurrentCommandName()
+{
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+    return m_CommandStack.front().args->Arg(0);
+#else
+    return m_CommandStack.front().cmd;
+#endif
+}
+
 const CCommand *
 BaseViper::PeekCommandStack()
 {

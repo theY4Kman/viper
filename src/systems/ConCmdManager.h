@@ -116,6 +116,8 @@ public:
 
     void RemoveConCmd(ConCmdInfo *pInfo, char const *name, bool is_read_safe);
     void RemoveConCmds(SourceHook::List<CmdHook *> &cmdlist, IViperPlugin *pl);
+    
+    ViperResultType DispatchClientCommand(int client, const char *cmd, int args, ViperResultType type);
 
 private:
     /** Adds a new command or finds one that already exists */

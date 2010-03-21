@@ -46,6 +46,7 @@ ICvar *icvar   = NULL;
 ICvar *g_pCVar = NULL;
 #endif
 IServerPluginHelpers *g_pServerPluginHelpers = NULL;
+IServerGameClients *serverClients = NULL;
 IUniformRandomStream *g_pRandom = NULL;
 IGameEventManager2 *gameevents = NULL;
 IEngineSound *enginesound = NULL;
@@ -295,6 +296,8 @@ ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
         INTERFACEVERSION_GAMEEVENTSMANAGER2);
     GET_V_IFACE_CURRENT(GetEngineFactory, enginesound, IEngineSound,
         IENGINESOUND_SERVER_INTERFACE_VERSION);
+    GET_V_IFACE_ANY(GetServerFactory, serverClients, IServerGameClients,
+        INTERFACEVERSION_SERVERGAMECLIENTS);
 
     
 #if SOURCE_ENGINE >= SE_ORANGEBOX

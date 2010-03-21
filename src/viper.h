@@ -44,6 +44,7 @@ public: // IBaseViper
     virtual void PushCommandStack(const CCommand *cmd);
     virtual const CCommand *PeekCommandStack();
     virtual void PopCommandStack();
+    virtual char const *CurrentCommandName();
 
 private:
     /**

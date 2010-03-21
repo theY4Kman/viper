@@ -36,7 +36,15 @@ console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
         return NULL;
     
     if (playerhelpers->GetReplyTo() == SM_REPLY_CONSOLE)
-        g_SMAPI->ConPrintf("%s\n", message);
+    {
+        int client = g_VCmds.GetCommandClient();
+        if (client <= 0)
+            g_SMAPI->ConPrintf("%s\n", message);
+        else
+            /* We subtract 1 because SetCommandClient adds 1. */
+            g_SMAPI->ClientConPrintf(gamehelpers->EdictOfIndex(client - 1),
+                "%s\n", message);
+    }
     else
     {
         /* Max chat msg length == 192, including NULL */
