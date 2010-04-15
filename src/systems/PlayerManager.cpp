@@ -1,6 +1,7 @@
 /**
  * =============================================================================
  * Viper
+ * Copyright (C) 2010 Brandon "monokrome" Stoner
  * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
@@ -29,8 +30,8 @@
  * @brief   Registers and creates forwards for the SM client listener
  */
 
-#include <IPlayerHelpers.h>
 #include "PlayerManager.h"
+#include <IPlayerHelpers.h>
 #include "ConCmdManager.h"
 #include "python/py_clients.h"
 #include "viper.h"
