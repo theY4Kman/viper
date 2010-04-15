@@ -1,6 +1,7 @@
 /**
  * =============================================================================
  * Viper
+ * Copyright (C) 2010 Brandon "monokrome" Stoner
  * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
  * =============================================================================
@@ -19,7 +20,6 @@
  */
 
 #include <Python.h>
-#include "viper_metamod_wrappers.h"
 #include "py_keyvalues.h"
 #include <utlbuffer.h>
 #include <filesystem.h>
