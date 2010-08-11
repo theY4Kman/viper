@@ -2,7 +2,7 @@
  * =============================================================================
  * Viper Base Extension Code
  * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
- * Copyright (C) 2004-2007 AlliedModders LLC.  All rights reserved.
+ * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
  * This program is free software; you can redistribute it and/or modify it under
