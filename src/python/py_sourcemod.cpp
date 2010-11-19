@@ -1,6 +1,7 @@
 /**
  * =============================================================================
  * Viper
+ * Copyright (C) 2010 Brandon "monokrome" Stoner
  * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
@@ -23,9 +24,9 @@
  * @brief Initializes the main Viper module: sourcemod
  */
 
-#include <Python.h>
-#include <structmember.h>
+//#include <Python.h>
 #include "viper_globals.h"
+#include <structmember.h>
 #include "python/init.h"
 #include "viper.h"
 
@@ -255,14 +256,14 @@ initsourcemod(void)
     Py_INCREF(g_pViperException);
     PyModule_AddObject(sourcemod, "ViperError", g_pViperException);
 
-#define PyModule_AddStringMacro(name, string) { \
+#define PyModule_AddStringMacroFromChar(name, string) { \
     PyObject *_name = PyString_FromString((string)); \
     Py_INCREF(_name); \
     PyModule_AddObject(sourcemod, #name, _name); }
     
-    PyModule_AddStringMacro("__author__", SMEXT_CONF_AUTHOR);
-    PyModule_AddStringMacro("__date__", SMEXT_CONF_DATESTRING);
-    PyModule_AddStringMacro("__version__", SMEXT_CONF_VERSION);
+    PyModule_AddStringMacroFromChar("__author__", SMEXT_CONF_AUTHOR);
+    PyModule_AddStringMacroFromChar("__date__", SMEXT_CONF_DATESTRING);
+    PyModule_AddStringMacroFromChar("__version__", SMEXT_CONF_VERSION);
     
     PyModule_AddIntConstant(sourcemod, "Plugin_Continue", Pl_Continue);
     PyModule_AddIntConstant(sourcemod, "Plugin_Stop", Pl_Stop);

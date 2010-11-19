@@ -1,6 +1,7 @@
 /**
  * =============================================================================
  * Viper
+ * Copyright (C) 2010 Brandon "monokrome" Stoner
  * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
@@ -21,9 +22,9 @@
 #ifndef _VIPER_INCLUDE_CONCMDMANAGER_H_
 #define _VIPER_INCLUDE_CONCMDMANAGER_H_
 
+#include "viper_globals.h"
 #include <sm_trie_tpl.h>
 #include <sh_list.h>
-#include "viper_globals.h"
 #include "IViperPluginSys.h"
 #include <compat_wrappers.h>
 

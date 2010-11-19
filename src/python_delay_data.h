@@ -1,6 +1,7 @@
 /**
  * =============================================================================
  * Viper
+ * Copyright (C) 2010 Brandon "monokrome" Stoner
  * Copyright (C) 2008-2010 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
@@ -66,4 +67,23 @@
     extern PyObject *_PyExc_RuntimeWarning;
     extern PyObject *_PyExc_SystemExit;
     extern PyObject *_PyExc_StopIteration;
+#else
+#   define _PyInt_Type &PyInt_Type
+#   define _PyString_Type &PyString_Type
+#   define _PyFloat_Type &PyFloat_Type
+#   define _PyType_Type &PyType_Type
+#   define _PyLong_Type &PyLong_Type
+#   define _PyTuple_Type &PyTuple_Type
+#   define _PyBool_Type &PyBool_Type
+#   define _PyDict_Type &PyDict_Type
+
+#   define _PyExc_TypeError PyExc_TypeError
+#   define _PyExc_IndexError PyExc_IndexError
+#   define _PyExc_IOError PyExc_IOError
+#   define _PyExc_RuntimeError PyExc_RuntimeError
+#   define _PyExc_KeyError PyExc_KeyError
+#   define _PyExc_RuntimeWarning PyExc_RuntimeWarning
+#   define _PyExc_SystemExit PyExc_SystemExit
+#   define _PyExc_StopIteration PyExc_StopIteration
 #endif
+
