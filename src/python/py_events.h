@@ -23,6 +23,7 @@
 
 #include <Python.h>
 #include <igameevents.h>
+#include "EventManager.h"
 
 extern PyTypeObject events__EventType;
 
@@ -30,6 +31,7 @@ struct events__Event {
     PyObject_HEAD
     
     IGameEvent *event;
+    ModEventFieldList *fields;
     bool bDontBroadcast;
 };
 

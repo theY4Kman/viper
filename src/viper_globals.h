@@ -52,6 +52,7 @@
 #include <IRootConsoleMenu.h>
 #include <IGameConfigs.h>
 #include <igameevents.h>
+#include <filesystem.h>
 #include "python/py_datatypes.h"
 #include "python_delay_data.h"
 
@@ -68,6 +69,7 @@ extern IServerGameClients *serverClients;
 extern IGameEventManager2 *gameevents;
 extern IEngineSound *enginesound;
 extern SourceMod::IGameConfig *g_pGameConf;
+extern IFileSystem *baseFs;
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 extern ICvar *g_pCVar;

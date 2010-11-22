@@ -29,17 +29,71 @@ typedef SourceHook::List<ViperEventHook *> ViperEventHookList;
 ViperEventManager::ViperEventManager()
 {
     m_EventHooks = sm_trie_create();
+    m_ModEvents = sm_trie_create();
 }
 
 ViperEventManager::~ViperEventManager()
 {
     sm_trie_destroy(m_EventHooks);
+    sm_trie_destroy(m_ModEvents);
 }
 
 void
 ViperEventManager::OnViperStartup(bool late)
 {
     m_HookParams = PyTuple_Pack(2, &events__EventType, _PyString_Type);
+    
+    /* Parse modevents.res and cache the event value types */
+    char respath[PLATFORM_MAX_PATH];
+    g_pSM->BuildPath(SourceMod::Path_Game, respath, sizeof(respath), "resource/modevents.res");
+    
+    KeyValues *kv = new KeyValues("modevents.res");
+    if (!kv->LoadFromFile(baseFs, respath))
+    {
+        g_pSM->LogError(myself, "Unable to open \"%s\": mod events will not work!\n", respath);
+        return;
+    }
+    
+    // Loop through events
+    for (KeyValues *events=kv->GetFirstSubKey(); events; events=events->GetNextKey())
+    {
+        // TODO: do we need to destroy this?
+        ModEventFieldList *fields = new SourceHook::List<ModEventField *>();
+        
+        // Loop through their fields
+        for (KeyValues *sub=events->GetFirstSubKey(); sub; sub=sub->GetNextKey())
+        {
+            ModEventField *field = new ModEventField();
+            field->name = sm_strdup(sub->GetName());
+            
+            char const *type = sub->GetString();
+            if (strcmp(type, "string") == 0)
+                field->type = ModEventType_String;
+            else if (strcmp(type, "bool") == 0)
+                field->type = ModEventType_Bool;
+            else if (strcmp(type, "byte") == 0)
+                field->type = ModEventType_Byte;
+            else if (strcmp(type, "short") == 0)
+                field->type = ModEventType_Short;
+            else if (strcmp(type, "long") == 0)
+                field->type = ModEventType_Long;
+            else if (strcmp(type, "float") == 0)
+                field->type = ModEventType_Float;
+            else if (strcmp(type, "local") == 0)
+                field->type = ModEventType_Local;
+            else
+            {
+                g_pSM->LogMessage(myself, "Field \"%s\" of event \"%s\" in modevents.res "
+                    "is of unknown type \"%s\"", field->name, events->GetName(), sub->GetString());
+                delete field;
+                continue;
+            }
+            
+            fields->push_back(field);
+        }
+        
+        sm_trie_insert(m_ModEvents, events->GetName(), (void *)fields);
+    }
 }
 
 void
@@ -228,6 +282,30 @@ ViperEventManager::UnhookEvent(char const *name, IViperPluginFunction *pFunc,
     }
     
     return EventHookErr_Okay;
+}
+
+ModEventFieldList *
+ViperEventManager::GetEventFields(char const *name)
+{
+    ModEventFieldList *fields;
+    if (!sm_trie_retrieve(m_ModEvents, name, (void **)&fields))
+        return NULL;
+    
+    return fields;
+}
+
+ModEventType
+ViperEventManager::GetFieldType(ModEventFieldList *fields,
+                                char const *name)
+{
+    for (ModEventFieldList::iterator iter=fields->begin();
+         iter!=fields->end(); iter++)
+    {
+        if (strcmp(name, (*iter)->name) == 0)
+            return (*iter)->type;
+    }
+    
+    return ModEventType_Unknown;
 }
 
 bool

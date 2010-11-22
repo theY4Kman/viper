@@ -1,5 +1,8 @@
 import unittest
+import libtest
+import sourcemod as sm
 from sourcemod import events, Plugin_Continue
+
 
 class EventsModuleTestCase(unittest.TestCase):
   def test_events_functions_exist(self):
@@ -44,8 +47,7 @@ class EventsTestCase(unittest.TestCase):
   def test_event_object_methods_exist(self):
     '''Event object methods exist'''
     evt = events.create('round_start')
-    for name in ['cancel', 'fire', 'has_field']+[p+'et_'+f for p in 'sg'
-                 for f in ['bool','float','int','string']]:
+    for name in ['cancel', 'fire', 'is_empty']:
       self.assertTrue(hasattr(evt, name), 'events.Event.%s does not exist' % name)
     evt.cancel()
   
@@ -63,34 +65,68 @@ class EventsTestCase(unittest.TestCase):
     self.assertRaises(AttributeError, setattr, evt, 'name', 'fuzzbuggler')
     evt.cancel()
   
+  # Holds the game_events for different mods. The field values include both
+  # the value and the type they should be returned as when using evt[field]
+  game_events = {
+    'tf': ('item_found',
+      {
+        'player': (0, int),
+        'quality': (20, int),
+        'item': ('poopsicles', str),
+        'method': (0, int),
+        'propername': (True, bool)
+      }),
+    'cstrike': ('round_start',
+      {
+        'timelimit': (69, int),
+        'fraglimit': (42, int),
+        'objective': ('PANTS ON THE GROUND', str),
+      })
+  }
+  
   def test_event_fire(self):
     '''Event field values exist and match'''
     self.values = False
-    def callback(evt, name):
-      for name in ['timelimit', 'fraglimit', 'objective']:
-        self.assertTrue(evt.has_field(name), 'round_start event should have '
-            'field "%s"' % name)
-      self.values = (evt.get_int('timelimit'), evt.get_int('fraglimit'), 
-          evt.get_string('objective'))
+    
+    event = self.game_events.get(sm.halflife.get_game_folder_name(), None)
+    if event is None:
+      print 'Unable to locate a test for your mod, using cstrike...'
+      event = self.game_events['cstrike']
+    
+    evt_name = event[0]
+    fields = event[1]
+    
+    def callback(evt, evt_name):
+      self.values = True
+      
+      for field in fields.iterkeys():
+        # Check each field exists
+        self.assertTrue(evt.has_field(field), '%s event should have field "%s"'
+            % (evt_name, field))
+        if not evt.has_field(field):
+          continue
+        
+        # Now check that the fields match what was written to them
+        self.assertEqual(evt[field], fields[field][0], 'Field "%s" set and '
+            'field %s retrieved differ (expected "%s", found "%s")' %
+            (field, field, fields[field][0], evt[field]))
+        
+        # Now check that the field types match modevents.res
+        self.assertEqual(type(evt[field]), fields[field][1], 'Field "%s" is of'
+            ' incorrect type "%s" (expected "%s", found "%s")' %
+            (field, str(type(evt[field])), str(fields[field][1]),
+            str(type(evt[field]))))
+      
       return Plugin_Continue
     
-    name = 'round_start'
-    timelimit = 67
-    fraglimit = 42
-    objective = 'PANTS ON THE GROUND'
+    events.hook(evt_name, callback)
     
-    events.hook(name, callback)
-    
-    evt = events.create(name)
-    evt.set_int('timelimit', timelimit)
-    evt.set_int('fraglimit', fraglimit)
-    evt.set_string('objective', objective)
+    evt = events.create(evt_name)
+    for field,value in fields.iteritems():
+      evt[field] = value[0]
     evt.fire()
     
-    self.assertTrue(self.values, 'event callback never called')
-    self.assertEqual(self.values[0], timelimit, 'timelimit set and timelimit '
-        'retrieved differ (expected %d, found %d)' % (timelimit, self.values[0]))
-    self.assertEqual(self.values[1], fraglimit, 'fraglimit set and fraglimit '
-        'retrieved differ (expected %d, found %d)' % (fraglimit, self.values[1]))
-    self.assertEqual(self.values[2], objective, 'objective set and objective '
-        'retrieved differ (expected %s, found %s)' % (objective, self.values[2]))
+    self.assertTrue(self.values, 'event callback never called. This is '
+        'probably due to events being handled on the next gameframe, and '
+        'thus isn\'t an issue.')
+      

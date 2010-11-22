@@ -46,6 +46,38 @@ struct ViperEventHook
     char *name;
 };
 
+enum ModEventType
+{
+    ModEventType_Unknown = -1,
+    ModEventType_String = 0,
+    ModEventType_Bool,
+    ModEventType_Byte,
+    ModEventType_Short,
+    ModEventType_Long,
+    ModEventType_Float,
+    ModEventType_Local 
+};
+
+struct ModEventField
+{
+    ModEventField()
+    {
+        name = NULL;
+        type = ModEventType_String;
+    }
+    
+    ~ModEventField()
+    {
+        if (name != NULL)
+            delete [] name;
+    }
+    
+    char const *name;
+    ModEventType type;
+};
+
+typedef SourceHook::List<ModEventField *> ModEventFieldList;
+
 enum ViperEventHookMode
 {
     EventHookMode_Pre,
@@ -82,6 +114,11 @@ public:
         ViperEventHookMode mode=EventHookMode_Post);
     ViperEventHookError UnhookEvent(char const *name, IViperPluginFunction *pFunc,
         ViperEventHookMode mode=EventHookMode_Post);
+    /** Retrieves a list of fields from the modevents.res trie */
+    ModEventFieldList *GetEventFields(char const *name);
+    /** Retrieves the type of a modevents.res event field from a list of fields */
+    ModEventType GetFieldType(SourceHook::List<ModEventField *> *fields,
+        char const *name);
 
 private: // IGameEventManager2 hooks
 	bool OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast);
@@ -91,6 +128,9 @@ private:
     Trie *m_EventHooks;
     SourceHook::CStack<IGameEvent *> m_EventCopies;
     SourceHook::CStack<ViperEventHook *> m_EventHookStack;
+    
+    /** modevents.res will be parsed and placed in here. */
+    Trie *m_ModEvents;
 };
 
 extern ViperEventManager g_EventManager;

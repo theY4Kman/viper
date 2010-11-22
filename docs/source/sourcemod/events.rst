@@ -46,9 +46,12 @@ Module Contents
 Event Objects
 =============
 
-..  note::
-    
-    There is no way to determine what fields are available in a game event, or the type of a field, which is why this class contains so many inconvenient methods.
+Event fields are accessed using the dictionary syntax::
+
+    evt['field']
+    evt['field'] = 'value'
+
+Viper parses the mod's resource/modevents.res file for every field and type for each game event. That allows Viper to return `evt['field']` as the correct type for that field. So if in modevents.res there is a "round_start" event with a field "fraglimit" of type "short", Viper will return a Python int for `evt['fraglimit']`.
 
 ..  attribute:: Event.dont_broadcast
     
@@ -66,25 +69,11 @@ Event Objects
     
     Fires a created event. If ``dont_broadcast`` is True, the event is broadcast to the clients.
 
-..  method:: Event.get_bool(field)
-             Event.get_float(field)
-             Event.get_int(field)
-             Event.get_string(field)
+..  method:: Event.is_empty(field)
     
-    Retrieves a value from a game event.
+    Returns whether or not an event field has an empty value.
     
-    ..  note::
+    .. note::
         
-        These will *ALWAYS* return a value, even if the field does not exist. Use :meth:`has_field <sourcemod.events.Event.has_field>` to make sure the field exists.
-
-..  method:: Event.has_field(field)
-    
-    Returns whether or not a field exists on a game event.
-
-..  method:: Event.set_bool(field, value)
-             Event.set_float(field, value)
-             Event.set_int(field, value)
-             Event.set_string(field, value)
-    
-    Sets a value in a game event.
+        This only tells if an event field has a value. This means that if you create an event, none of its fields will have values, and this function will return True for all of them.
 

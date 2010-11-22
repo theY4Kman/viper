@@ -308,6 +308,7 @@ keyvalues__KeyValues__copy(keyvalues__KeyValues *self)
     return GetPyObjectFromKeyValues(self->kv->MakeCopy());
 }
 
+// Declaration here because definition is below keyvalues__KeyValues__get
 static PyObject *
 keyvalues__KeyValues__subscript__(keyvalues__KeyValues *self, PyObject *key);
 

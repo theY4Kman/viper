@@ -50,6 +50,7 @@ IServerGameClients *serverClients = NULL;
 IUniformRandomStream *g_pRandom = NULL;
 IGameEventManager2 *gameevents = NULL;
 IEngineSound *enginesound = NULL;
+IFileSystem *baseFs = NULL;
 
 SourceMod::IForward *g_pSMOnBanIdentity = NULL;
 SourceMod::IForward *g_pSMOnBanClient = NULL;
@@ -296,6 +297,8 @@ ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
         INTERFACEVERSION_GAMEEVENTSMANAGER2);
     GET_V_IFACE_CURRENT(GetEngineFactory, enginesound, IEngineSound,
         IENGINESOUND_SERVER_INTERFACE_VERSION);
+    GET_V_IFACE_CURRENT(GetEngineFactory, baseFs, IFileSystem,
+        FILESYSTEM_INTERFACE_VERSION);
     GET_V_IFACE_ANY(GetServerFactory, serverClients, IServerGameClients,
         INTERFACEVERSION_SERVERGAMECLIENTS);
 

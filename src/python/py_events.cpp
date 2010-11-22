@@ -67,8 +67,9 @@ events__Event__fire(events__Event *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+/* This returns true only when the field has a value. */
 static PyObject *
-events__Event__get_bool(events__Event *self, PyObject *args)
+events__Event__is_empty(events__Event *self, PyObject *args)
 {
     if (self->event == NULL)
     {
@@ -80,151 +81,7 @@ events__Event__get_bool(events__Event *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &field))
         return NULL;
     
-    return Py_BuildValue("b", self->event->GetBool(field));
-}
-
-static PyObject *
-events__Event__get_float(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    if (!PyArg_ParseTuple(args, "s", &field))
-        return NULL;
-    
-    return Py_BuildValue("f", self->event->GetFloat(field));
-}
-
-static PyObject *
-events__Event__get_int(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    if (!PyArg_ParseTuple(args, "s", &field))
-        return NULL;
-    
-    return Py_BuildValue("i", self->event->GetInt(field));
-}
-
-static PyObject *
-events__Event__get_string(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    if (!PyArg_ParseTuple(args, "s", &field))
-        return NULL;
-    
-    return PyString_FromString(self->event->GetString(field));
-}
-
-static PyObject *
-events__Event__has_field(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    if (!PyArg_ParseTuple(args, "s", &field))
-        return NULL;
-    
-    return Py_BuildValue("b", !self->event->IsEmpty(field));
-}
-
-static PyObject *
-events__Event__set_bool(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    bool value;
-    
-    if (!PyArg_ParseTuple(args, "sb", &field, &value))
-        return NULL;
-    
-    self->event->SetBool(field, value);
-    
-    Py_RETURN_NONE;
-}
-
-static PyObject *
-events__Event__set_float(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    float value;
-    
-    if (!PyArg_ParseTuple(args, "sf", &field, &value))
-        return NULL;
-    
-    self->event->SetFloat(field, value);
-    
-    Py_RETURN_NONE;
-}
-
-static PyObject *
-events__Event__set_int(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    int value;
-    
-    if (!PyArg_ParseTuple(args, "si", &field, &value))
-        return NULL;
-    
-    self->event->SetInt(field, value);
-    
-    Py_RETURN_NONE;
-}
-
-static PyObject *
-events__Event__set_string(events__Event *self, PyObject *args)
-{
-    if (self->event == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
-    }
-    
-    char const *field;
-    char const *value;
-    
-    if (!PyArg_ParseTuple(args, "ss", &field, &value))
-        return NULL;
-    
-    self->event->SetString(field, value);
-    
-    Py_RETURN_NONE;
+    return Py_BuildValue("b", self->event->IsEmpty(field));
 }
 
 static PyObject *
@@ -248,6 +105,159 @@ events__Event__nameget(events__Event *self)
     return PyString_FromString(self->event->GetName());
 }
 
+static PyObject *
+events__Event__subscript__(events__Event *self, PyObject *key)
+{
+    if (!PyString_Check(key))
+        return PyErr_Format(_PyExc_TypeError, "expected key of type string, not "
+            "%s.", key->ob_type->tp_name);
+    
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
+    char const *keystr = PyString_AS_STRING(key);
+    if (self->event->IsEmpty(keystr))
+    {
+        PyErr_Format(g_pViperException, "field \"%s\" does not exist in "
+            "game event \"%s\".", keystr, self->event->GetName());
+        return NULL;
+    }
+    
+    /* I do not yet know why, but the first time execution reaches
+     * this function, self->fields is set to 0x1. So at the cost of
+     * a trie lookup every call, we'll fix that.
+     */
+    self->fields = g_EventManager.GetEventFields(self->event->GetName());
+    if (self->fields == NULL)
+    {
+        PyErr_Format(g_pViperException, "UH-OH! Could not retrieve field "
+            " type list for game event \"%s\".", self->event->GetName());
+        return NULL;
+    }
+    
+    switch (g_EventManager.GetFieldType(self->fields, keystr))
+    {
+    case ModEventType_Local:
+    case ModEventType_String:
+        return PyString_FromString(self->event->GetString(keystr));
+    
+    case ModEventType_Bool:
+        return PyBool_FromLong(self->event->GetBool(keystr));
+    
+    case ModEventType_Byte:
+    case ModEventType_Short:
+    case ModEventType_Long:
+        return PyInt_FromLong(self->event->GetInt(keystr));
+    
+    case ModEventType_Float:
+        return PyFloat_FromDouble(self->event->GetFloat(keystr));
+    
+    default:
+        Py_RETURN_NONE;
+    };
+}
+
+static int
+events__Event__ass_subscript__(events__Event *self, PyObject *key,
+                               PyObject *value)
+{
+    if (!PyString_Check(key))
+    {
+        PyErr_Format(_PyExc_TypeError, "expected key of type string, not %s.",
+            key->ob_type->tp_name);
+        return -1;
+    }
+    
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
+    //if (self->fields == NULL)
+    //{
+        self->fields = g_EventManager.GetEventFields(self->event->GetName());
+        if (self->fields == NULL)
+        {
+            PyErr_Format(g_pViperException, "UH-OH! Could not retrieve field "
+                " type list for game event \"%s\".", self->event->GetName());
+            return -1;
+        }
+    //}
+    
+    char const *keystr = PyString_AS_STRING(key);
+    ModEventType type = g_EventManager.GetFieldType(self->fields, keystr);
+    
+    switch (type)
+    {
+    case ModEventType_Local:
+    case ModEventType_String:
+        if (!PyString_Check(value))
+        {
+            PyErr_Format(_PyExc_TypeError, "expected field \"%s\" value of "
+                "type string, not %s.", keystr, value->ob_type->tp_name);
+            return -1;
+        }
+        
+        self->event->SetString(keystr, PyString_AS_STRING(value));
+        return 0;
+    
+    case ModEventType_Bool:
+        if (!PyBool_Check(value))
+        {
+            PyErr_Format(_PyExc_TypeError, "expected field \"%s\" value of "
+                "type bool, not %s.", keystr, value->ob_type->tp_name);
+            return -1;
+        }
+        
+        self->event->SetBool(keystr, value == Py_True);
+        return 0;
+    
+    case ModEventType_Byte:
+    case ModEventType_Short:
+    case ModEventType_Long:
+        if (!PyInt_Check(value))
+        {
+            PyErr_Format(_PyExc_TypeError, "expected field \"%s\" value of "
+                "type int, not %s.", keystr, value->ob_type->tp_name);
+            return -1;
+        }
+        
+        self->event->SetInt(keystr, PyInt_AS_LONG(value));
+        return 0;
+    
+    case ModEventType_Float:
+        if (!PyFloat_Check(value))
+        {
+            PyErr_Format(_PyExc_TypeError, "expected field \"%s\" value of "
+                "type float, not %s.", keystr, value->ob_type->tp_name);
+            return -1;
+        }
+        
+        self->event->SetFloat(keystr, PyFloat_AS_DOUBLE(value));
+        return 0;
+    
+    default:
+        // Execution should _never_ get here
+        PyErr_Format(_PyExc_TypeError, "unknown field type %d encountered "
+            "on event \"%s\" field \"%s\"", type, self->event->GetName(),
+            keystr);
+        return -1;
+    }
+    
+    // sawce
+    return 0;
+}
+
+static PyMappingMethods events__EventMappingMethods = {
+    (lenfunc)NULL,                                   /*mp_length*/
+    (binaryfunc)events__Event__subscript__,          /*mp_subscript*/
+    (objobjargproc)events__Event__ass_subscript__    /*mp_ass_subscript*/
+};
+
 static PyMemberDef events__Event__members[] = {
     {"dont_broadcast", T_UBYTE, offsetof(events__Event, bDontBroadcast), READONLY,
         "Whether or not this event will be broadcast to players."},
@@ -270,77 +280,13 @@ static PyMethodDef events__Event__methods[] = {
         "@type  dont_broadcast: bool\n"
         "@param dont_broadcast: Determines whether or not to broadcast this event to\n"
         "   the clients."},
-    {"get_bool", (PyCFunction)events__Event__get_bool, METH_VARARGS,
-        "get_bool(field) -> bool\n\n"
-        "Retrieves a boolean value from a game event.\n\n"
+    {"is_empty", (PyCFunction)events__Event__is_empty, METH_VARARGS,
+        "is_empty(field) -> bool\n\n"
+        "Returns whether or not an event field has an empty value.\n\n"
         "@type  field: str\n"
-        "@param field: The field to access\n"
+        "@param field: The field to check\n"
         "@rtype: bool\n"
-        "@return: The value of a boolean field.\n"
-        "@note: This will ALWAYS retrieve a value, even if the field does not exist.\n"
-        "   Use has_field to make sure the field exists."},
-    {"get_float", (PyCFunction)events__Event__get_float, METH_VARARGS,
-        "get_float(field) -> float\n\n"
-        "Retrieves a float value from a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to access\n"
-        "@rtype: float\n"
-        "@return: The value of a float field.\n"
-        "@note: This will ALWAYS retrieve a value, even if the field does not exist.\n"
-        "   Use has_field to make sure the field exists."},
-    {"get_int", (PyCFunction)events__Event__get_int, METH_VARARGS,
-        "get_int(field) -> int\n\n"
-        "Retrieves an integer value from a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to access\n"
-        "@rtype: int\n"
-        "@return: The value of an integer field.\n"
-        "@note: This will ALWAYS retrieve a value, even if the field does not exist.\n"
-        "   Use has_field to make sure the field exists."},
-    {"get_string", (PyCFunction)events__Event__get_string, METH_VARARGS,
-        "get_string(field) -> str\n\n"
-        "Retrieves a string value from a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to access\n"
-        "@rtype: str\n"
-        "@return: The value of a string field.\n"
-        "@note: This will ALWAYS retrieve a value, even if the field does not exist.\n"
-        "   Use has_field to make sure the field exists."},
-    {"has_field", (PyCFunction)events__Event__has_field, METH_VARARGS,
-        "has_field(field) -> bool\n\n"
-        "Returns whether or not a field exists on an event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to check for existence\n"
-        "@rtype: bool\n"
-        "@return: True if the field exists, False if not."},
-    {"set_bool", (PyCFunction)events__Event__set_bool, METH_VARARGS,
-        "set_bool(field, value)\n\n"
-        "Sets a boolean value in a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to set\n"
-        "@type  value: bool\n"
-        "@param value: The boolean value to set."},
-    {"set_float", (PyCFunction)events__Event__set_float, METH_VARARGS,
-        "set_float(field, value)\n\n"
-        "Sets a float value in a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to set\n"
-        "@type  value: float\n"
-        "@param value: The float value to set."},
-    {"set_int", (PyCFunction)events__Event__set_int, METH_VARARGS,
-        "set_int(field, value)\n\n"
-        "Sets an integer value in a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to set\n"
-        "@type  value: int\n"
-        "@param value: The int value to set."},
-    {"set_string", (PyCFunction)events__Event__set_string, METH_VARARGS,
-        "set_string(field, value)\n\n"
-        "Sets a string value in a game event.\n\n"
-        "@type  field: str\n"
-        "@param field: The field to set\n"
-        "@type  value: str\n"
-        "@param value: The string value to set."},
+        "@return: True if the field has a value, False if not."},
     {NULL, NULL, 0, NULL},
 };
 
@@ -358,7 +304,7 @@ PyTypeObject events__EventType = {
     0,                          /*tp_repr*/
     0,                          /*tp_as_number*/
     0,                          /*tp_as_sequence*/
-    0,                          /*tp_as_mapping*/
+    &events__EventMappingMethods,/*tp_as_mapping*/
     0,                          /*tp_hash */
     0,                          /*tp_call*/
     (reprfunc)events__Event__str__,/*tp_str*/
@@ -399,6 +345,7 @@ events__create(PyObject *self, PyObject *args)
     
     events__Event *pyEvent = PyObject_New(events__Event, &events__EventType);
     pyEvent->event = pEvent;
+    pyEvent->fields = NULL;
     
     return (PyObject*)pyEvent;
 }
