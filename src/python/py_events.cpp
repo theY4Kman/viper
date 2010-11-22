@@ -85,6 +85,47 @@ events__Event__is_empty(events__Event *self, PyObject *args)
 }
 
 static PyObject *
+events__Event__get_fields(events__Event *self, PyObject *args)
+{
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
+    if (self->py_fields != NULL)
+        return PyDict_Copy(self->py_fields);
+    
+    if (self->fields == NULL)
+    {
+        self->fields = g_EventManager.GetEventFields(self->event->GetName());
+        if (self->fields == NULL)
+        {
+            PyErr_Format(g_pViperException, "UH-OH! Could not retrieve field "
+                " type list for game event \"%s\".", self->event->GetName());
+            return NULL;
+        }
+    }
+    
+    self->py_fields = PyDict_New();
+    
+    for (ModEventFieldList::iterator iter=self->fields->begin();
+         iter!=self->fields->end(); iter++)
+    {
+        ModEventField *field = (*iter);
+        
+        if (field->type == ModEventType_Unknown)
+            PyDict_SetItemString(self->py_fields, field->name,
+                PyString_FromString("unknown"));
+        else
+            PyDict_SetItemString(self->py_fields, field->name,
+                PyString_FromString(ModEventTypeStrings[field->type]));
+    }
+    
+    return PyDict_Copy(self->py_fields);
+}
+
+static PyObject *
 events__Event__str__(events__Event *self)
 {
     if (self->event == NULL)
@@ -126,10 +167,6 @@ events__Event__subscript__(events__Event *self, PyObject *key)
         return NULL;
     }
     
-    /* I do not yet know why, but the first time execution reaches
-     * this function, self->fields is set to 0x1. So at the cost of
-     * a trie lookup every call, we'll fix that.
-     */
     self->fields = g_EventManager.GetEventFields(self->event->GetName());
     if (self->fields == NULL)
     {
@@ -160,6 +197,26 @@ events__Event__subscript__(events__Event *self, PyObject *key)
     };
 }
 
+static Py_ssize_t
+events__Event__len__(events__Event *self)
+{    
+    if (self->event == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid game event.");
+        return NULL;
+    }
+    
+    self->fields = g_EventManager.GetEventFields(self->event->GetName());
+    if (self->fields == NULL)
+    {
+        PyErr_Format(g_pViperException, "UH-OH! Could not retrieve field "
+            " type list for game event \"%s\".", self->event->GetName());
+        return NULL;
+    }
+    
+    return self->fields->size();
+}
+
 static int
 events__Event__ass_subscript__(events__Event *self, PyObject *key,
                                PyObject *value)
@@ -177,8 +234,8 @@ events__Event__ass_subscript__(events__Event *self, PyObject *key,
         return NULL;
     }
     
-    //if (self->fields == NULL)
-    //{
+    if (self->fields == NULL)
+    {
         self->fields = g_EventManager.GetEventFields(self->event->GetName());
         if (self->fields == NULL)
         {
@@ -186,7 +243,7 @@ events__Event__ass_subscript__(events__Event *self, PyObject *key,
                 " type list for game event \"%s\".", self->event->GetName());
             return -1;
         }
-    //}
+    }
     
     char const *keystr = PyString_AS_STRING(key);
     ModEventType type = g_EventManager.GetFieldType(self->fields, keystr);
@@ -253,7 +310,7 @@ events__Event__ass_subscript__(events__Event *self, PyObject *key,
 }
 
 static PyMappingMethods events__EventMappingMethods = {
-    (lenfunc)NULL,                                   /*mp_length*/
+    (lenfunc)events__Event__len__,                   /*mp_length*/
     (binaryfunc)events__Event__subscript__,          /*mp_subscript*/
     (objobjargproc)events__Event__ass_subscript__    /*mp_ass_subscript*/
 };
@@ -280,6 +337,10 @@ static PyMethodDef events__Event__methods[] = {
         "@type  dont_broadcast: bool\n"
         "@param dont_broadcast: Determines whether or not to broadcast this event to\n"
         "   the clients."},
+    {"get_fields", (PyCFunction)events__Event__get_fields, METH_NOARGS,
+        "get_fields() -> dict\n\n"
+        "Returns a dict with the game event's fields as keys and types as values.\n"
+        "The values will be strings as seen in modevents.res."},
     {"is_empty", (PyCFunction)events__Event__is_empty, METH_VARARGS,
         "is_empty(field) -> bool\n\n"
         "Returns whether or not an event field has an empty value.\n\n"
@@ -346,6 +407,7 @@ events__create(PyObject *self, PyObject *args)
     events__Event *pyEvent = PyObject_New(events__Event, &events__EventType);
     pyEvent->event = pEvent;
     pyEvent->fields = NULL;
+    pyEvent->py_fields = NULL;
     
     return (PyObject*)pyEvent;
 }

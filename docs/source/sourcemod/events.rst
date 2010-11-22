@@ -51,7 +51,19 @@ Event fields are accessed using the dictionary syntax::
     evt['field']
     evt['field'] = 'value'
 
-Viper parses the mod's resource/modevents.res file for every field and type for each game event. That allows Viper to return `evt['field']` as the correct type for that field. So if in modevents.res there is a "round_start" event with a field "fraglimit" of type "short", Viper will return a Python int for `evt['fraglimit']`.
+Viper parses the mod's resource/modevents.res file for every field and type for each game event. That allows Viper to return ``evt['field']`` as the correct type for that field. So if in modevents.res there is a "round_start" event with a field "fraglimit" of type "short", Viper will return a Python int for ``evt['fraglimit']``.
+
+Since Viper knows the fields each game event has, it provides length::
+    
+    len(evt) # The number of fields `evt` has
+
+To iterate over the fields of an event, use the :ref:`get_fields <sourcemod.events.Event.get_fields>` function to retrieve the fields. Then iterate over the dictionary however you please::
+
+    fields = evt.get_fields()
+    for field in fields.iterkeys():
+        print field
+    for field,type in fields.iteritems():
+        print "%s is of type %s" % (field, type)
 
 ..  attribute:: Event.dont_broadcast
     
@@ -68,6 +80,13 @@ Viper parses the mod's resource/modevents.res file for every field and type for 
 ..  method:: Event.fire([dont_broadcast=False])
     
     Fires a created event. If ``dont_broadcast`` is True, the event is broadcast to the clients.
+
+..  method:: Event.get_fields()
+    
+    Retrieves the fields of a game event as seen in modevents.res. They are returned as a dictionary, with the keys being the field names and the values being their type. For example::
+
+    >>> evt.get_fields()
+    {'player': 'byte', 'quality': 'byte', 'item': 'string', 'method': 'byte', 'propername': 'bool'}
 
 ..  method:: Event.is_empty(field)
     

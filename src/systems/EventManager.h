@@ -58,6 +58,17 @@ enum ModEventType
     ModEventType_Local 
 };
 
+static char const *ModEventTypeStrings[] =
+{
+    "string",
+    "bool",
+    "byte",
+    "short",
+    "long",
+    "float",
+    "local"
+};
+
 struct ModEventField
 {
     ModEventField()

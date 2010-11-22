@@ -66,7 +66,8 @@ class EventsTestCase(unittest.TestCase):
     evt.cancel()
   
   # Holds the game_events for different mods. The field values include both
-  # the value and the type they should be returned as when using evt[field]
+  # the value and the type they should be returned as when using evt[field].
+  # None of the field values should be blank.
   game_events = {
     'tf': ('item_found',
       {
@@ -84,13 +85,50 @@ class EventsTestCase(unittest.TestCase):
       })
   }
   
+  def test_event_len(self):
+    '''Event len(evt) produces correct result.'''
+    event = self.game_events.get(sm.halflife.get_game_folder_name(), None)
+    if event is None:
+      print 'Unable to locate a game event for your mod, using cstrike...'
+      event = self.game_events['cstrike']
+    
+    evt_name = event[0]
+    fields = event[1]
+    
+    evt = events.create(evt_name)
+    for field,value in fields.iteritems():
+      evt[field] = value[0]
+    
+    self.assertEqual(len(evt), len(fields), 'modevents.res fields length (%d)'
+        ' and passed fields length (%d) do not match.' % (len(evt), len(fields)))
+    
+    evt.cancel()
+  
+  def test_event_get_fields(self):
+    '''Event get_fields() returns all event fields.'''
+    event = self.game_events.get(sm.halflife.get_game_folder_name(), None)
+    if event is None:
+      print 'Unable to locate a game event for your mod, using cstrike...'
+      event = self.game_events['cstrike']
+    
+    evt_name = event[0]
+    fields = event[1]
+    
+    evt = events.create(evt_name)
+    
+    # The set() is important -- we don't care about ordering.
+    self.assertEqual(set(evt.get_fields().keys()), set(fields.keys()),
+        'get_fields() returns a wrong or incomplete set of fields.')
+    
+    evt.cancel()
+  
   def test_event_fire(self):
     '''Event field values exist and match'''
     self.values = False
     
     event = self.game_events.get(sm.halflife.get_game_folder_name(), None)
     if event is None:
-      print 'Unable to locate a test for your mod, using cstrike...'
+      print 'Unable to locate a game event for your mod, using cstrike...'
       event = self.game_events['cstrike']
     
     evt_name = event[0]
@@ -100,10 +138,10 @@ class EventsTestCase(unittest.TestCase):
       self.values = True
       
       for field in fields.iterkeys():
-        # Check each field exists
-        self.assertTrue(evt.has_field(field), '%s event should have field "%s"'
-            % (evt_name, field))
-        if not evt.has_field(field):
+        # Check each field has a value
+        self.assertTrue(not evt.is_empty(field), '"%s" event field "%s" has a'
+            ' blank value.' % (evt_name, field))
+        if evt.is_empty(field):
           continue
         
         # Now check that the fields match what was written to them

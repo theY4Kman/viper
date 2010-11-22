@@ -1,0 +1,1 @@
+This is the Viper testing suite. It is a Viper plug-in, so this folder should be placed under sourcemod/plugins. To test the entities system, the plug-in uses the world entity, which isn't created until after map start. So, these tests should be run manually after map start.

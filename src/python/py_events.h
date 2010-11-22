@@ -31,8 +31,11 @@ struct events__Event {
     PyObject_HEAD
     
     IGameEvent *event;
-    ModEventFieldList *fields;
     bool bDontBroadcast;
+    
+    ModEventFieldList *fields;
+    /** A dict containing  */
+    PyObject *py_fields;
 };
 
 #endif // _INCLUDE_PYTHON_EVENTS_H_

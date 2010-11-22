@@ -336,6 +336,8 @@ ViperEventManager::OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast)
             events__Event *pyEvent = PyObject_New(events__Event,
                 &events__EventType);
             pyEvent->event = pEvent;
+            pyEvent->fields = NULL;
+            pyEvent->py_fields = NULL;
             pyEvent->bDontBroadcast = bDontBroadcast;
             
             PyObject *args = PyTuple_Pack(2, pyEvent, PyString_FromString(name));
