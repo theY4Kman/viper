@@ -155,6 +155,10 @@ Client Objects
 Attributes
 ----------
 
+..  data:: Client.index
+    
+    A number containing the index of the client. This is what SourcePawn uses for handling clients.
+
 ..  data:: Client.abs_angles
     
     The client's angles vector.
