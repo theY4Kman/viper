@@ -253,6 +253,9 @@ ViperPlayerManager::OnClientAuthorized(int client, char const *authstring)
 bool
 ViperPlayerManager::OnClientPreAdminCheck(int client)
 {
+    if (m_OnClientPreAdminCheck->GetFunctionCount() == 0)
+        return true;
+    
     int result;
     PyObject *args = PyTuple_Pack(1, GetPythonClient(client));
     m_OnClientPreAdminCheck->Execute(&result, args);
