@@ -218,7 +218,7 @@ CConCmdManager::AddCommand(IViperPlugin *pPlugin, PyFunction *callback, CmdType 
     pHook->pf = callback;
     
     if (IS_STR_FILLED(description))
-        pHook->helptext = description;
+        pHook->helptext = sm_strdup(description);
     else
         pHook->helptext = NULL;
     
