@@ -427,6 +427,7 @@ CConCmdManager::InternalDispatch(const CCommand &command)
     py_cmd->args = (PyListObject*)args_list;
     py_cmd->argstring = command.ArgS();
     py_cmd->name = cmd;
+    py_cmd->reply_to = playerhelpers->GetReplyTo();
     py_cmd->client = g_Players.GetPythonClient(client);
     assert(py_cmd->client != NULL);
     

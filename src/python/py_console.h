@@ -35,6 +35,8 @@ typedef struct {
     char const *argstring;
     /* Name of the ConCommand */
     char const *name;
+    /* How the command was executed: 0 console, 1 chat */
+    unsigned int reply_to;
     /* The client whom called the ConCommand */
     PyObject *client;
 } console__ConCommandReply;

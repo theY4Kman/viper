@@ -723,7 +723,11 @@ void
 CPluginManager::OnRootConsoleCommand(char const *cmdname,
     const CCommand &command)
 {
-#   define CheckLoadLock() if (m_LoadingLocked) g_pMenu->ConsolePrint("[Viper] There is a loading lock in effect. No plug-ins can be loaded.")
+#   define CheckLoadLock() if (m_LoadingLocked) \
+    {\
+        g_pMenu->ConsolePrint("[Viper] There is a loading lock in effect. No plug-ins can be loaded."); \
+        return; \
+    }
 
     char const *cmd = command.Arg(3);
     int argc = command.ArgC();

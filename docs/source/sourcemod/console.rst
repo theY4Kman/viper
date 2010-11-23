@@ -8,6 +8,18 @@
 Module Contents
 ===============
 
+..  _sm-reply-constants:
+
+..  list-table::
+    :widths: 10 90
+    
+    * - **Name**
+      - **Description**
+    * - ..  data:: SM_REPLY_CONSOLE
+      - The command was executed in the console.
+    * - ..  data:: SM_REPLY_CHAT
+      - The command was executed in chat (by "!cmd" or "/cmd" -- depending on your server's chat trigger configuration)
+
 ..  function:: create_convar(name, value[, description[, flags[, min[, max]]]])
     
     Creates a new console variable.
@@ -217,6 +229,10 @@ ConCommandReply Objects
 ..  attribute:: ConCommandReply.client
     
     The :ref:`Client <client-object>` whom executed the ConCommand.
+
+..  attribute:: ConCommandReply.reply_to
+    
+    How the command was executed. This is either :ref:`SM_REPLY_CHAT <sm-reply-constants>` or :ref:`SM_REPLY_CONSOLE <sm-reply-constants>`
 
 ..  method:: ConCommandReply.reply(message)
     

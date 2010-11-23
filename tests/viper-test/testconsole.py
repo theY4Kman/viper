@@ -13,6 +13,11 @@ class ConsoleModuleTestCase(unittest.TestCase):
     for name in ['ConVar', 'ConCommandReply']:
       self.assertTrue(hasattr(console, name))
   
+  def test_console_reply_to_exist(self):
+    '''sourcemod.console SM_REPLY constants exist'''
+    for name in ['SM_REPLY_CHAT', 'SM_REPLY_CONSOLE']:
+      self.assertTrue(hasattr(console, name))
+  
   def test_console_fcvar_flags_exist(self):
     '''sourcemod.console FCVAR flags exist'''
     for name in ['NONE', 'UNREGISTERED', 'LAUNCHER', 'GAMEDLL', 'CLIENTDLL',
@@ -161,6 +166,10 @@ class ConCommandTestCase(unittest.TestCase):
       self.assertEqual(self.callback_called[2], client, 'ConCommand callback'
           ' passed wrong argstring (expected "%s", found "%s")' % (str(client),
           str(self.callback_called[2])))
+      
+      self.assertEqual(cmd.reply_to, console.SM_REPLY_CONSOLE, 'ConCommand'
+          ' callback has incorrect reply_to value (expected %d, found %d)'
+          % (console.SM_REPLY_CONSOLE, cmd.reply_to))
       return Plugin_Handled
     
     name = gen_rand_cvar_name()

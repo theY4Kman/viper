@@ -64,6 +64,7 @@ console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+
 static PyMethodDef console__ConCommandReply__methods[] = {
     {"reply", (PyCFunction)console__ConCommandReply__reply, METH_VARARGS,
         "reply(message)\n\n"
@@ -83,6 +84,9 @@ static PyMemberDef console__ConCommandReply__members[] = {
         "The name of the ConCommand executed."},
     {"argstring", T_STRING, offsetof(console__ConCommandReply, argstring), READONLY,
         "The full argument string sent to the server. This includes any quotes sent."},
+    {"reply_to", T_UINT, offsetof(console__ConCommandReply, reply_to), READONLY,
+        "How the console command was run: chat or console. Will be an SM_REPLY "
+        "constant."},
     {NULL},
 };
 
@@ -710,6 +714,9 @@ initconsole(void)
     PyModule_AddIntMacro(console, FCVAR_DONTRECORD);
     PyModule_AddIntMacro(console, FCVAR_NOT_CONNECTED);
     PyModule_AddIntMacro(console, FCVAR_ARCHIVE_XBOX);
+    
+    PyModule_AddIntMacro(console, SM_REPLY_CHAT);
+    PyModule_AddIntMacro(console, SM_REPLY_CONSOLE);
     
     /* Manually define the next ones, as they are not defined in OB */
     PyModule_AddIntConstant(console, "FCVAR_LAUNCHER",          (1<<1));

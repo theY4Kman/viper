@@ -61,7 +61,7 @@ To iterate over the fields of an event, use the :ref:`get_fields <sourcemod.even
 
     fields = evt.get_fields()
     for field in fields.iterkeys():
-        print field
+        print "%s: %s" % (field, evt[field])
     for field,type in fields.iteritems():
         print "%s is of type %s" % (field, type)
 
