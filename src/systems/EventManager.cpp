@@ -21,6 +21,7 @@
 #include "EventManager.h"
 #include "ForwardSys.h"
 #include "python/py_events.h"
+#include "viper_metamod_wrappers.h"
 
 SH_DECL_HOOK2(IGameEventManager2, FireEvent, SH_NOATTRIB, 0, bool, IGameEvent *,
     bool);

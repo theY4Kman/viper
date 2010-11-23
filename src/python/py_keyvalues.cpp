@@ -1004,8 +1004,7 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
     {
         KeyValues *kv = new KeyValues("");
         kv->UsesEscapeSequences(use_escape_sequences);
-        if (!kv->LoadFromFile((IBaseFileSystem *)g_SMAPI->GetFileSystemFactory()
-            (BASEFILESYSTEM_INTERFACE_VERSION, NULL), PyString_AS_STRING(file), NULL))
+        if (!kv->LoadFromFile(baseFs, PyString_AS_STRING(file), NULL))
         {
             kv->deleteThis();
             return PyErr_Format(g_pViperException, "error loading from \"%s\"", 
