@@ -63,7 +63,7 @@ static PyMethodDef sourcemod__methods[] = {
         "@rtype: string\n"
         "@return: Returns the path to the game directory"},
     {"get_sourcemod_path", (PyCFunction)sourcemod__get_sourcemod_path, METH_VARARGS|METH_KEYWORDS,
-        "get_sourcemod_path([path=""]) -> str\n\n"
+        "get_sourcemod_path([path=\"\"]) -> str\n\n"
         "Returns the full path to SourceMod.\n\n"
         "@type  path: str\n"
         "@param path: A path to append to the SourceMod path\n"

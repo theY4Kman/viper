@@ -1139,7 +1139,7 @@ static PyMethodDef clients__Client__methods[] = {
         "@rtype: bool\n"
         "@return: True if the client is timing out, False otherwise."},
     {"kick", (PyCFunction)clients__Client__kick, METH_VARARGS|METH_KEYWORDS,
-        "kick([msg=""[, delay=True]])\n\n"
+        "kick([msg=\"\"[, delay=True]])\n\n"
         "Disconnects a player from a server.\n\n"
         "@type  msg: str\n"
         "@param msg: A message to show the user as a disconnect reason. Note that a\n"
