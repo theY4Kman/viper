@@ -279,8 +279,22 @@ ViperPlayerManager::GetPythonClient(int client)
     
     if (m_Clients[client] != NULL)
     {
-        Py_INCREF(m_Clients[client]);
-        return m_Clients[client];
+        // Check if somehow the cached client is in the wrong place
+        if (((clients__Client*)m_Clients[client])->index != client)
+        {
+            g_pSM->LogMessage(myself, "[DEBUG] Client object %d cached "
+                "incorrectly in slot %d. Fixing...",
+                ((clients__Client*)m_Clients[client])->index, client);
+            
+            // If so, we'll DECREF it and replace it with a new object
+            Py_DECREF(m_Clients[client]);
+            m_Clients[client] = NULL;
+        }
+        else
+        {
+            Py_INCREF(m_Clients[client]);
+            return m_Clients[client];
+        }
     }
     
     clients__Client *newclient = PyObject_New(clients__Client,
