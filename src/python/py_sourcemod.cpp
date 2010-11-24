@@ -261,9 +261,9 @@ initsourcemod(void)
     Py_INCREF(_name); \
     PyModule_AddObject(sourcemod, #name, _name); }
     
-    PyModule_AddStringMacroFromChar("__author__", SMEXT_CONF_AUTHOR);
-    PyModule_AddStringMacroFromChar("__date__", SMEXT_CONF_DATESTRING);
-    PyModule_AddStringMacroFromChar("__version__", SMEXT_CONF_VERSION);
+    PyModule_AddStringMacroFromChar(__author__, SMEXT_CONF_AUTHOR);
+    PyModule_AddStringMacroFromChar(__date__, SMEXT_CONF_DATESTRING);
+    PyModule_AddStringMacroFromChar(__version__, SMEXT_CONF_VERSION);
     
     PyModule_AddIntConstant(sourcemod, "Plugin_Continue", Pl_Continue);
     PyModule_AddIntConstant(sourcemod, "Plugin_Stop", Pl_Stop);

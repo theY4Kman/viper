@@ -18,6 +18,11 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _INCLUDE_VIPER_METAMOD_WRAPPERS_H_
+#define _INCLUDE_VIPER_METAMOD_WRAPPERS_H_
+
 #ifndef METAMOD_PLAPI_NAME
 #   include <metamod_wrappers.h>
 #endif
+
+#endif//_INCLUDE_VIPER_METAMOD_WRAPPERS_H_
