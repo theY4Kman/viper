@@ -145,7 +145,8 @@ BaseViper::PopCommandStack()
 void
 BaseViper::GameFrame(bool simulating)
 {
-    m_GameFrame->Execute(NULL, m_EmptyTuple);
+    if (m_GameFrame->GetFunctionCount())
+        m_GameFrame->Execute(NULL, m_EmptyTuple);
 }
 
 BaseViper g_Viper;

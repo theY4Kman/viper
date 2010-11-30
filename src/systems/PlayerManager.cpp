@@ -261,6 +261,7 @@ ViperPlayerManager::OnClientPreAdminCheck(int client)
     m_OnClientPreAdminCheck->Execute(&result, args);
     Py_DECREF(args);
     
+    /* Cheap (and cool looking) way to turn an int into a bool */
     return !!result;
 }
 void

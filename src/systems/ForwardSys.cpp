@@ -41,6 +41,10 @@ CForward::~CForward()
 PyObject *
 CForward::Execute(int *result, PyObject *args)
 {
+    /* Do nothing if there are no hooks */
+    if (GetFunctionCount() == 0)
+        Py_RETURN_NONE;
+    
     if (PyTuple_Size(args) != m_iTypesCnt)
         return NULL;
     
