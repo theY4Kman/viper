@@ -88,8 +88,14 @@ sourcemod__server_err__write(sourcemod__server_err *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &arg))
         return NULL;
     
-    g_pSM->LogError(myself, "%s", arg);
     g_SMAPI->ConPrint(arg);
+    
+    // Prevent duplicate newlines at end of error log messages
+    unsigned int len = strlen(arg);
+    if (arg[len-1] == '\n')
+        arg[len-1] = '\0';
+    
+    g_pSM->LogError(myself, "%s", arg);
     
     Py_RETURN_NONE;
 }
