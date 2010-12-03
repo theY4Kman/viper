@@ -90,6 +90,7 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 		g_pMenu->ConsolePrint(" Viper Version Information:");
 		g_pMenu->ConsolePrint("    Viper Version: %s", SMEXT_CONF_VERSION);
 		g_pMenu->ConsolePrint("    Python Version: %s (Linked against %s)", py_ver, PY_VERSION);
+		g_pMenu->ConsolePrint("    Built %s %s", __DATE__, __TIME__);
 		g_pMenu->ConsolePrint("    http://y4kstudios.com/viper/");
 		
 		delete [] py_ver;
