@@ -208,6 +208,16 @@ clients__Client__fake_command(clients__Client *self, PyObject *args)
 }
 
 static PyObject *
+clients__Client__is_connected(clients__Client *self)
+{
+    if (self->index < 1)
+        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
+    return PyBool_FromLong(player->IsConnected());
+}
+
+static PyObject *
 clients__Client__is_timing_out(clients__Client *self)
 {
     if (self->index < 1)
@@ -1133,6 +1143,11 @@ static PyMethodDef clients__Client__methods[] = {
         "Executes a client command on the server without being networked.\n\n"
         "@type  cmd: str\n"
         "@param cmd: The command string to execute."},
+    {"is_connected", (PyCFunction)clients__Client__is_connected, METH_NOARGS,
+        "is_connected() -> bool\n\n"
+        "Returns whether the client is connected.\n"
+        "@rtype: bool\n"
+        "@return: True if client is connected, False if not."},
     {"is_timing_out", (PyCFunction)clients__Client__is_timing_out, METH_NOARGS,
         "is_timing_out() -> bool\n\n"
         "Returns if the client is timing out.\n\n"

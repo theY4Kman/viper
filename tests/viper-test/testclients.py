@@ -57,7 +57,7 @@ class ClientsTypeTestCase(unittest.TestCase):
     for name in ['fake_command', 'is_timing_out', 'kick',
                  'notify_post_admin_check', 'print_center', 'print_console',
                  'print_chat', 'print_hint', 'set_fake_client_convar',
-                 'show_vgui_panel']:
+                 'show_vgui_panel', 'is_connected']:
       self.assert_(hasattr(clients.Client, name) and
           callable(getattr(clients.Client, name)), 'clients.Client.%s does not '
           'exist or is not callable' % name)

@@ -85,9 +85,13 @@ Client Objects
     :type   cmd: str
     :param  cmd: The command string to execute.
 
+..  method:: Client.is_connected()
+    
+    Returns whether the client is connected.
+
 ..  method:: Client.is_timing_out()
     
-    Returns if the client is timing out.
+    Returns whether the client is timing out.
 
 ..  method:: Client.kick([msg="" [, delay=True]])
     
