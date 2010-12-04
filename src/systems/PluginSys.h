@@ -131,6 +131,11 @@ public:
     
     virtual bool SetProperty( char const *prop, void *value );
     virtual bool GetProperty( char const *prop, void **ptr, bool remove=false );
+    
+    virtual PyObject *GetPluginDict()
+    {
+        return m_pPluginDict;
+    }
 
 private:
     ViperPluginType m_type;

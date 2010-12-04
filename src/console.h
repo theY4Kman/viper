@@ -28,7 +28,8 @@
 class ViperConsole :
     public SourceMod::IRootConsoleCommand,
     public ViperGlobalClass,
-    public IConCommandBaseAccessor
+    public IConCommandBaseAccessor,
+    public ICommandCallback
 {
 public: // IRootConsoleCommand
 	// Called when an admin runs "sm py"
@@ -38,7 +39,20 @@ public: // ViperGlobalClass
 	virtual void OnViperAllShutdown();
 public: // IConCommandBaseAccessor
     bool RegisterConCommandBase(ConCommandBase *pCommand);
+public: // ICommandCallbackvoid
+    void CommandCallback(const CCommand &command);
+
+public:
+    ViperConsole::ViperConsole();
+
+private:
+    ConCommandBase *m_InterpCmd;
+    PyThreadState *m_pThreadState;
+    PyInterpreterState *m_pInterpState;
+    PyObject *m_InterpGlobals;
 };
+
+extern ViperConsole g_VConsole;
 
 #endif /* _INCLUDE_VIPER_CONSOLE_H_ */
 

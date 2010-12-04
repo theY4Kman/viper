@@ -31,6 +31,11 @@ ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
 #endif
     "The version of Viper installed.");
 
+ViperConsole::ViperConsole()
+{
+    m_InterpCmd = NULL;
+    m_InterpGlobals = NULL;
+}
 
 void
 ViperConsole::OnViperStartup(bool late)
@@ -96,6 +101,46 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 		delete [] py_ver;
 		return;
 	}
+	else if (strcmp(cmd, "setinterp") == 0)
+	{
+	    char const *cmdname = NULL;
+	    if (command.ArgC() >= 3)
+	        cmdname = command.Arg(3);
+	    else
+	    {
+	        g_pMenu->ConsolePrint("[Viper] If an interpreter command has not been set, "
+	            "provide one. If one has been set, provide the current command name "
+	            "to clear it.");
+	        return;
+	    }
+	    
+	    if (m_InterpCmd != NULL)
+	    {
+	        if (command.ArgC() >= 3)
+	        {
+	            if (strcmp(cmdname, m_InterpCmd->GetName()) == 0)
+	            {
+	                g_pMenu->ConsolePrint("[Viper] Interpreter command cleared.");
+	                META_UNREGCVAR(m_InterpCmd);
+	                m_InterpCmd = NULL;
+	                
+	                return;
+	            }
+	        }
+	        
+            g_pMenu->ConsolePrint("[Viper] Interpreter command already set. Supply the"
+                " correct current interpreter command to clear it.");
+            return;
+	    }
+	    
+	    ConCmdInfo *pInfo = g_VCmds.AddOrFindCommand(cmdname, "",
+	        FCVAR_PROTECTED|FCVAR_HIDDEN);
+	    m_InterpCmd = pInfo->pCmd;
+	    
+	    g_pMenu->ConsolePrint("[Viper] Interpreter command set successfully!");
+	    
+	    return;
+	}
 
 	g_pMenu->ConsolePrint("Viper menu:");
 	g_pMenu->DrawGenericOption("cmds", "View commands created by a plugin");
@@ -103,6 +148,98 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 	g_pMenu->DrawGenericOption("cvars", "View convars created by a plugin");
 	g_pMenu->DrawGenericOption("plugins", "Manage plugins");
 	g_pMenu->DrawGenericOption("version", "Display version information");
+}
+
+void
+ViperConsole::CommandCallback(const CCommand &command)
+{
+    if (m_InterpCmd == NULL || strcmp(command.Arg(0),
+        m_InterpCmd->GetName()) != 0)
+        return;
+    
+    char const *exec = NULL;
+    PyThreadState *tstate = NULL;
+    PyObject *globals = NULL;
+    
+    /* interpcmd plugin_id execcmd */
+    if (command.ArgC() == 3)
+    {
+        char const *pl_id = command.Arg(1);
+        exec = command.Arg(2);
+        
+        IViperPlugin *pl = g_VPlugins.FindPluginByConsoleArg(pl_id);
+        if (pl == NULL)
+        {
+            g_SMAPI->ConPrintf("[Viper] Could not locate plugin \"%s\"\n", pl_id);
+            return;
+        }
+        
+        tstate = pl->GetThreadState();
+        globals = pl->GetPluginDict();
+    }
+    
+    /* interpcmd execcmd */
+    else if (command.ArgC() == 2)
+    {
+        if (m_pThreadState == NULL)
+        {
+            /* Create a completeley new environment (sub-interpreter) */
+            m_pThreadState = Py_NewInterpreter();
+            if (m_pThreadState == NULL)
+            {
+                g_pSM->LogError(myself, "Fatal error in creating Python "
+                    "sub-interpreter for interp cmd!");
+                return;
+            }
+            
+            m_pInterpState = m_pThreadState->interp;
+        }
+        
+        tstate = m_pThreadState;
+        exec = command.Arg(1);
+        
+        if (m_InterpGlobals == NULL)
+        {
+            PyThreadState *_swap = PyThreadState_Get();
+            PyThreadState_Swap(tstate);
+            
+            PyObject *__main__ = PyImport_ImportModule("__main__");
+            m_InterpGlobals = PyModule_GetDict(__main__);
+            Py_DECREF(__main__);
+            
+            PyThreadState_Swap(_swap);
+        }
+        
+        globals = m_InterpGlobals;
+    }
+    
+    else
+    {
+        g_SMAPI->ConPrint("[Viper] Syntax: interpcmd [plugin_id] <execcmd>\n");
+        return;
+    }
+    
+    
+    PyThreadState *_swap = PyThreadState_Get();
+    PyThreadState_Swap(tstate);
+    
+    if (globals == NULL)
+        globals = PyEval_GetGlobals();
+    
+    PyObject *result = PyRun_String(exec, Py_single_input, globals, NULL);
+    
+    if (result == NULL)
+        PyErr_Print();
+    else if (result != Py_None)
+    {
+        PyObject *py_str = result->ob_type->tp_repr(result);
+        char const *str = PyString_AS_STRING(py_str);
+        
+        g_SMAPI->ConPrintf("[Viper] %s\n", str);
+        Py_DECREF(py_str);
+    }
+    
+    PyThreadState_Swap(_swap);
 }
 
 bool

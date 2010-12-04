@@ -119,10 +119,11 @@ public:
     void RemoveConCmds(SourceHook::List<CmdHook *> &cmdlist, IViperPlugin *pl);
     
     ViperResultType DispatchClientCommand(int client, const char *cmd, int args, ViperResultType type);
-
-private:
+    
     /** Adds a new command or finds one that already exists */
     ConCmdInfo * AddOrFindCommand(char const *name, char const *description, int flags);
+
+private:
     void InternalDispatch(const CCommand &command);
 
 private:

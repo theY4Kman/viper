@@ -21,6 +21,7 @@
 #include "systems/ConCmdManager.h"
 #include "python/py_console.h"
 #include "viper.h"
+#include "console.h"
 #include "IViperForwardSys.h"
 #include "PluginSys.h"
 #include "PlayerManager.h"
@@ -43,6 +44,8 @@ void CommandCallback()
     g_Viper.PushCommandStack(&command);
     
     g_VCmds.InternalDispatch(command);
+    
+    g_VConsole.CommandCallback(command);
     
     g_Viper.PopCommandStack();
 }

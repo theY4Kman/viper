@@ -149,6 +149,11 @@ public:
      * @param remove    If true, removes the property
      */
     virtual bool GetProperty(char const *prop, void **ptr, bool remove=false) =0;
+    
+    /**
+     * @brief Returns the plug-in's globals
+     */
+    virtual PyObject *GetPluginDict() =0;
 };
 
 /**
