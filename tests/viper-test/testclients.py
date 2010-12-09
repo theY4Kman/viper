@@ -49,7 +49,7 @@ class ClientsTypeTestCase(unittest.TestCase):
         'avg_packets_in', 'avg_packets_out', 'data_rate', 'deaths', 'entity',
         'fake', 'frags', 'health', 'ip', 'lang_id', 'latency', 'latency_in',
         'latency_out', 'maxs', 'mins', 'model', 'name', 'serial', 'steamid',
-        'team', 'time_connected', 'userid', 'weapon']:
+        'team', 'time_connected', 'userid', 'weapon', 'index']:
       self.assertTrue(hasattr(clients.Client, name))
   
   def test_clients_functions_exist(self):
