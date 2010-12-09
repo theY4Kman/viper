@@ -54,11 +54,13 @@ console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
             strncpy(buf, message, 192);
             buf[191] = '\0';
             
-            gamehelpers->TextMsg(g_VCmds.GetCommandClient(), HUD_PRINTTALK, buf);
+            gamehelpers->TextMsg(g_VCmds.GetCommandClient(),
+                HUD_PRINTTALK, buf);
             Py_RETURN_NONE;
         }
         
-        gamehelpers->TextMsg(g_VCmds.GetCommandClient(), HUD_PRINTTALK, message);
+        gamehelpers->TextMsg(g_VCmds.GetCommandClient(),
+            HUD_PRINTTALK, message);
     }
     
     Py_RETURN_NONE;
@@ -145,14 +147,15 @@ console__ConVar__hook_change(console__ConVar *self, PyObject *args)
     
     if (!PyCallable_Check(callback))
     {
-        PyErr_SetString(g_pViperException, "The callback passed was not callable");
+        PyErr_SetString(g_pViperException, "The callback passed was not"
+            " callable");
         return NULL;
     }
     
     GET_THREAD_PLUGIN();
     
-    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(callback,
-        pPlugin);
+    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(
+        callback, pPlugin);
     
     g_ConVarManager.HookConVarChange(self->pVar, pFunc);
     delete pFunc;
@@ -189,14 +192,15 @@ console__ConVar__unhook_change(console__ConVar *self, PyObject *args)
     
     if (!PyCallable_Check(callback))
     {
-        PyErr_SetString(g_pViperException, "The callback passed was not callable");
+        PyErr_SetString(g_pViperException, "The callback passed was not"
+            " callable");
         return NULL;
     }
     
     GET_THREAD_PLUGIN();
     
-    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(callback,
-        pPlugin);
+    IViperPluginFunction *pFunc = CPluginFunction::CreatePluginFunction(
+        callback, pPlugin);
     
     g_ConVarManager.UnhookConVarChange(self->pVar, pFunc);
     delete pFunc;
@@ -530,7 +534,7 @@ console__print_to_server(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "s", &message))
         return NULL;
 
-    g_SMAPI->ConPrintf("%s\n", message);
+    META_CONPRINTF("%s\n", message);
     
     Py_RETURN_NONE;
 }
@@ -551,7 +555,8 @@ PyRegConCommand(PyObject *args, PyObject *keywds, CmdType type)
     
     if (!PyCallable_Check(pFunc))
     {
-        PyErr_SetString(g_pViperException, "The callback passed was not callable");
+        PyErr_SetString(g_pViperException, "The callback passed was not"
+            " callable");
         return NULL;
     }
     
@@ -693,7 +698,8 @@ initconsole(void)
     
     Py_INCREF((PyObject*)&console__ConCommandReplyType);
     Py_INCREF((PyObject*)&console__ConVarType);
-    PyModule_AddObject(console, "ConCommandReply", (PyObject*)&console__ConCommandReplyType);
+    PyModule_AddObject(console, "ConCommandReply",
+        (PyObject*)&console__ConCommandReplyType);
     PyModule_AddObject(console, "ConVar", (PyObject*)&console__ConVarType);
     
     PyModule_AddIntMacro(console, FCVAR_NONE);

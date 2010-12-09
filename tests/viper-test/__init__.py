@@ -32,7 +32,8 @@ viper_suite = unittest.TestLoader().loadTestsFromTestCase(TestCoreFunctions)
 
 # Load all test modules
 for mod in ['testsourcemod', 'testentity','testhalflife', 'testforwards',
-            'testconsole', 'testevents', 'testclients', 'testkeyvalues']:
+            'testconsole', 'testevents', 'testclients', 'testkeyvalues',
+            'testbitbuf']:
   viper_suite.addTest(unittest.TestLoader().loadTestsFromName(mod))
 
 unittest.TextTestRunner(verbosity=2, stream=sys.stdout).run(viper_suite)

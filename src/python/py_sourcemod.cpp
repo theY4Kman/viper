@@ -258,7 +258,9 @@ initsourcemod(void)
         "The standard Viper library.");
     
     if (g_pViperException == NULL)
-        g_pViperException = PyErr_NewException("sourcemod.ViperError", NULL, NULL);
+        g_pViperException = PyErr_NewException("sourcemod.ViperError",
+            NULL, NULL);
+    
     Py_INCREF(g_pViperException);
     PyModule_AddObject(sourcemod, "ViperError", g_pViperException);
 
@@ -281,8 +283,8 @@ initsourcemod(void)
     if (PyType_Ready(&sourcemod__server_outType) < 0 ||
         PyType_Ready(&sourcemod__server_errType) < 0)
     {
-        g_pSM->LogError(myself, "stdout/err to server console redirection failed."
-            " `print` will output to stdout.");
+        g_pSM->LogError(myself, "stdout/err to server console redirection"
+            " failed. `print` will output to stdout.");
         
         if (PyErr_Occurred())
             PyErr_Print();

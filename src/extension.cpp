@@ -80,6 +80,7 @@ PyTypeObject *_PyLong_Type = NULL;
 PyTypeObject *_PyTuple_Type = NULL;
 PyTypeObject *_PyBool_Type = NULL;
 PyTypeObject *_PyDict_Type = NULL;
+PyTypeObject *_PyList_Type = NULL;
 #endif
 
 PyThreadState *g_pGlobalThreadState = NULL;
@@ -215,6 +216,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "tuple"));
         Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "bool"));
         Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "dict"));
+        Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "list"));
     }
     else
     {
@@ -226,6 +228,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         Py_XINCREF(_PyTuple_Type = (PyTypeObject *)PyObject_GetAttrString(types, "TupleType"));
         Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BooleanType"));
         Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(types, "DictType"));
+        Py_XINCREF(_PyList_Type = (PyTypeObject *)PyObject_GetAttrString(types, "ListType"));
         
         Py_DECREF(types);
     }

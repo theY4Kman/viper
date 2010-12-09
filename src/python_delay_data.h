@@ -40,6 +40,7 @@
     extern PyTypeObject *_PyTuple_Type;
     extern PyTypeObject *_PyBool_Type;
     extern PyTypeObject *_PyDict_Type;
+    extern PyTypeObject *_PyList_Type;
     
 #   undef PyInt_Check
 #   undef PyFloat_Check
@@ -49,6 +50,7 @@
 #   undef PyTuple_Check
 #   undef PyBool_Check
 #   undef PyDict_Check
+#   undef PyList_Check
 
 #   define PyInt_Check(op) PyObject_TypeCheck(op, _PyInt_Type)
 #   define PyFloat_Check(op) PyObject_TypeCheck(op, _PyFloat_Type)
@@ -57,6 +59,7 @@
 #   define PyLong_Check(op) PyObject_TypeCheck(op, _PyLong_Type)
 #   define PyTuple_Check(op) PyObject_TypeCheck(op, _PyTuple_Type)
 #   define PyDict_Check(op) PyObject_TypeCheck(op, _PyDict_Type)
+#   define PyList_Check(op) PyObject_TypeCheck(op, _PyList_Type)
 #   define PyBool_Check(x) ((x)->ob_type == _PyBool_Type)
 
     extern PyObject *_PyExc_TypeError;
@@ -76,6 +79,7 @@
 #   define _PyTuple_Type &PyTuple_Type
 #   define _PyBool_Type &PyBool_Type
 #   define _PyDict_Type &PyDict_Type
+#   define _PyList_Type &PyList_Type
 
 #   define _PyExc_TypeError PyExc_TypeError
 #   define _PyExc_IndexError PyExc_IndexError

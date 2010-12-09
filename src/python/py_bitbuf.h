@@ -23,22 +23,62 @@
 
 #include <Python.h>
 #include <bitbuf.h>
+#include <sh_stack.h>
 #include "viper_globals.h"
 
 extern PyTypeObject bitbuf__BitBufType;
+
+enum BitBufType
+{
+    BitBufType_Bool = 0,
+    BitBufType_Byte,
+    BitBufType_Char,
+    BitBufType_Short,
+    BitBufType_Word,
+    BitBufType_Num,
+    BitBufType_Float,
+    BitBufType_String,
+    BitBufType_Entity,
+    BitBufType_Angle,
+    BitBufType_Coord,
+    BitBufType_VecCoord,
+    BitBufType_VecNormal
+};
+
+/** Stores information about one piece of data in a bitbuf */
+struct BitBufCell
+{
+    BitBufType type;
+    
+    union BitBufCellData
+    {
+        bool asBool; // Bool
+        int asInt; //Char, Byte, Short, Entity, Word
+        long asLong; // Num
+        float asFloat; // Float, Coord
+        char const *asString; // String
+        float asVector[3]; // VecCoord, VecNormal
+        
+        struct
+        {
+            float value;
+            int numbits;
+        } asAngle;
+    } data;
+};
 
 struct bitbuf__BitBuf
 {
     PyObject_HEAD
     
-    // The buffer shared between read and write
-    void *buffer;
-    // The max length, in bytes, of the buffer
-    int nBytes;
-    
-    bf_write *write;
-    bf_read *read;
+    // Stores data to write to a bf_write
+    SourceHook::CStack<BitBufCell *> cells;
 };
+
+extern PyTypeObject bitbuf__BitBufType;
+
+extern PyObject *GetBitBuf();
+extern bool BitBufToBfWrite(bitbuf__BitBuf *obj, bf_write *bitbuf);
 
 #endif//_INCLUDE_PYTHON_BITBUF_H_
 
