@@ -113,7 +113,7 @@ datatypes__Color__init__(datatypes__Color *self, PyObject *args,
     int g = 0;
     int a = 0;
     
-    static char *keywdlist[] = {"r", "b", "g", "a", NULL};
+    static char *keywdlist[] = {"r", "g", "b", "a", NULL};
     
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "|iiii", keywdlist, &r, &g, &b, &a))
         return -1;

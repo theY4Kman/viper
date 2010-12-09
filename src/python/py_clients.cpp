@@ -63,12 +63,14 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "iis|ssi", keywdlist,
-        &ban_time, &ban_flags, &ban_reason, &ban_kickmsg, &ban_cmd, &ban_source))
+        &ban_time, &ban_flags, &ban_reason, &ban_kickmsg, &ban_cmd,
+        &ban_source))
     {
         return NULL;
     }
@@ -129,7 +131,8 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
         }
     }
 #else
-	/* Dark Messiah doesn't have Steam IDs so there is only one ban method to choose */
+	/* Dark Messiah doesn't have Steam IDs so there is only one ban method to
+	 * choose */
 	ban_flags |= BANFLAG_IP;
 	ban_flags &= ~BANFLAG_AUTHID;
 #endif
@@ -147,7 +150,8 @@ clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
                 *ptr = '\0';
             
             char bancommand[256];
-            UTIL_Format(bancommand, sizeof(bancommand), "addip %d %s\n", ban_time, ip);
+            UTIL_Format(bancommand, sizeof(bancommand), "addip %d %s\n",
+                ban_time, ip);
             
             /* Kick... */
             if ((ban_flags & BANFLAG_NOKICK) != BANFLAG_NOKICK)
@@ -192,11 +196,13 @@ static PyObject *
 clients__Client__fake_command(clients__Client *self, PyObject *args)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     
     char *cmd;
     if (!PyArg_ParseTuple(args, "s", &cmd))
@@ -211,7 +217,8 @@ static PyObject *
 clients__Client__is_connected(clients__Client *self)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     return PyBool_FromLong(player->IsConnected());
@@ -221,15 +228,19 @@ static PyObject *
 clients__Client__is_timing_out(clients__Client *self)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     else if (!player->IsInGame())
-        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
     else if (player->IsFakeClient())
-        return PyErr_Format(g_pViperException, "Client %d is fake", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is fake",
+            self->index);
     
     INetChannelInfo *pInfo = engine->GetPlayerNetInfo(self->index);
     
@@ -240,11 +251,13 @@ static PyObject *
 clients__Client__kick(clients__Client *self, PyObject *args, PyObject *kwds)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     
     char const *msg = "";
     bool delay = true;
@@ -282,15 +295,19 @@ static PyObject *
 clients__Client__notify_post_admin_check(clients__Client *self)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     else if (!player->IsInGame())
-        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
     else if (!player->IsAuthorized())
-        return PyErr_Format(g_pViperException, "Client %d is not authorized", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not authorized",
+            self->index);
     
     player->NotifyPostAdminChecks();
     
@@ -309,12 +326,14 @@ clients__Client__print_center(clients__Client *self, PyObject *args)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     else if (!player->IsInGame())
     {
-        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
         return NULL;
     }
     
@@ -331,13 +350,16 @@ static PyObject *
 clients__Client__print_chat(clients__Client *self, PyObject *args)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     else if (!player->IsInGame())
-        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
     
     char *message;
     if (!PyArg_ParseTuple(args, "s", &message))
@@ -356,9 +378,11 @@ clients__Client__print_console(clients__Client *self, PyObject *args)
     {
         player = playerhelpers->GetGamePlayer(self->index);
         if (!player->IsConnected())
-            return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+            return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         else if (!player->IsInGame())
-            return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+            return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
         
         /* Silently fail on bots; the engine will crash otherwise */
         if (player->IsFakeClient())
@@ -376,7 +400,7 @@ clients__Client__print_console(clients__Client *self, PyObject *args)
     if (self->index != 0)
         engine->ClientPrintf(player->GetEdict(), buffer);
     else
-        META_CONPRINT(buffer);
+        g_SMAPI->ConPrintf("%s\n", buffer);
     
     Py_RETURN_NONE;
 }
@@ -385,13 +409,16 @@ static PyObject *
 clients__Client__print_hint(clients__Client *self, PyObject *args)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     else if (!player->IsInGame())
-        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
 
     char const *msg;
     if (!PyArg_ParseTuple(args, "s", &msg))
@@ -399,7 +426,8 @@ clients__Client__print_hint(clients__Client *self, PyObject *args)
     
     if (!g_HL2.HintTextMsg(self->index, msg))
     {
-        PyErr_SetString(g_pViperException, "Could not send HintTextMsg usermessage.");
+        PyErr_SetString(g_pViperException, "Could not send HintTextMsg"
+            " usermessage.");
         return NULL;
     }
     
@@ -416,18 +444,22 @@ clients__Client__set_fake_client_convar(clients__Client *self, PyObject *args)
         return NULL;
     
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     
     if (!player->IsFakeClient())
-        return PyErr_Format(g_pViperException, "Client %d is not fake", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not fake",
+            self->index);
     
     edict_t *pEdict = player->GetEdict();
     if (pEdict == NULL)
-        return PyErr_Format(g_pViperException, "Unable to retrieve client %d's edict", self->index);
+        return PyErr_Format(g_pViperException, "Unable to retrieve client %d's"
+            " edict", self->index);
     
     engine->SetFakeClientConVarValue(pEdict, convar, value);
     
@@ -455,7 +487,8 @@ clients__Client__show_vgui_panel(clients__Client *self, PyObject *args,
     
     if (!g_HL2.ShowVGUIMenu(self->index, name, kv, show))
     {
-        PyErr_SetString(g_pViperException, "Could not send VGUIMenu usermessage");
+        PyErr_SetString(g_pViperException, "Could not send VGUIMenu"
+            " usermessage");
         return NULL;
     }
     
@@ -475,14 +508,17 @@ clients__Client__entityget(clients__Client *self)
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     
     else if (!player->IsInGame())
-        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
     
     edict_t *pEdict = player->GetEdict();
     if (pEdict == NULL)
-        return PyErr_Format(g_pViperException, "Unable to retrieve client %d's edict", self->index);
+        return PyErr_Format(g_pViperException, "Unable to retrieve client %d's"
+            " edict", self->index);
     
     entity__Entity *entity = (entity__Entity *)entity__EntityType.tp_new(
         &entity__EntityType, NULL, NULL);
@@ -503,7 +539,8 @@ clients__Client__fakeget(clients__Client *self)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
@@ -525,7 +562,8 @@ clients__Client__ipget(clients__Client *self)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
@@ -544,7 +582,8 @@ clients__Client__lang_idget(clients__Client *self)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
@@ -581,7 +620,8 @@ clients__Client__nameget(clients__Client *self)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
@@ -607,7 +647,8 @@ clients__Client__steamidget(clients__Client *self)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
@@ -622,18 +663,22 @@ static PyObject *
 clients__Client__teamget(clients__Client *self)
 {
     if (self->index < 1)
-        return PyErr_Format(g_pViperException, "Client %d is invalid", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is invalid",
+            self->index);
     
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
-        return PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
     else if (!player->IsInGame())
-        return PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        return PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
 
 	IPlayerInfo *pInfo = player->GetPlayerInfo();
 	if (pInfo == NULL)
 	{
-        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this game");
+        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this"
+            " game");
         return NULL;
 	}
 
@@ -659,19 +704,22 @@ clients__Client__teamset(clients__Client *self, PyObject *setobj)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return -1;
     }
     else if (!player->IsInGame())
     {
-        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
         return -1;
     }
 
 	IPlayerInfo *pInfo = player->GetPlayerInfo();
 	if (pInfo == NULL)
 	{
-        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this game");
+        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this"
+            " game");
         return -1;
 	}
 	
@@ -692,12 +740,13 @@ clients__Client__useridget(clients__Client *self)
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     
-    return PyInt_FromLong(player->IsFakeClient() ? engine->GetPlayerUserId(player->GetEdict())
-                           : player->GetUserId());
+    return PyInt_FromLong(player->IsFakeClient() ?
+        engine->GetPlayerUserId(player->GetEdict()) : player->GetUserId());
 }
 
 enum clients__client__getsets_t
@@ -748,19 +797,22 @@ clients__Client__getter_valid_ingame_modsupport(clients__Client *self,
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     else if (!player->IsInGame())
     {
-        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
         return NULL;
     }
 
 	IPlayerInfo *pInfo = player->GetPlayerInfo();
 	if (pInfo == NULL)
 	{
-        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this game");
+        PyErr_SetString(g_pViperException, "IPlayerInfo not supported by this"
+            " game");
         return NULL;
 	}
 	
@@ -806,12 +858,14 @@ clients__Client__getter_valid_ingame_fake(clients__Client *self,
     IGamePlayer *player = playerhelpers->GetGamePlayer(self->index);
     if (!player->IsConnected())
     {
-        PyErr_Format(g_pViperException, "Client %d is not connected", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not connected",
+            self->index);
         return NULL;
     }
     else if (!player->IsInGame())
     {
-        PyErr_Format(g_pViperException, "Client %d is not in game", self->index);
+        PyErr_Format(g_pViperException, "Client %d is not in game",
+            self->index);
         return NULL;
     }
     

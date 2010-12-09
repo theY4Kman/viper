@@ -970,8 +970,8 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
     {
         if (!PyCallable_Check(read))
         {
-            PyErr_SetString(_PyExc_TypeError, "the read function of file is not "
-                "callable");
+            PyErr_SetString(_PyExc_TypeError, "the read function of `file` is"
+                " not callable");
             return NULL;
         }
         
@@ -993,7 +993,8 @@ keyvalues__keyvalues_from_file(PyObject *self, PyObject *args, PyObject *kwds)
             char *str = PyString_AsString(pystr);
             Py_DECREF(pystr);
             
-            return PyErr_Format(g_pViperException, "error loading from %s", str);
+            return PyErr_Format(g_pViperException, "error loading from %s",
+                str);
         }
         
         PyObject *kvpy = GetPyObjectFromKeyValues(kv);
@@ -1045,7 +1046,8 @@ initkeyvalues(void)
         "Abstracts the Valve KeyValues interface.");
     
     Py_INCREF((PyObject *)&keyvalues__KeyValuesType);
-    PyModule_AddObject(keyvalues, "KeyValues", (PyObject *)&keyvalues__KeyValuesType);
+    PyModule_AddObject(keyvalues, "KeyValues",
+        (PyObject *)&keyvalues__KeyValuesType);
     
     return keyvalues;
 }
