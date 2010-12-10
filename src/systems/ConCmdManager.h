@@ -104,6 +104,8 @@ public: // IViperPluginsListener
     virtual void OnPluginUnloaded(IViperPlugin *plugin);
 
 public:
+    CConCmdManager();
+    
     bool AddCommand(IViperPlugin *pPlugin, PyFunction *callback, CmdType type,
         char const *name, char const *description, int flags);
 

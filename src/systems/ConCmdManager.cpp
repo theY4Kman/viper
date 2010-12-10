@@ -80,6 +80,10 @@ AddToPlCmdList(CmdList *pList, const PlCmdInfo &info)
     pList->push_back(info);
 }
 
+CConCmdManager::CConCmdManager() : m_CmdClient(0)
+{
+}
+
 void
 CConCmdManager::OnViperAllInitialized()
 {
@@ -581,6 +585,8 @@ CConCmdManager::DispatchClientCommand(int client, const char *cmd, int args, Vip
     if (temp != NULL)
         pInfo = (*temp);
     
+    SetCommandClient(client);
+    
     if (temp == NULL || pInfo == NULL)
     {
         /* Unfortunately, we now have to do a slow lookup because Valve made client commands 
@@ -606,8 +612,6 @@ CConCmdManager::DispatchClientCommand(int client, const char *cmd, int args, Vip
         if (pInfo == NULL)
             return type;
     }
-    
-    SetCommandClient(client);
     
     ViperResultType result = Pl_Continue;
     SourceHook::List<CmdHook *>::iterator iter;
