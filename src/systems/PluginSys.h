@@ -210,6 +210,9 @@ private:
     bool m_LoadingLocked;
 };
 
+/** Initializes everything a Viper plug-in needs */
+PyObject *InitializePlugin(char const *path);
+
 extern CPluginManager g_VPlugins;
 
 #endif /* _INCLUDE_VIPER_PLUGINSYS_H_ */

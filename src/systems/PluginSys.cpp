@@ -241,16 +241,11 @@ CPlugin::CreatePlugin(char const *path, char* error, size_t maxlength)
     return pPlugin;
 }
 
-void
-CPlugin::RunPlugin()
+PyObject *
+InitializePlugin(char const *path)
 {
-    PyThreadState_Swap(m_pThreadState);
-    
-    /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
     char *path_string = new char[PLATFORM_MAX_PATH];
-    size_t len = strrchr(m_sPath, '/') - m_sPath;
-    strncpy(path_string, m_sPath, len);
-    path_string[len] = '\0';
+    strcpy(path_string, path);
     
     PyObject *newpath = PyList_New(5);
     PyList_SetItem(newpath, 0, PyString_FromString(path_string));
@@ -293,14 +288,31 @@ CPlugin::RunPlugin()
     
     /* Create the plug-in's globals dict */
     PyObject *__main__ = PyImport_ImportModule("__main__");
-    m_pPluginDict = PyModule_GetDict(__main__);
+    PyObject *pluginDict = PyModule_GetDict(__main__);
     Py_DECREF(__main__);
     
     /* Add __file__ to the plug-in */
-    PyDict_SetItemString(m_pPluginDict, "__file__", PyString_FromString(m_sPath));
+    PyDict_SetItemString(pluginDict, "__file__", PyString_FromString(path));
     
     /* Initialize the sourcemod Python module. */
     initsourcemod();
+    
+    return pluginDict;
+}
+
+void
+CPlugin::RunPlugin()
+{
+    PyThreadState_Swap(m_pThreadState);
+    
+    /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
+    char *path_string = new char[PLATFORM_MAX_PATH];
+    size_t len = strrchr(m_sPath, '/') - m_sPath;
+    strncpy(path_string, m_sPath, len);
+    path_string[len] = '\0';
+
+    m_pPluginDict = InitializePlugin(path_string);
+    delete [] path_string;
     
     /* Run the plug-in file.
      * We use Python's File object so that the underlying C FILE object will always match
@@ -677,12 +689,12 @@ CPlugin *
 CPluginManager::FindPluginByConsoleArg(char const *arg)
 {
     int id;
-    char *end;
+    char *end = NULL;
     CPlugin *pl;
     
     /* By order first */
     id = strtol(arg, &end, 10);
-    if (*end == '\0')
+    if (end != NULL && *end == '\0')
     {
         pl = GetPluginByOrder(id);
         if (pl != NULL)

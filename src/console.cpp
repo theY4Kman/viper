@@ -157,15 +157,44 @@ ViperConsole::CommandCallback(const CCommand &command)
         m_InterpCmd->GetName()) != 0)
         return;
     
-    char const *exec = NULL;
+    if (command.ArgC() < 2)
+    {
+        g_SMAPI->ConPrint("[Viper] Syntax: interpcmd [plugin_id] <execcmd>\n");
+        return;
+    }
+    
+    int plugin_id;
+    
+    char *exec = new char[512];
     PyThreadState *tstate = NULL;
     PyObject *globals = NULL;
     
     /* interpcmd plugin_id execcmd */
-    if (command.ArgC() == 3)
+    if (sscanf(command.Arg(1), "%d", &plugin_id) == 1)
     {
+        if (command.ArgC() < 3)
+        {
+            g_SMAPI->ConPrint("[Viper] Syntax: interpcmd [plugin_id] <execcmd>\n");
+            return;
+        }
+        
         char const *pl_id = command.Arg(1);
-        exec = command.Arg(2);
+        char *cmd = new char[sizeof(exec)];
+        
+        strcpy(cmd, command.ArgS());
+        cmd = strchr(exec, ' ');
+        
+        if (cmd == NULL)
+        {
+            g_SMAPI->ConPrint("[Viper] Something terrible happened.\n");
+            return;
+        }
+        
+        // strchr returns before the space, we want after it
+        cmd += 1;
+        
+        strcpy(exec, cmd);
+        delete [] cmd;
         
         IViperPlugin *pl = g_VPlugins.FindPluginByConsoleArg(pl_id);
         if (pl == NULL)
@@ -179,7 +208,7 @@ ViperConsole::CommandCallback(const CCommand &command)
     }
     
     /* interpcmd execcmd */
-    else if (command.ArgC() == 2)
+    else
     {
         if (m_pThreadState == NULL)
         {
@@ -196,16 +225,17 @@ ViperConsole::CommandCallback(const CCommand &command)
         }
         
         tstate = m_pThreadState;
-        exec = command.Arg(1);
+        strcpy(exec, command.ArgS());
         
         if (m_InterpGlobals == NULL)
         {
             PyThreadState *_swap = PyThreadState_Get();
             PyThreadState_Swap(tstate);
             
-            PyObject *__main__ = PyImport_ImportModule("__main__");
-            m_InterpGlobals = PyModule_GetDict(__main__);
-            Py_DECREF(__main__);
+            m_InterpGlobals = InitializePlugin("<interp>");
+            PyObject *sm = PyImport_ImportModule("sourcemod");
+            PyDict_SetItemString(m_InterpGlobals, "sourcemod", sm);
+            PyDict_SetItemString(m_InterpGlobals, "sm", sm);
             
             PyThreadState_Swap(_swap);
         }
@@ -213,12 +243,13 @@ ViperConsole::CommandCallback(const CCommand &command)
         globals = m_InterpGlobals;
     }
     
-    else
+    /* Strip quotes */
+    int len = strlen(exec);
+    if (exec[0] == '"' && exec[len-1] == '"')
     {
-        g_SMAPI->ConPrint("[Viper] Syntax: interpcmd [plugin_id] <execcmd>\n");
-        return;
+        exec[len-1] = '\0';
+        exec = &exec[1];
     }
-    
     
     PyThreadState *_swap = PyThreadState_Get();
     PyThreadState_Swap(tstate);
@@ -227,6 +258,7 @@ ViperConsole::CommandCallback(const CCommand &command)
         globals = PyEval_GetGlobals();
     
     PyObject *result = PyRun_String(exec, Py_single_input, globals, NULL);
+    delete [] exec;
     
     if (result == NULL)
         PyErr_Print();
