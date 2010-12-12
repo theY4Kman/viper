@@ -41,6 +41,8 @@ void CommandCallback()
 {
     CCommand command;
 #endif
+    g_VCmds.SetCommandClient(-1);
+        
     g_Viper.PushCommandStack(&command);
     
     g_VCmds.InternalDispatch(command);
@@ -620,7 +622,7 @@ CConCmdManager::DispatchClientCommand(int client, const char *cmd, int args, Vip
     PyThreadState *_save = PyThreadState_Get();
     
     /* Build the sourcemod.console.ConCommand object */
-    PyObject *args_list = PyList_New(args-1);
+    PyObject *args_list = PyList_New(args < 0 ? 0 : args);
     
     const CCommand *command = g_Viper.PeekCommandStack();
     int i;
