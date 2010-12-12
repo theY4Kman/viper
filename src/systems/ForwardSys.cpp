@@ -51,7 +51,9 @@ CForward::Execute(int *result, PyObject *args)
     int i;
     for (i=0; i<m_iTypesCnt; i++)
     {
-        if (!PyObject_IsInstance(PyTuple_GetItem(args, i),
+        /* If an arg is None, disregard it. */
+        if (PyTuple_GetItem(args, i) != Py_None &&
+            !PyObject_IsInstance(PyTuple_GetItem(args, i),
             PyTuple_GetItem(m_types, i)))
         {
             PyErr_Format(_PyExc_TypeError, "expected type %s for argument %d, "
