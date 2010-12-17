@@ -156,22 +156,34 @@ Client Objects
 
 Client objects cannot be instantiated by themselves. Instead, use :func:`get_client(index) <sourcemod.clients.get_client>` to retrieve a client object.
 
-..  method:: Client.fake_command(cmd)
+..  method:: ban(time, flags, reason[, kickmsg="Kicked", cmd=None, source=0])
+    
+    Bans the client. ``time`` is the time, in minutes, to ban the client (0 = permanent).
+    
+    ``flags`` is a bitstring of :ref:`BANFLAG flags <banflags>` that will control the banning mechanism. If :data:`BANFLAG_AUTHID <sourcemod.clients.BANFLAG_AUTHID>` is set and no auth ID is available, the ban will fail, unless :ref:`BANFLAG_AUTO <sourcemod.clients.BANFLAG_AUTO>` is also set.
+    
+    ``reason`` is a string containing the reason for banning the client. ``kickmsg`` is the message to display to the player when they're kicked.
+    
+    ``cmd`` is a string containing the command used to initiate the ban in order to identify the source. If this is left empty, then the ban_client forward will not be called. ``source`` is a value that could be interpreted as the identity of the player whom was the source of the banning (not actually checked by Core).
+    
+    This returns ``True`` if the player was successfully banned, and ``False`` otherwise (the only case ``False`` is returned is mentioned above in the explanation of ``flags``).
+
+..  method:: fake_command(cmd)
     
     Executes a client command on the server without being networked.
     
     :type   cmd: str
     :param  cmd: The command string to execute.
 
-..  method:: Client.is_connected()
+..  method:: is_connected()
     
     Returns whether the client is connected.
 
-..  method:: Client.is_timing_out()
+..  method:: is_timing_out()
     
     Returns whether the client is timing out.
 
-..  method:: Client.kick([msg="" [, delay=True]])
+..  method:: kick([msg="" [, delay=True]])
     
     Disconnects a player from the server.
     
@@ -182,39 +194,39 @@ Client objects cannot be instantiated by themselves. Instead, use :func:`get_cli
     :rtype: bool
     :returns: True on successful kick, False if the player is already in the kick queue.
 
-..  method:: Client.notify_post_admin_check()
+..  method:: notify_post_admin_check()
     
     Signals that a player has completed post-connection admin checks. Has no effect if the player has already had this event signalled. Note: This must be sent even if no admin id was assigned.
 
-..  method:: Client.print_center(message)
+..  method:: print_center(message)
     
     Prints a message to this client in the center of the screen.
     
     :type   message: str
     :param  message: The message to print.
 
-..  method:: Client.print_chat(message)
+..  method:: print_chat(message)
     
     Prints a message to this client's chat area.
     
     :type   message: str
     :param  message: The message to print.
 
-..  method:: Client.print_console(message)
+..  method:: print_console(message)
     
     Prints a message to this client's console.
     
     :type   message: str
     :param  message: The message to print.
 
-..  method:: Client.print_hint(message)
+..  method:: print_hint(message)
     
     Prints a message to this client inside a hint box.
     
     :type   message: str
     :param  message: The message to print.
 
-..  method:: Client.set_fake_client_convar(convar, value)
+..  method:: set_fake_client_convar(convar, value)
     
     Sets a convar value on a fake client.
     
@@ -223,249 +235,249 @@ Client objects cannot be instantiated by themselves. Instead, use :func:`get_cli
     :type   value: str
     :param  value: The value to set the ConVar to.
 
-..  method:: Client.show_vgui_panel(name[, kv=None[, show=True]])
+..  method:: show_vgui_panel(name[, kv=None[, show=True]])
     
     Show a VGUI panel to the client.
     
     :type   name: str
     :param  name: Panel type name (see viewport_panel_names.h for a list of panel names)
-    :type   kv: :ref:`KeyValues <keyvalues-object>`
-    :param  kv: A :ref:`KeyValues <keyvalues-object>` with all the data for the panel setup. The data inside the :ref:`KeyValues <keyvalues-object>` depends on the panel type.
+    :type   kv: :class:`KeyValues <keyvalues-object>`
+    :param  kv: A :class:`KeyValues <keyvalues-object>` with all the data for the panel setup. The data inside the :ref:`KeyValues <keyvalues-object>` depends on the panel type.
     :type   show: bool
     :param  show: True to show the panel, or False to remove it from the client's screen.
 
 Attributes
 ----------
 
-..  data:: Client.index
+..  data:: index
     
     A number containing the index of the client. This is what SourcePawn uses for handling clients.
 
-..  data:: Client.abs_angles
+..  data:: abs_angles
     
     The client's angles vector.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support. 
 
-..  data:: Client.abs_origin
+..  data:: abs_origin
     
     The client's origin vector.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.alive
+..  data:: alive
     
     Whether the client is alive or dead.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.avg_choke
+..  data:: avg_choke
 
     The client's average packet choke. Value is a percentage ranging from 0.0 to 1.0
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
     
-..  data:: Client.avg_choke_in
+..  data:: avg_choke_in
     
     The client's average incoming packet choke. Value is a percentage ranging from 0.0 to 1.0.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_choke_out
+..  data:: avg_choke_out
     
     The client's average outgoing packet choke. Value is a percentage ranging from 0.0 to 1.0.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_data
+..  data:: avg_data
     
     The client's data flow, incoming and outgoing, in bytes per second.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.avg_data_in
+..  data:: avg_data_in
     
     The client's incoming data flow in bytes per second.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
     
-..  data:: Client.avg_data_out
+..  data:: avg_data_out
     
     The client's outgoing data flow in bytes per second.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.avg_latency
+..  data:: avg_latency
     
     The client's average packet latency, both incoming and outgoing, in seconds.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_latency_in
+..  data:: avg_latency_in
     
     The client's average incoming packet latency in seconds.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_latency_out
+..  data:: avg_latency_out
     
     The client's average outgoing packet latency in seconds.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_loss
+..  data:: avg_loss
     
     The client's average packet loss. Value is a percentage ranging from 0.0 to 1.0.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_loss_in
+..  data:: avg_loss_in
     
     The client's average incoming packet loss. Value is a percentage ranging from 0.0 to 1.0.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_loss_out
+..  data:: avg_loss_out
     
     The client's average outgoing packet loss. Value is a percentage ranging from 0.0 to 1.0.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_packets
+..  data:: avg_packets
     
     The client's average packet frequency, incoming and outgoing, in packets per second.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_packets_in
+..  data:: avg_packets_in
     
     The client's average incoming packet frequency, in packets per second.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.avg_packets_out
+..  data:: avg_packets_out
     
     The client's average outgoing packet frequency, in packets per second.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.data_rate
+..  data:: data_rate
 
     The client's send date rate in bytes per second
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.deaths
+..  data:: deaths
 
     The player's death count.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.entity
+..  data:: entity
 
-    The :ref:`Entity <entity-object>` of the Client.
+    The :class:`Entity <sourcemod.entity.Entity>` of the Client.
 
-..  data:: Client.fake
+..  data:: fake
 
     Whether the client is fake or not.
 
     :except sourcemod.ViperError: Invalid client or client not connected.
 
-..  data:: Client.frags
+..  data:: frags
 
     The player's frag count.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.health
+..  data:: health
 
     The health of the player.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.ip
+..  data:: ip
 
     The IP address of this client.
 
     :except sourcemod.ViperError: Invalid client or client not connected.
 
-..  data:: Client.lang_id
+..  data:: lang_id
 
     The client's language ID as an int.
 
     :except sourcemod.ViperError: Invalid client or client not connected.
 
-..  data:: Client.latency
+..  data:: latency
 
     The client's packet latency (RTT), both incoming and outgoing, in seconds. This is more accurate than the average latency, but jittery.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.latency_in
+..  data:: latency_in
 
     The client's incoming packet latency (RTT) in seconds. This is more accurate than the average latency, but jittery.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.latency_out
+..  data:: latency_out
 
     The client's outgoing packet latency (RTT) in seconds. This is more accurate than the average latency, but jittery.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.maxs
+..  data:: maxs
 
     The client's max size vector.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.mins
+..  data:: mins
 
     The client's min size vector.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.model
+..  data:: model
 
     The client's model name.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or no mod support.
 
-..  data:: Client.name
+..  data:: name
 
     The name of this client.
 
     :except sourcemod.ViperError: Invalid client or client not connected.
 
-..  data:: Client.serial
+..  data:: serial
 
     The client's unique serial identifier.
 
-..  data:: Client.steamid
+..  data:: steamid
 
     The Steam ID of this client. This is None when the client is not authorized, yet.
 
     :except sourcemod.ViperError: Invalid client or client not connected.
 
-..  data:: Client.team
+..  data:: team
 
     The player's team.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, no mod support, or client not in-game.
 
-..  data:: Client.time_connected
+..  data:: time_connected
 
     The amount of time the client has been connected in seconds.
 
     :except sourcemod.ViperError: Invalid client, client not in-game, or client is a fake client.
 
-..  data:: Client.userid
+..  data:: userid
 
     The userid of this client.
 
     :except sourcemod.ViperError: Invalid client or client not connected.
 
-..  data:: Client.weapon
+..  data:: weapon
 
     The player's weapon name.
 

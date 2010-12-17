@@ -1167,13 +1167,13 @@ static PyMethodDef clients__Client__methods[] = {
     
     {"is_in_kick_queue",},
     {"can_user_target",},
-    {"is_timing_out",},
     {"UNDEFINED",},
     {"UNDEFINED",},
     {"UNDEFINED",},
-    {"ban", (PyCFunction)clients__Client__ban, METH_VARARGS | METH_KEYWORDS,
-        "ban(time, flags, reason, kickmsg=\"Kicked\"[, cmd=None[, source=0]]]) -> bool\n\n"
-        "Bans the client.\n\n",
+#endif
+    {"ban", (PyCFunction)clients__Client__ban, METH_VARARGS|METH_KEYWORDS,
+        "ban(time, flags, reason[, kickmsg=\"Kicked\"[, cmd=None[, source=0]]]) -> bool\n\n"
+        "Bans the client.\n\n"
         "@type  time: int\n"
         "@param time: Time, in minutes, to ban (0 = permanent)\n"
         "@type  flags: banning.BANFLAG\n"
@@ -1183,7 +1183,7 @@ static PyMethodDef clients__Client__methods[] = {
         "@type  reason: str\n"
         "@param reason: Reason to ban the client for.\n"
         "@type  kickmsg: str\n"
-        "@param kickmsg: Message o display to the user when they're kicked.\n"
+        "@param kickmsg: Message to display to the user when they're kicked.\n"
         "@type  cmd: str\n"
         "@param cmd: Command string to identify the source. If this is left empty,\n"
         "    then the ban_client forward will not be called.\n"
@@ -1192,7 +1192,6 @@ static PyMethodDef clients__Client__methods[] = {
         "    player whom was the source of the banning (not actually checked by Core).\n"
         "@rtype: bool\n"
         "@return: True on success, False on failure."},
-#endif
     {"fake_command", (PyCFunction)clients__Client__fake_command, METH_VARARGS,
         "fake_command(cmd)\n\n"
         "Executes a client command on the server without being networked.\n\n"
