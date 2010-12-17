@@ -39,6 +39,7 @@
 #define BANTIME_FOREVER 0
 
 using SourceMod::IGamePlayer;
+using SourceMod::cmd_target_info_t;
 
 static PyObject *
 clients__Client__ban(clients__Client *self, PyObject *args, PyObject *kwds)
@@ -1401,6 +1402,73 @@ clients__get_max_clients(PyObject *self, PyObject *args)
     return PyInt_FromLong(playerhelpers->GetMaxClients());
 }
 
+static PyObject *
+clients__process_target_string(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    char *pattern;
+    PyObject *py_client;
+    int flags = 0;
+    
+    int admin;
+    
+    static char *keywdlist[] = {"pattern", "admin", "flags", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sO|i", keywdlist, &pattern,
+        &py_client, &flags))
+        return NULL;
+        
+    if (PyObject_IsInstance(py_client, (PyObject *)&clients__ClientType))
+        admin = ((clients__Client*)py_client)->index;
+    else if (PyInt_Check(py_client))
+        admin = PyInt_AS_LONG(py_client);
+    else
+    {
+        PyErr_Format(_PyExc_TypeError, "`admin` is the wrong type (expected"
+            " clients.Client or int, got %s)", py_client->ob_type->tp_name);
+        return NULL;
+    }
+    
+    /* Ready the structure */
+    cmd_target_info_t *tinfo = new cmd_target_info_t();
+    tinfo->admin = admin;
+    tinfo->pattern = pattern;
+    
+    int max_targets = playerhelpers->GetMaxClients();
+    cell_t *targets = new cell_t[max_targets];
+    
+    tinfo->max_targets = max_targets;
+    tinfo->targets = targets;
+    
+    /* 64 is arbitrary; seems like the right max length for names */
+    int target_name_maxlength = 64;
+    char *target_name = new char[target_name_maxlength];
+    
+    tinfo->target_name = target_name;
+    tinfo->target_name_maxlength = target_name_maxlength;
+    
+    /* Process the structure */
+    playerhelpers->ProcessCommandTarget(tinfo);
+    
+    /* Extract info from the structure */
+    PyObject *py_target_name = PyString_FromString(tinfo->target_name);
+    
+    /* Turn targets into a Python list */
+    PyObject *py_targets = PyList_New(tinfo->num_targets);
+    for (unsigned int i=0; i<tinfo->num_targets; i++)
+        PyList_SetItem(py_targets, i, g_Players.GetPythonClient(i));
+    
+    PyObject *py_target_name_style = PyBool_FromLong(tinfo->target_name_style);
+    PyObject *py_reason = PyInt_FromLong(tinfo->reason);
+    
+    /* Plop it all in a tuple */
+    PyObject *py_return = PyTuple_Pack(4, py_targets, py_target_name,
+        py_target_name_style, py_reason);
+    
+    delete [] targets;
+    delete [] target_name;
+    
+    return py_return;
+}
+
 static PyMethodDef clients__methods[] = {
     {"create_fake_client", clients__create_fake_client, METH_VARARGS,
         "create_fake_client(name) -> Client object\n\n"
@@ -1439,6 +1507,24 @@ static PyMethodDef clients__methods[] = {
         "get_max_clients() -> int\n\n"
         "Returns the maximum number of clients allowed on the server. This may return 0\n"
         "if called before on_map_start."},
+    {"process_target_string", (PyCFunction)clients__process_target_string, METH_VARARGS|METH_KEYWORDS,
+        "process_target_string(pattern, admin[, flags=0]) -> tuple\n\n"
+        "Processes a generic target string and resolves it to a list of clients or one\n"
+        "client, based on filtering rules.\n"
+        "@type  pattern: str\n"
+        "@param pattern: Target pattern to process\n"
+        "@type  admin: clients.Client or int\n"
+        "@param admin: The clients.Client object or client index of the client to\n"
+        "    process the target string from\n"
+        "@type  flags: int\n"
+        "@param flags: A combination of COMMAND_FILTER flags. See clients.COMMAND_FILTER*\n"
+        "@rtype: tuple\n"
+        "@return: A tuple containing the useful values:\n"
+        "    (targets, target_name, tn_is_ml, reason)\n"
+        "     targets: a list of Client objects that matched the pattern\n"
+        "     target_name: a string describing the player(s) matched\n"
+        "     tn_is_ml: a boolean that's True if 'target_name' is multi-lingual\n"
+        "     reason: an int containing a clients.COMMAND_TARGET value"},
     {NULL, NULL, 0, NULL},
 };
 
@@ -1463,6 +1549,23 @@ initclients(void)
     PyModule_AddIntMacro(clients, BANFLAG_NOKICK);
     PyModule_AddIntMacro(clients, BANFLAG_NOWRITE);
     PyModule_AddIntMacro(clients, BANTIME_FOREVER);
+    
+    PyModule_AddIntMacro(clients, COMMAND_FILTER_ALIVE);
+    PyModule_AddIntMacro(clients, COMMAND_FILTER_DEAD);
+    PyModule_AddIntMacro(clients, COMMAND_FILTER_CONNECTED);
+    PyModule_AddIntMacro(clients, COMMAND_FILTER_NO_IMMUNITY);
+    PyModule_AddIntMacro(clients, COMMAND_FILTER_NO_MULTI);
+    PyModule_AddIntMacro(clients, COMMAND_FILTER_NO_BOTS);
+    
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_VALID);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_NONE);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_NOT_ALIVE);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_NOT_DEAD);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_NOT_IN_GAME);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_IMMUNE);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_EMPTY_FILTER);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_NOT_HUMAN);
+    PyModule_AddIntMacro(clients, COMMAND_TARGET_AMBIGUOUS);
     
     return clients;
 }
