@@ -12,8 +12,8 @@ Module Contents
     
     Creates a new edict (the basis of a networkable entity).
 
-    :rtype: :ref:`Entity object <entity-object>`
-    :returns: A valid :ref:`Entity object <entity-object>` on success, None otherwise
+    :rtype: :class:`Entity object <sourcemod.entity.Entity>`
+    :returns: A valid :class:`Entity object <sourcemod.entity.Entity>` on success, None otherwise
 
 ..  function:: get_entity_count()
 
@@ -24,10 +24,15 @@ Module Contents
     Returns the maximum number of entities.
 
 
-..  _entity-object:
+..  class: Entity
 
 Entity Objects
 ==============
+
+To retrieve an Entity object for an entity index, pass the index to the constructor:
+
+  >>> myent = Entity(42)
+  <Entity 42: 'clownshoes' at 0xDEADBEEF>
 
 ..  data:: Entity.classname
     
@@ -59,7 +64,10 @@ Entity Objects
         >>> if my_client.entity == weap.sendprops["m_hOwner"]: print True
         True
 
-    Snazzy, eh? It even supports arrays inside sendprops, so you can do ``my_client.entity.sendprops["m_hMyWeapons"][3]``
+    Snazzy, eh? It even supports arrays inside sendprops, so you can do::
+    
+        >>> my_client.entity.sendprops["m_hMyWeapons"][3]
+        <Entity 897: 'weapon_knife' at: 0xBADBADBA>
 
 ..  method:: Entity.is_networkable()
     

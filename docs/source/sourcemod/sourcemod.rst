@@ -29,7 +29,7 @@ This is the standard library provided by Viper. It is all written in C, and shou
 
 ..  class:: server_out
     
-    Writes to the server console. An instance of this class is used to overwrite `sys.stdout` in order to provide `print` redirection.
+    Writes to the server console. An instance of this class is used to overwrite `sys.stdout` in order to provide `print` redirection to the server console.
 
     ..  method:: sourcemod.server_out.write(msg)
         

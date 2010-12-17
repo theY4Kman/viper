@@ -7,7 +7,7 @@ Viper plug-ins are simple enough to write. They are written in Python (obviously
 Folder Layout
 =============
 
-Viper plug-ins are placed in the sourcemod/plugins folder, just like SourceMod plugins. In the sourcemod/plugins folder, create a new folder named `helloworld`. Inside that folder, create a file named `__init__.py`. This file is the plugin::
+Viper plug-ins are placed in the sourcemod/plugins folder, just like SourceMod plugins. Unlike SourceMod plug-ins, however, each Viper plug-in resides in its own folder undearneath sourcemod/plugins/. In the sourcemod/plugins folder, create a new folder named `helloworld`. Inside that folder, create a file named `__init__.py`. This file is the plugin::
   
   addons/
     sourcemod/

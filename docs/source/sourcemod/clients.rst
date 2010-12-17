@@ -5,24 +5,79 @@
 ..  module:: sourcemod.clients
 ..  moduleauthor:: Zach "theY4Kman" Kanzler <they4kman@gmail.com>
 
-Module Contents
-===============
+The :mod:`sourcemod.clients` module contains functions and objects having to do with clients. There may be different functions available in this module than SourceMod's `clients.inc`, because they fit in better here.
 
-..  data:: BANFLAG_AUTO
-    
-    Auto-detects whether to ban by steamid or IP
+Constants
+=========
 
-..  data:: BANFLAG_IP
-    
-    Always ban by IP
+..  _banflags:
 
-..  data:: BANFLAG_AUTHID
-    
-    Always ban by authstring (Steam ID) if possible
+These flags will be used in the clients.Client.ban() function, which is yet to be implemented.
 
-..  data:: BANFLAG_NOKICK
-    
-    Does not kick the client
++--------------------------------------+------------------------------------------------+
+| Flag                                 | Description                                    |
++======================================+================================================+
+| .. data:: BANFLAG_AUTO               | Auto-detects whether to ban by steamid or IP   |
++--------------------------------------+------------------------------------------------+
+| .. data:: BANFLAG_IP                 | Always ban by IP                               |
++--------------------------------------+------------------------------------------------+
+| .. data:: BANFLAG_AUTHID             | Always ban by authstring (Steam ID) if possible|
++--------------------------------------+------------------------------------------------+
+| .. data:: BANFLAG_NOKICK             | Does not kick the client                       |
++--------------------------------------+------------------------------------------------+
+
+..  _command-filter-flags:
+
+Use COMMAND_FILTER flags with :ref:`process_target_string <sourcemod.clients.process_target_string>` to filter the players that will be chosen.
+
++--------------------------------------+-----------------------------------------------+
+| Flag                                 | Description                                   |
++======================================+===============================================+
+| .. data:: COMMAND_FILTER_ALIVE       | Only allow alive players                      |
++--------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_FILTER_DEAD        | Only filter dead players                      |
++--------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_FILTER_CONNECTED   | Allow players not fully in-game               |
++--------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_FILTER_NO_IMMUNITY | Ignore immunity rules                         |
++--------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_FILTER_NO_MULTI    | Do not allow multiple target patterns         |
++--------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_FILTER_NO_BOTS     | Do not allow bots to be targetted             |
++--------------------------------------+-----------------------------------------------+
+
+..  _command-targets:
+
+The tuple :ref:`process_target_string <sourcemod.clients.process_target_string>` returns contains a `reason` field, which will be one of the constants below. These describe the reason why :ref:`process_target_string <sourcemod.clients.process_target_string>` failed or succeeded.
+For implementation purposes, `reason` values larger than 0 succeeded, a value of 0 means no player was matched, and anything below 0 means players were found, but they didn't meet the COMMAND_FILTER flags passed.
+
++----------------------------------------+-----------------------------------------------+
+| Flag                                   | Description                                   |
++========================================+===============================================+
+| .. data:: COMMAND_TARGET_VALID         | Client passed the filter. The value of this   |
+|                                        | flag is 1.                                    |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_NONE          | No target was found. The value of this flag   |
+|                                        | is 0. The rest of the flags' values continue  |
+|                                        | to decline by 1.                              |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_NOT_ALIVE     | Single client is not alive                    |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_NOT_DEAD      | Single client is not dead                     |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_NOT_IN_GAME   | Single client is not in game                  |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_IMMUNE        | Single client is immune                       |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_EMPTY_FILTER  | A multi-filter (such as @all) had no targets  |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_NOT_HUMAN     | Target was not human                          |
++----------------------------------------+-----------------------------------------------+
+| .. data:: COMMAND_TARGET_AMBIGUOUS     | Partial name had too many targets             |
++----------------------------------------+-----------------------------------------------+
+
+Functions
+=========
 
 ..  function:: create_fake_client(name)
     
@@ -72,11 +127,34 @@ Module Contents
     
     Returns the maximum number of clients allowed on the server. This may return 0 if called before the global forward :ref:`on_map_start`.
 
+..  function:: process_target_string(pattern, admin[, flags=0])
+    
+    Processes a generic target string and resolves it to a list of clients, or one client, based on filtering rules.
+    
+    This function returns a tuple containing all the useful data: ``(targets, target_name, target_name_is_multilingual, reason)``
+    
+    * ``targets`` is a list of all the clients matched. This will always be a list, even when only one client is matched.
+    * ``target_name`` is a string containing a description of the targets matched. For instance, if one client is matched, ``target_name`` will be that client's name; if all the bots that are alive are matched, ``target_name`` will be "all alive bots".
+    * ``target_name_is_multilingual`` is a boolean that is True if ``target_name`` is multilingual. That is, if it's a translated phrase. For single client matches, where ``target_name`` is the client matched, this will be False.
+    * ``reason`` is an int containing a :ref:`COMMAND_TARGET <command-targets>` constant, describing the reason why no players were matched.
+    
+    Returning a tuple allows easier handling of the data::
+    
+      targets,target_name,tn_is_ml,reason = process_target_string("@all", 2, COMMAND_FILTER_ALIVE|COMMAND_FILTER_CONNECTED)
+    
+    :type   pattern: str
+    :param  pattern: Target pattern to process.
+    :type   admin: clients.Client or int
+    :param  admin: The :ref:`clients.Client object <client-object>` or client index of the client to process the target string from.
+    :type   flags: int
+    :param  flags: :ref:`COMMAND_FILTER flags<command-filter-flags>` to filter the search.
 
 ..  _client-object:
 
 Client Objects
 ==============
+
+Client objects cannot be instantiated by themselves. Instead, use :func:`get_client(index) <sourcemod.clients.get_client>` to retrieve a client object.
 
 ..  method:: Client.fake_command(cmd)
     

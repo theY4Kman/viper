@@ -12,21 +12,31 @@ Module Contents
 
 ..  _exec-types:
 
-..  list-table::
-    :widths: 10 90
-    
-    * - **Exec Type**
-      - **Description**
-    * - ..  data:: ET_Ignore
-      - Ignore all return values and return None
-    * - ..  data:: ET_Single
-      - This is no longer used and will act like ET_Ignore
-    * - ..  data:: ET_Event
-      - Acts as an event, allowing callbacks to return :ref:`Plugin result types <result-types>`. Mid-stops are not allowed, meaning returning :data:`Plugin_Stop <sourcemod.Plugin_Stop>` will not stop the forward. Returns the highest number value returned.
-    * - ..  data:: ET_Hook
-      - Acts as a hook, allowing callbacks to return :ref:`Plugin result types <result-types>`. Mid-stops are allowed, meaning returning :data:`Plugin_Stop <sourcemod.Plugin_Stop>` will stop the forward. Returns the highest number value returned.
-    * - ..  data:: ET_LowEvent
-      - Same as ET_Event, except that it returns the lowest number value returned.
++--------------------------------------+------------------------------------------------+
+| Exec Type                            | Description                                    |
++======================================+================================================+
+| .. data:: ET_Ignore                  | Ignore all return values and return None       |
++--------------------------------------+------------------------------------------------+
+| .. data:: ET_Single                  | This is no longer used and will act like       |
+|                                      | ET_Ignore                                      |
++--------------------------------------+------------------------------------------------+
+| .. data:: ET_Event                   | Acts as an event, allowing callbacks to return |
+|                                      | :ref:`Plugin result types <result-types>`.     |
+|                                      | Mid-stops are not allowed, meaning returning   |
+|                                      | :data:`Plugin_Stop <sourcemod.Plugin_Stop>`    |
+|                                      | will not stop the forward. Returns the highest |
+|                                      | number value returned by the callbacks.        |
++--------------------------------------+------------------------------------------------+
+| .. data:: ET_Hook                    | Acts as a hook, allowing callbacks to return   |
+|                                      | :ref:`Plugin result types <result-types>`.     |
+|                                      | Mid-stops are allowed, meaning returning       |
+|                                      | :data:`Plugin_Stop <sourcemod.Plugin_Stop>`    |
+|                                      | will stop the forward. Returns the highest     |
+|                                      | number value returned by the callbacks.        |
++--------------------------------------+------------------------------------------------+
+| .. data:: ET_LowEvent                | Same as ET_Event, except that it returns the   |
+|                                      | lowest number value returned.                  |
++--------------------------------------+------------------------------------------------+
 
 ..  function:: create(name, callback, et, ...)
     
@@ -55,7 +65,7 @@ Module Contents
     :type   et: :ref:`ET constant <exec-types>`
     :param  et: How return values of registered callbacks should be handled when the forward is fired.
     :param  ...: The types of the parameters that will be passed to all the registered callbacks when the forward is fired.
-    :returns: A :ref:`Forward object <forward-objects>`
+    :returns: A :class:`Forward object <sourcemod.forwards.Forward>`
 
 ..  function:: register(forward, callback)
     
@@ -64,7 +74,7 @@ Module Contents
     :returns: True if successful; False if the specified forward could not be found or if the forward name passed is blank.
 
 
-..  _forward-objects:
+..  class: Forward
 
 Forward Objects
 ===============
@@ -74,6 +84,10 @@ Calling ``len()`` on a forward will return the number of hooks registered to the
 ..  attribute:: name
     
     The name of the forward. This is blank for anonymous forwards.
+
+..  describe:: len(forward)
+    
+    Returns the number of callbacks registered to this forward. Interchangeable with :meth:`get_function_count <sourcemod.forwards.Forward.get_function_count>`
 
 ..  method:: Forward.add_function(func)
     

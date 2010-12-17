@@ -10,15 +10,15 @@ Module Contents
 
 ..  _sm-reply-constants:
 
-..  list-table::
-    :widths: 10 90
-    
-    * - **Name**
-      - **Description**
-    * - ..  data:: SM_REPLY_CONSOLE
-      - The command was executed in the console.
-    * - ..  data:: SM_REPLY_CHAT
-      - The command was executed in chat (by "!cmd" or "/cmd" -- depending on your server's chat trigger configuration)
++--------------------------------------+------------------------------------------------+
+| Flag                                 | Description                                    |
++======================================+================================================+
+| .. data:: SM_REPLY_CONSOLE           | The command was executed in the console.       |
++--------------------------------------+------------------------------------------------+
+| .. data:: SM_REPLY_CHAT              | The command was executed in chat (by "!cmd" or |
+|                                      | "/cmd" -- depending on your server's chat      |
+|                                      | trigger configuration)                         |
++--------------------------------------+------------------------------------------------+
 
 ..  function:: create_convar(name, value[, description[, flags[, min[, max]]]])
     

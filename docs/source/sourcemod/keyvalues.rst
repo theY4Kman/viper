@@ -12,19 +12,19 @@ Module Contents
 
 ..  function:: keyvalues_from_file(file [, use_escape_sequences=False])
     
-    Creates a new :ref:`KeyValues object <keyvalues-object>` from a file or file-like object.
+    Creates a new :class:`KeyValues object <sourcemod.keyvalues.KeyValues>` from a file or file-like object.
     
     :type   file: str/file
     :param  file: If a string, creates a new KeyValues object from the filename stored in the string. Otherwise it must be a file-like object, in that it must have a ``read()`` function.
     :type   use_escape_sequences: bool
     :param  use_escape_sequences: Whether or not to parse escape sequences such as ``\n`` or ``\\``
-    :rtype: :ref:`KeyValues <keyvalues-object>`
-    :return: A valid :ref:`KeyValues object <keyvalues-object>` on success, None otherwise.
+    :rtype: :class:`KeyValues <sourcemod.keyvalues.KeyValues>`
+    :return: A valid :class:`KeyValues object <sourcemod.keyvalues.KeyValues>` on success, None otherwise.
 
 
 ..  index:: KeyValues
 
-..  _keyvalues-object:
+..  class: KeyValues
 
 KeyValues Objects
 =================
@@ -97,18 +97,14 @@ Attributes and Methods
     :param  string: The string value to parse
 
 ..  method:: KeyValues.save(file)
-    
-    **NOT IMPLEMENTED YET**
         
     Save this KeyValues to a file
     
     :type   file: str or file
-    :param  file: A filename to save to, or a file-like object (must have a ``write()`` method)
-    :rtype: bool
-    :returns: True on successful save, False otherwise.    
+    :param  file: A :keyword:`file` object to save to. 
 
 
-The KeyValues object supports the dict object protocol, so almost everything you can do with a dict, you can do with a KeyValues.
+The KeyValues object supports the dictionary object protocol, so almost everything you can do with a :keyword:`dict`, you can do with a KeyValues.
 
 ..  method:: KeyValues.iteritems()
              KeyValues.iterkeys()
@@ -140,7 +136,7 @@ The KeyValues object supports the dict object protocol, so almost everything you
 
 ..  describe:: del kv[key]
     
-    Remove ``kv[key]`` from *kv*. Raises a KeyError if *key* is not in the KeyValues.
+    Remove ``kv[key]`` from *kv*. Raises a :exc:`KeyError` if *key* is not in the KeyValues.
 
 ..  describe:: key in kv
     
@@ -152,4 +148,4 @@ The KeyValues object supports the dict object protocol, so almost everything you
 
 ..  describe:: iter(kv)
     
-    Return an iterator over the keys of the KeyValues. This is a shortcut for :meth:`iterkeys <keyvalues.KeyValues.iterkeys>`
+    Return an iterator over the keys of the KeyValues. This is a shortcut for :meth:`iterkeys <sourcemod.keyvalues.KeyValues.iterkeys>`

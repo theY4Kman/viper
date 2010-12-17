@@ -8,14 +8,20 @@ Viper Documentation
 
 Viper is a SourceMod extension that embeds the CPython interpreter and loads Python plug-ins. It has a standard library written completely in C++ for excellent performance.
 
-Contents:
-=========
+Tutorials and non-API Documentation
+===================================
 
-.. toctree::
-   :maxdepth: 3
-   
-   sourcemod/index.rst
-   first_plugin.rst
+Learn the basics of Viper plug-in writing with :doc:`first_plugin`. Learn how to access the Viper menu from the console in :doc:`viper_menu`
+
+Contents
+========
+
+..  toctree::
+    :maxdepth: 3
+    
+    first_plugin.rst
+    viper_menu.rst
+    sourcemod/index.rst
 
 Indices and tables
 ==================
