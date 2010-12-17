@@ -22,6 +22,7 @@
 #include "systems/ConCmdManager.h"
 #include "systems/ConVarManager.h"
 #include "systems/PluginSys.h"
+#include <sm_trie.h>
 
 ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
 #if SOURCE_ENGINE >= SE_ORANGEBOX
@@ -31,10 +32,110 @@ ConVar Py_Version("viper_version", SMEXT_CONF_VERSION,
 #endif
     "The version of Viper installed.");
 
+/** This class maintains the interpreter, and is necessary for commands that
+ ** need a plug-in, such as natives.invoke or console.reg_concmd */
+class ViperInterp : public IViperPlugin
+{
+public:
+    ViperInterp()
+    {
+        m_info.name = "<interp>";
+        m_info.author = SMEXT_CONF_AUTHOR;
+        m_info.description = "The Viper Console Interpreter";
+        m_info.version = SMEXT_CONF_VERSION;
+        m_info.url = SMEXT_CONF_URL;
+        
+        m_pProps = sm_trie_create();
+    }
+    
+    ~ViperInterp()
+    {
+        sm_trie_destroy(m_pProps);
+    }
+
+public: // IViperPlugin
+    virtual void RunPlugin()
+    {
+        /* Create a completeley new environment (sub-interpreter) */
+        m_ThreadState = Py_NewInterpreter();
+        if (m_ThreadState == NULL)
+        {
+            g_pSM->LogError(myself, "Fatal error in creating Python "
+                "sub-interpreter for interp cmd!");
+            return;
+        }
+        
+        m_InterpState = m_ThreadState->interp;
+        
+        PyThreadState *_swap = PyThreadState_Get();
+        PyThreadState_Swap(m_ThreadState);
+        
+        m_PluginDict = InitializePlugin("<interp>");
+        PyObject *sm = PyImport_ImportModule("sourcemod");
+        PyDict_SetItemString(m_PluginDict, "sourcemod", sm);
+        PyDict_SetItemString(m_PluginDict, "sm", sm);
+        
+        PyThreadState_Swap(_swap);
+    }
+    
+    virtual void UpdateInfo() {}
+    
+    virtual char const *GetPath() { return "<interp>"; }
+    virtual char const *GetFolder() { return "<interp>"; }
+    virtual char const *GetName() { return "<interp>"; }
+    
+    virtual PyThreadState *GetThreadState() { return m_ThreadState; }
+    virtual PyInterpreterState *GetInterpState() { return m_InterpState; }
+    
+    virtual ViperPluginStatus GetStatus() { return ViperPlugin_Running; }
+    virtual ViperPluginType GetType() { return ViperPluginType_Global; }
+    
+    virtual const viper_plugininfo_t *GetPublicInfo() { return &m_info; }
+
+    virtual bool SetProperty(char const *prop, void *value)
+    {
+        return sm_trie_insert(m_pProps, prop, value);
+    }
+
+    virtual bool GetProperty(char const *prop, void **ptr, bool remove)
+    {
+        void *temp;
+
+        if (!sm_trie_retrieve(m_pProps, prop, (void **)&temp))
+            return false;
+        
+        *ptr = temp;
+
+        if (remove)
+        {
+            sm_trie_delete(m_pProps, prop);
+            return true;
+        }
+
+        return true;
+    }
+    
+    virtual PyObject *GetPluginDict() { return m_PluginDict; }
+
+private:
+    PyThreadState *m_ThreadState;
+    PyInterpreterState *m_InterpState;
+    PyObject *m_PluginDict;
+    
+    viper_plugininfo_t m_info;
+    Trie *m_pProps;
+};
+
 ViperConsole::ViperConsole()
 {
     m_InterpCmd = NULL;
-    m_InterpGlobals = NULL;
+    m_Interp = NULL;
+}
+
+ViperConsole::~ViperConsole()
+{
+    if (m_Interp != NULL)
+        delete m_Interp;
 }
 
 void
@@ -213,37 +314,16 @@ ViperConsole::CommandCallback(const CCommand &command)
     /* interpcmd execcmd */
     else
     {
-        if (m_pThreadState == NULL)
+        if (m_Interp == NULL)
         {
-            /* Create a completeley new environment (sub-interpreter) */
-            m_pThreadState = Py_NewInterpreter();
-            if (m_pThreadState == NULL)
-            {
-                g_pSM->LogError(myself, "Fatal error in creating Python "
-                    "sub-interpreter for interp cmd!");
-                return;
-            }
-            
-            m_pInterpState = m_pThreadState->interp;
+            m_Interp = new ViperInterp();
+            m_Interp->RunPlugin();
         }
         
-        tstate = m_pThreadState;
+        tstate = m_Interp->GetThreadState();
         strcpy((char *)&exec, command.ArgS());
         
-        if (m_InterpGlobals == NULL)
-        {
-            PyThreadState *_swap = PyThreadState_Get();
-            PyThreadState_Swap(tstate);
-            
-            m_InterpGlobals = InitializePlugin("<interp>");
-            PyObject *sm = PyImport_ImportModule("sourcemod");
-            PyDict_SetItemString(m_InterpGlobals, "sourcemod", sm);
-            PyDict_SetItemString(m_InterpGlobals, "sm", sm);
-            
-            PyThreadState_Swap(_swap);
-        }
-        
-        globals = m_InterpGlobals;
+        globals = m_Interp->GetPluginDict();
     }
     
     /* Strip quotes */

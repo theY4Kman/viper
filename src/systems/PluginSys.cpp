@@ -23,6 +23,7 @@
 #include "ConCmdManager.h"
 #include "python/init.h"
 #include "viper.h"
+#include "console.h"
 #include <string.h>
 
 CPluginFunction::~CPluginFunction()
@@ -639,9 +640,13 @@ CPluginManager::UnloadPlugin(CPlugin *plugin)
     return true;
 }
 
-CPlugin *
+IViperPlugin *
 CPluginManager::GetPluginOfInterpreterState(PyInterpreterState *interp)
 {
+    IViperPlugin *interp_plugin = g_VConsole.GetInterpPlugin();
+    if (interp_plugin != NULL && interp_plugin->GetInterpState() == interp)
+        return interp_plugin;
+    
     SourceHook::List<CPlugin *>::iterator iter;
     for (iter=m_list.begin(); iter!=m_list.end(); iter++)
     {

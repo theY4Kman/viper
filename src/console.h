@@ -22,6 +22,7 @@
 #define _INCLUDE_VIPER_CONSOLE_H_
 
 #include "viper_globals.h"
+#include "IViperPluginSys.h"
 #include <IRootConsoleMenu.h>
 #include <compat_wrappers.h>
 
@@ -43,13 +44,17 @@ public: // ICommandCallbackvoid
     void CommandCallback(const CCommand &command);
 
 public:
-    ViperConsole::ViperConsole();
+    ViperConsole();
+    ~ViperConsole();
+    
+    IViperPlugin *GetInterpPlugin()
+    {
+        return m_Interp;
+    }
 
 private:
     ConCommandBase *m_InterpCmd;
-    PyThreadState *m_pThreadState;
-    PyInterpreterState *m_pInterpState;
-    PyObject *m_InterpGlobals;
+    IViperPlugin *m_Interp;
 };
 
 extern ViperConsole g_VConsole;

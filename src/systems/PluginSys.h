@@ -183,7 +183,7 @@ public: // IViperPluginManager
     bool ReloadPlugin(CPlugin *plugin);
     
     /// Returns a plugin by its interpreter state
-    CPlugin *GetPluginOfInterpreterState(PyInterpreterState *interp);
+    IViperPlugin *GetPluginOfInterpreterState(PyInterpreterState *interp);
     /// Returns a plugin from its path
     CPlugin *GetPluginByPath(char const *path);
     /// Returns a plugin from an id
