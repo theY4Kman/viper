@@ -42,7 +42,8 @@ enum BitBufType
     BitBufType_Angle,
     BitBufType_Coord,
     BitBufType_VecCoord,
-    BitBufType_VecNormal
+    BitBufType_VecNormal,
+    BitBufType_Angles
 };
 
 /** Stores information about one piece of data in a bitbuf */
@@ -75,7 +76,15 @@ struct bitbuf__BitBuf
     SourceHook::CStack<BitBufCell *> cells;
 };
 
+struct bitbuf__BitBufRead
+{
+    PyObject_HEAD
+    
+    bf_read *bf;
+};
+
 extern PyTypeObject bitbuf__BitBufType;
+extern PyTypeObject bitbuf__BitBufReadType;
 
 extern PyObject *GetBitBuf();
 extern bool BitBufToBfWrite(bitbuf__BitBuf *obj, bf_write *bitbuf);

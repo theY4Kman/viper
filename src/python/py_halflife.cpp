@@ -70,6 +70,29 @@ halflife__get_current_map(PyObject *self)
     return PyString_FromString(gamehelpers->GetCurrentMap());
 }
 
+/* In order to compile under any environment, independent of the MM:S version,
+ * we redefine all the SOURCE_ENGINE constants.
+ */
+#undef SOURCE_ENGINE_UNKNOWN
+#undef SOURCE_ENGINE_ORIGINAL
+#undef SOURCE_ENGINE_EPISODEONE
+#undef SOURCE_ENGINE_ORANGEBOX
+#undef SOURCE_ENGINE_LEFT4DEAD
+#undef SOURCE_ENGINE_DARKMESSIAH
+#undef SOURCE_ENGINE_ORANGEBOXVALVE
+#undef SOURCE_ENGINE_LEFT4DEAD2
+#undef SOURCE_ENGINE_ALIENSWARM
+
+#define SOURCE_ENGINE_UNKNOWN           0   /**< Could not determine the engine version */
+#define SOURCE_ENGINE_ORIGINAL          1   /**< Original Source Engine (used by The Ship) */
+#define SOURCE_ENGINE_EPISODEONE        2   /**< Episode 1 Source Engine (second major SDK) */
+#define SOURCE_ENGINE_ORANGEBOX         3   /**< Orange Box Source Engine (third major SDK) */
+#define SOURCE_ENGINE_LEFT4DEAD         4   /**< Left 4 Dead */
+#define SOURCE_ENGINE_DARKMESSIAH       5   /**< Dark Messiah Multiplayer (based on original engine) */
+#define SOURCE_ENGINE_ORANGEBOXVALVE    6   /**< Orange Box Source Engine for Valve games (TF2/DOD:S) */
+#define SOURCE_ENGINE_LEFT4DEAD2        7   /**< Left 4 Dead 2 */
+#define SOURCE_ENGINE_ALIENSWARM        8   /**< Alien Swarm */
+
 static PyObject *
 halflife__guess_sdk_version(PyObject *self)
 {
@@ -89,6 +112,18 @@ halflife__guess_sdk_version(PyObject *self)
     
     case SOURCE_ENGINE_ORANGEBOX:
         return PyInt_FromLong(30);
+    
+    case SOURCE_ENGINE_ORANGEBOXVALVE:
+        return PyInt_FromLong(35);
+    
+    case SOURCE_ENGINE_LEFT4DEAD:
+        return PyInt_FromLong(40);
+    
+    case SOURCE_ENGINE_LEFT4DEAD2:
+        return PyInt_FromLong(50);
+    
+    case SOURCE_ENGINE_ALIENSWARM:
+        return PyInt_FromLong(60);
     }
 #else
     /* The Ship is the only known game to use the old engine */
@@ -367,7 +402,10 @@ inithalflife(void)
     PyModule_AddIntConstant(halflife, "SOURCE_SDK_DARKMESSIAH", 15);
     PyModule_AddIntConstant(halflife, "SOURCE_SDK_EPISODE1", 20);
     PyModule_AddIntConstant(halflife, "SOURCE_SDK_EPISODE2", 30);
+    PyModule_AddIntConstant(halflife, "SOURCE_SDK_EPISODE2VALVE", 35);
     PyModule_AddIntConstant(halflife, "SOURCE_SDK_LEFT4DEAD", 40);
+    PyModule_AddIntConstant(halflife, "SOURCE_SDK_LEFT4DEAD2", 50);
+    PyModule_AddIntConstant(halflife, "SOURCE_SDK_ALIENSWARM", 60);
     
     return halflife;
 }

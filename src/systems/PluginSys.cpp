@@ -83,8 +83,6 @@ CPluginFunction::ForwardCallback(IViperForward *fwd, PyObject *result,
         return Pl_Continue;
     }
     
-    PyThreadState_Swap(_save);
-    
     if (!PyInt_Check(pyresult))
         return Pl_Continue;
     
@@ -94,6 +92,8 @@ CPluginFunction::ForwardCallback(IViperForward *fwd, PyObject *result,
     
     if (int_res > Pl_Stop)
         return Pl_Stop;
+    
+    PyThreadState_Swap(_save);
     
     return (ViperResultType)int_res;
 }
@@ -244,8 +244,11 @@ CPlugin::CreatePlugin(char const *path, char* error, size_t maxlength)
 PyObject *
 InitializePlugin(char const *path)
 {
+    /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
     char *path_string = new char[PLATFORM_MAX_PATH];
-    strcpy(path_string, path);
+    size_t len = strrchr(path, '/') - path;
+    strncpy(path_string, path, len);
+    path_string[len] = '\0';
     
     PyObject *newpath = PyList_New(5);
     PyList_SetItem(newpath, 0, PyString_FromString(path_string));
@@ -304,15 +307,8 @@ void
 CPlugin::RunPlugin()
 {
     PyThreadState_Swap(m_pThreadState);
-    
-    /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
-    char *path_string = new char[PLATFORM_MAX_PATH];
-    size_t len = strrchr(m_sPath, '/') - m_sPath;
-    strncpy(path_string, m_sPath, len);
-    path_string[len] = '\0';
 
-    m_pPluginDict = InitializePlugin(path_string);
-    delete [] path_string;
+    m_pPluginDict = InitializePlugin(m_sPath);
     
     /* Run the plug-in file.
      * We use Python's File object so that the underlying C FILE object will always match

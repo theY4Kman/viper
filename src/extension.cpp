@@ -81,6 +81,7 @@ PyTypeObject *_PyTuple_Type = NULL;
 PyTypeObject *_PyBool_Type = NULL;
 PyTypeObject *_PyDict_Type = NULL;
 PyTypeObject *_PyList_Type = NULL;
+PyTypeObject *_PyFile_Type = NULL;
 #endif
 
 PyThreadState *g_pGlobalThreadState = NULL;
@@ -233,16 +234,21 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         Py_DECREF(types);
     }
     
-#   define TYPE_IS_NULL(type) (_Py##type##_Type == NULL)
-    if (TYPE_IS_NULL(Type) && TYPE_IS_NULL(Int) && TYPE_IS_NULL(String)
-        && TYPE_IS_NULL(Float) && TYPE_IS_NULL(Long) && TYPE_IS_NULL(Tuple)
-        && TYPE_IS_NULL(Bool) && TYPE_IS_NULL(Dict))
-    {
-        strncpy(error, "Unable to initialize Python data types -- cannot run Viper.",
-            maxlength);
-        return false;
-    }
-#   undef TYPE_IS_NULL
+#   define CHECK_TYPE_IS_NULL(type) if (_Py##type##_Type == NULL) { \
+        strncpy(error, "Unable to initialize Python " #type " type -- cannot run Viper.", \
+            maxlength); \
+        return false; }
+    
+    CHECK_TYPE_IS_NULL(Type);
+    CHECK_TYPE_IS_NULL(Int);
+    CHECK_TYPE_IS_NULL(String);
+    CHECK_TYPE_IS_NULL(Float)
+    CHECK_TYPE_IS_NULL(Long)
+    CHECK_TYPE_IS_NULL(Tuple)
+    CHECK_TYPE_IS_NULL(Bool)
+    CHECK_TYPE_IS_NULL(Dict)
+    CHECK_TYPE_IS_NULL(List);
+    CHECK_TYPE_IS_NULL(File);
 
 #endif
     

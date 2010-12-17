@@ -23,192 +23,6 @@
 #include "py_entity.h"
 #include "py_datatypes.h"
 
-PyObject *
-bitbuf__BitBuf__write_angle(bitbuf__BitBuf *self, PyObject *args,
-                            PyObject *kwds)
-{
-    float num;
-    int numBits = 8;
-    
-    static char *keywdlist[] = {"num", "numBits"};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "f|i", keywdlist, &num,
-            &numBits))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Angle;
-    cell->data.asAngle.value = num;
-    cell->data.asAngle.numbits = numBits;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_bool(bitbuf__BitBuf *self, PyObject *args)
-{
-    bool bit;
-    if (!PyArg_ParseTuple(args, "b", &bit))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Bool;
-    cell->data.asBool = bit;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_byte(bitbuf__BitBuf *self, PyObject *args)
-{
-    char byte;
-    if (!PyArg_ParseTuple(args, "B", &byte))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Byte;
-    cell->data.asInt = byte;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_char(bitbuf__BitBuf *self, PyObject *args)
-{
-    char byte;
-    if (!PyArg_ParseTuple(args, "c", &byte))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Char;
-    cell->data.asInt = byte;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_coord(bitbuf__BitBuf *self, PyObject *args)
-{
-    float coord;
-    if (!PyArg_ParseTuple(args, "f", &coord))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Coord;
-    cell->data.asFloat = coord;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_entity(bitbuf__BitBuf *self, PyObject *args)
-{
-    PyObject *py_ent;
-    int ent_index;
-    
-    if (!PyArg_ParseTuple(args, "O", &py_ent))
-        return NULL;
-    
-    if (PyObject_IsInstance(py_ent, (PyObject *)&entity__EntityType))
-        ent_index = gamehelpers->IndexOfEdict(((entity__Entity *)py_ent)->edict);
-    else if (PyInt_Check(py_ent))
-        ent_index = PyInt_AS_LONG(py_ent);
-    else
-    {
-        PyErr_Format(_PyExc_TypeError, "`entity` is the wrong type (expected"
-            " sourcemod.entity.Entity or int, got \"%s\")",
-            py_ent->ob_type->tp_name);
-        return NULL;
-    }
-    
-    if (ent_index == -1)
-    {
-        PyErr_SetString(g_pViperException, "entity is invalid.");
-        return NULL;
-    }
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Entity;
-    cell->data.asInt = ent_index;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_float(bitbuf__BitBuf *self, PyObject *args)
-{
-    float num;
-    if (!PyArg_ParseTuple(args, "f", &num))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Float;
-    cell->data.asFloat = num;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_num(bitbuf__BitBuf *self, PyObject *args)
-{
-    int num;
-    if (!PyArg_ParseTuple(args, "i", &num))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Num;
-    cell->data.asInt = num;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_short(bitbuf__BitBuf *self, PyObject *args)
-{
-    short num;
-    if (!PyArg_ParseTuple(args, "h", &num))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_Short;
-    cell->data.asInt = num;
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
-PyObject *
-bitbuf__BitBuf__write_string(bitbuf__BitBuf *self, PyObject *args)
-{
-    char *str;
-    if (!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
-    
-    BitBufCell *cell = new BitBufCell();
-    cell->type = BitBufType_String;
-    cell->data.asString = sm_strdup(str);
-    
-    self->cells.push(cell);
-    
-    Py_RETURN_NONE;
-};
-
 /* Tries to extract a vector out of a PyObject, as a list-like item, and as
  * a datatypes.Vector object.
  */
@@ -263,7 +77,216 @@ PyObjectToVector(PyObject *obj, float vec[3])
     return true;
 }
 
-PyObject *
+static PyObject *
+bitbuf__BitBuf__write_angle(bitbuf__BitBuf *self, PyObject *args,
+                            PyObject *kwds)
+{
+    float num;
+    int numBits = 8;
+    
+    static char *keywdlist[] = {"num", "numBits"};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "f|i", keywdlist, &num,
+            &numBits))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Angle;
+    cell->data.asAngle.value = num;
+    cell->data.asAngle.numbits = numBits;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_angles(bitbuf__BitBuf *self, PyObject *args)
+{
+    PyObject *py_vec;
+    float vec[3] = {0.0, 0.0, 0.0};
+    
+    if (!PyArg_ParseTuple(args, "O", &py_vec))
+        return NULL;
+    
+    if (!PyObjectToVector(py_vec, vec))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Angles;
+    cell->data.asVector[0] = vec[0];
+    cell->data.asVector[1] = vec[1];
+    cell->data.asVector[2] = vec[2];
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_bool(bitbuf__BitBuf *self, PyObject *args)
+{
+    bool bit;
+    if (!PyArg_ParseTuple(args, "b", &bit))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Bool;
+    cell->data.asBool = bit;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_byte(bitbuf__BitBuf *self, PyObject *args)
+{
+    char byte;
+    if (!PyArg_ParseTuple(args, "B", &byte))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Byte;
+    cell->data.asInt = byte;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_char(bitbuf__BitBuf *self, PyObject *args)
+{
+    char byte;
+    if (!PyArg_ParseTuple(args, "c", &byte))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Char;
+    cell->data.asInt = byte;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_coord(bitbuf__BitBuf *self, PyObject *args)
+{
+    float coord;
+    if (!PyArg_ParseTuple(args, "f", &coord))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Coord;
+    cell->data.asFloat = coord;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_entity(bitbuf__BitBuf *self, PyObject *args)
+{
+    PyObject *py_ent;
+    int ent_index;
+    
+    if (!PyArg_ParseTuple(args, "O", &py_ent))
+        return NULL;
+    
+    if (PyObject_IsInstance(py_ent, (PyObject *)&entity__EntityType))
+        ent_index = gamehelpers->IndexOfEdict(((entity__Entity *)py_ent)->edict);
+    else if (PyInt_Check(py_ent))
+        ent_index = PyInt_AS_LONG(py_ent);
+    else
+    {
+        PyErr_Format(_PyExc_TypeError, "`entity` is the wrong type (expected"
+            " sourcemod.entity.Entity or int, got \"%s\")",
+            py_ent->ob_type->tp_name);
+        return NULL;
+    }
+    
+    if (ent_index == -1)
+    {
+        PyErr_SetString(g_pViperException, "entity is invalid.");
+        return NULL;
+    }
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Entity;
+    cell->data.asInt = ent_index;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_float(bitbuf__BitBuf *self, PyObject *args)
+{
+    float num;
+    if (!PyArg_ParseTuple(args, "f", &num))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Float;
+    cell->data.asFloat = num;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_num(bitbuf__BitBuf *self, PyObject *args)
+{
+    int num;
+    if (!PyArg_ParseTuple(args, "i", &num))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Num;
+    cell->data.asInt = num;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_short(bitbuf__BitBuf *self, PyObject *args)
+{
+    short num;
+    if (!PyArg_ParseTuple(args, "h", &num))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_Short;
+    cell->data.asInt = num;
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+bitbuf__BitBuf__write_string(bitbuf__BitBuf *self, PyObject *args)
+{
+    char *str;
+    if (!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+    
+    BitBufCell *cell = new BitBufCell();
+    cell->type = BitBufType_String;
+    cell->data.asString = sm_strdup(str);
+    
+    self->cells.push(cell);
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 bitbuf__BitBuf__write_vec_coord(bitbuf__BitBuf *self, PyObject *args)
 {
     PyObject *py_vec;
@@ -284,9 +307,9 @@ bitbuf__BitBuf__write_vec_coord(bitbuf__BitBuf *self, PyObject *args)
     self->cells.push(cell);
     
     Py_RETURN_NONE;
-};
+}
 
-PyObject *
+static PyObject *
 bitbuf__BitBuf__write_vec_normal(bitbuf__BitBuf *self, PyObject *args)
 {
     PyObject *py_vec;
@@ -307,9 +330,9 @@ bitbuf__BitBuf__write_vec_normal(bitbuf__BitBuf *self, PyObject *args)
     self->cells.push(cell);
     
     Py_RETURN_NONE;
-};
+}
 
-PyObject *
+static PyObject *
 bitbuf__BitBuf__write_word(bitbuf__BitBuf *self, PyObject *args)
 {
     short word;
@@ -323,17 +346,17 @@ bitbuf__BitBuf__write_word(bitbuf__BitBuf *self, PyObject *args)
     self->cells.push(cell);
     
     Py_RETURN_NONE;
-};
+}
 
 
 /* Magic methods */
-PyObject *
+static PyObject *
 bitbuf__BitBuf__str__(bitbuf__BitBuf *self)
 {
     return PyString_FromFormat("<BitBuf object at: %p>", self);
 }
 
-void
+static void
 bitbuf__BitBuf__del__(bitbuf__BitBuf *self)
 {
     SourceHook::CStack<BitBufCell *>::iterator iter = self->cells.begin();
@@ -348,32 +371,6 @@ bitbuf__BitBuf__del__(bitbuf__BitBuf *self)
     }
 }
 
-/* Get/Sets */
-#if 0
-PyObject *
-bitbuf__BitBuf__num_bytes_leftget(bitbuf__BitBuf *self)
-{
-    if (self->buffer == NULL)
-    {
-        PyErr_SetString(g_pViperException, "Invalid bitbuf buffer.");
-        return NULL;
-    }
-    
-    if (self->read == NULL)
-        self->read = new bf_read(self->buffer, self->nBytes);
-    
-    return PyInt_FromLong();
-}
-#endif
-
-PyGetSetDef bitbuf__BitBuf__getsets[] = {
-#if NOT_IMPLEMENTED_YET
-    {"num_bytes_left", (getter)bitbuf__BitBuf__num_bytes_leftget, NULL,
-        "The number of bytes left in a bitbuffer."},
-#endif
-    {NULL}
-};
-
 PyMethodDef bitbuf__BitBuf__methods[] = {
     {"write_angle", (PyCFunction)bitbuf__BitBuf__write_angle, METH_VARARGS|METH_KEYWORDS,
         "write_angle(angle[, numBits=8])\n\n"
@@ -383,6 +380,12 @@ PyMethodDef bitbuf__BitBuf__methods[] = {
         "@param angle: Angle to write to the bitbuffer.\n"
         "@type  numBits: int"
         "@param numBits: Optional number of bits to use.\n"},
+    {"write_angles", (PyCFunction)bitbuf__BitBuf__write_angles, METH_VARARGS,
+        "write_angles(angles)\n\n"
+        "Writes a 3D angle vector to a writable bitbuffer (bf_write).\n"
+        "@note: nothing is actually written to a bitbuffer until necessary.\n"
+        "@type  angles: datatypes.Vector or list-like[3]\n"
+        "@param angles: Angles to write to the bitbuffer.\n"},
     {"write_bool", (PyCFunction)bitbuf__BitBuf__write_bool, METH_VARARGS,
         "write_bool(bit)\n\n"
         "Writes a single bit to a writable bitbuffer (bf_write).\n"
@@ -397,7 +400,7 @@ PyMethodDef bitbuf__BitBuf__methods[] = {
         "@param byte: A byte to write to the bitbuffer. Value will be written as 8bit."},
     {"write_coord", (PyCFunction)bitbuf__BitBuf__write_coord, METH_VARARGS,
         "write_coord(coord)\n\n"
-        "Writes an coordinate to a writable bitbuffer (bf_write).\n"
+        "Writes a coordinate to a writable bitbuffer (bf_write).\n"
         "@note: nothing is actually written to a bitbuffer until necessary.\n"
         "@type  coord: float\n"
         "@param coord: Coordinate to write to the bitbuffer."},
@@ -441,15 +444,14 @@ PyMethodDef bitbuf__BitBuf__methods[] = {
         "write_vec_coord(vec)\n\n"
         "Writes a 3D vector of coordinates to a writable bitbuffer (bf_write).\n"
         "@note: nothing is actually written to a bitbuffer until necessary.\n"
-        "@type  vec: datatypes.Vector or list[3]\n"
-        "@type  vec: datatypes.Vector or list[3] or tuple(3)\n"
+        "@type  vec: datatypes.Vector or list-like[3]\n"
         "@param vec: A Vector object or list-like object of 3 floats to write to the \n"
         "    bitbuffer."},
     {"write_vec_normal", (PyCFunction)bitbuf__BitBuf__write_vec_normal, METH_VARARGS,
         "write_vec_normal(vec)\n\n"
         "Writes a 3D normal vector to a writable bitbuffer (bf_write).\n"
         "@note: nothing is actually written to a bitbuffer until necessary.\n"
-        "@type  vec: datatypes.Vector or list[3] or tuple(3)\n"
+        "@type  vec: datatypes.Vector or list-like[3]\n"
         "@param vec: A Vector object or list-like object of 3 floats to write to the \n"
         "    bitbuffer."},
     {"write_word", (PyCFunction)bitbuf__BitBuf__write_word, METH_VARARGS,
@@ -484,7 +486,7 @@ PyTypeObject bitbuf__BitBufType = {
     0,                                              /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,         /*tp_flags*/
     /* tp_doc */
-    "Interact with Source BitBuffers.",
+    "Interact with writable Source BitBuffers (bf_write).",
     0,                                              /* tp_traverse */
     0,                                              /* tp_clear */
     0,                                              /* tp_richcompare */
@@ -493,7 +495,100 @@ PyTypeObject bitbuf__BitBufType = {
     0,                                              /* tp_iternext */
     bitbuf__BitBuf__methods,                        /* tp_methods */
     0,                                              /* tp_members */
-    bitbuf__BitBuf__getsets,                        /* tp_getset */
+    0,                                              /* tp_getset */
+    0,                                              /* tp_base */
+    0,                                              /* tp_dict */
+    0,                                              /* tp_descr_get */
+    0,                                              /* tp_descr_set */
+    0,                                              /* tp_dictoffset */
+    0,                                              /* tp_init */
+    0,                                              /* tp_alloc */
+    &PyType_GenericNew,                             /* tp_new */
+};
+
+
+/* Methods */
+
+
+/* Magic methods */
+static PyObject *
+bitbuf__BitBufRead__str__(bitbuf__BitBuf *self)
+{
+    return PyString_FromFormat("<BitBuf object at: %p>", self);
+}
+
+/* Get/Sets */
+PyObject *
+bitbuf__BitBufRead__num_bytes_leftget(bitbuf__BitBufRead *self)
+{
+    if (self->bf == NULL)
+    {
+        PyErr_SetString(g_pViperException, "Invalid bitbuffer (bf_read *).");
+        return NULL;
+    }
+    
+    return PyInt_FromLong(self->bf->GetNumBitsLeft() >> 3);
+}
+
+PyMethodDef bitbuf__BitBufRead__methods[] = {
+#if NOT_DOCUMENTED_YET
+    {"read_bool"},
+    {"read_byte"},
+    {"read_char"},
+    {"read_short"},
+    {"read_word"},
+    {"read_num"},
+    {"read_float"},
+    {"read_string"},
+    {"read_entity"},
+    {"read_angle"},
+    {"read_coord"},
+    {"read_vec_coord"},
+    {"read_vec_normal"},
+    {"read_angles"},
+#endif
+    {NULL, NULL, 0, NULL}
+};
+
+PyGetSetDef bitbuf__BitBufRead__getsets[] = {
+    {"num_bytes_left", (getter)bitbuf__BitBufRead__num_bytes_leftget, NULL,
+        "The number of bytes left in the bf_read."},
+    {NULL}
+};
+
+PyTypeObject bitbuf__BitBufReadType = {
+    PyObject_HEAD_INIT(_PyType_Type)
+    0,                                              /*ob_size*/
+    "sourcemod.bitbuf.BitBufRead",                  /*tp_name*/
+    sizeof(bitbuf__BitBufRead),                     /*tp_basicsize*/
+    0,                                              /*tp_itemsize*/
+    0,                                              /*tp_dealloc*/
+    0,                                              /*tp_print*/
+    0,                                              /*tp_getattr*/
+    0,                                              /*tp_setattr*/
+    0,                                              /*tp_compare*/
+    0,                                              /*tp_repr*/
+    0,                                              /*tp_as_number*/
+    0,                                              /*tp_as_sequence*/
+    0,                                              /*tp_as_mapping*/
+    0,                                              /*tp_hash */
+    0,                                              /*tp_call*/
+    (reprfunc)bitbuf__BitBufRead__str__,            /*tp_str*/
+    0,                                              /*tp_getattro*/
+    0,                                              /*tp_setattro*/
+    0,                                              /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,         /*tp_flags*/
+    /* tp_doc */
+    "Interact with readable Source BitBuffers (bf_read).",
+    0,                                              /* tp_traverse */
+    0,                                              /* tp_clear */
+    0,                                              /* tp_richcompare */
+    0,                                              /* tp_weaklistoffset */
+    0,                                              /* tp_iter */
+    0,                                              /* tp_iternext */
+    bitbuf__BitBufRead__methods,                    /* tp_methods */
+    0,                                              /* tp_members */
+    bitbuf__BitBufRead__getsets,                    /* tp_getset */
     0,                                              /* tp_base */
     0,                                              /* tp_dict */
     0,                                              /* tp_descr_get */
@@ -509,7 +604,12 @@ initbitbuf(void)
 {
     Py_INCREF(_PyType_Type);
     bitbuf__BitBufType.ob_type = _PyType_Type;
-    if (PyType_Ready(&bitbuf__BitBufType) < 0)
+    
+    Py_INCREF(_PyType_Type);
+    bitbuf__BitBufReadType.ob_type = _PyType_Type;
+    
+    if (PyType_Ready(&bitbuf__BitBufType) < 0 ||
+        PyType_Ready(&bitbuf__BitBufReadType) < 0)
         return NULL;
     
     PyObject *bitbuf = Py_InitModule3("bitbuf", NULL,
@@ -517,6 +617,9 @@ initbitbuf(void)
     
     Py_INCREF((PyObject *)&bitbuf__BitBufType);
     PyModule_AddObject(bitbuf, "BitBuf", (PyObject *)&bitbuf__BitBufType);
+    
+    Py_INCREF((PyObject *)&bitbuf__BitBufReadType);
+    PyModule_AddObject(bitbuf, "BitBufRead", (PyObject *)&bitbuf__BitBufReadType);
     
     return bitbuf;
 }
@@ -586,20 +689,28 @@ BitBufToBfWrite(bitbuf__BitBuf *obj, bf_write *bitbuf)
             break;
         
         case BitBufType_VecCoord:
-        {
-            Vector vec(cell->data.asVector[0], cell->data.asVector[1],
-                cell->data.asVector[2]);
-            bitbuf->WriteBitVec3Coord(vec);
-            break;
-        }
+            {
+                Vector vec(cell->data.asVector[0], cell->data.asVector[1],
+                    cell->data.asVector[2]);
+                bitbuf->WriteBitVec3Coord(vec);
+                break;
+            }
         
         case BitBufType_VecNormal:
-        {
-            Vector vec(cell->data.asVector[0], cell->data.asVector[1],
-                cell->data.asVector[2]);
-            bitbuf->WriteBitVec3Normal(vec);
-            break;
-        }
+            {
+                Vector vec(cell->data.asVector[0], cell->data.asVector[1],
+                    cell->data.asVector[2]);
+                bitbuf->WriteBitVec3Normal(vec);
+                break;
+            }
+        
+        case BitBufType_Angles:
+            {
+                QAngle ang(cell->data.asVector[0], cell->data.asVector[1],
+                    cell->data.asVector[2]);
+                bitbuf->WriteBitAngles(ang);
+                break;
+            }
         };
     }
     

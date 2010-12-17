@@ -436,6 +436,22 @@ keyvalues__KeyValues__parse(keyvalues__KeyValues *self, PyObject *args)
 }
 
 static PyObject *
+keyvalues__KeyValues__save(keyvalues__KeyValues *self, PyObject *args)
+{
+    PyObject *py_fp;
+    if (!PyArg_ParseTuple(args, "O!", &py_fp, _PyFile_Type))
+        return NULL;
+    
+    CUtlBuffer buf(0, 0, CUtlBuffer::TEXT_BUFFER);
+    self->kv->RecursiveSaveToFile(buf, 0);
+    
+    if (PyFile_WriteString((char const *)buf.Base(), py_fp) == -1)
+        return NULL;
+    
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 keyvalues__KeyValues__values(keyvalues__KeyValues *self)
 {
     PyObject *list = PyList_New(0);
@@ -606,7 +622,8 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
         return 0;
     }
     
-    PyObject *valid_types = PyTuple_Pack(6, &keyvalues__KeyValuesType,
+    /* This object is never decref'd. This is fine because we never shutdown. */
+    static PyObject *valid_types = PyTuple_Pack(6, &keyvalues__KeyValuesType,
         _PyString_Type, _PyInt_Type, _PyFloat_Type, _PyLong_Type,
         &datatypes__ColorType);
     
@@ -618,8 +635,6 @@ keyvalues__KeyValues__ass_subscript__(keyvalues__KeyValues *self, PyObject *key,
         Py_XDECREF(valid_types);
         return -1;
     }
-    
-    Py_XDECREF(valid_types);
     
     if (PyObject_IsInstance(value, (PyObject *)self->ob_type))
     {
@@ -816,15 +831,6 @@ keyvalues__KeyValues__str__(keyvalues__KeyValues *self)
 }
 
 static PyMethodDef keyvalues__KeyValues__methods[] = {
-#ifdef NOT_IMPLEMENTED_YET
-    {"save", (PyCFunction)keyvalues__KeyValues__save, METH_VARARGS,
-        "save(file) -> bool\n\n"
-        "Saves this KeyValues to a file.\n\n"
-        "@type  file: str or file\n"
-        "@param file: A filename to save to, or a file-like object.\n"
-        "@rtype: bool\n"
-        "@return: True on success, False otherwise."},
-#endif
     {"clear", (PyCFunction)keyvalues__KeyValues__clear, METH_VARARGS|METH_KEYWORDS,
         "clear([key])\n\n"
         "With no arguments, removes all sub-keys. With |key|, this clears the value of\n"
@@ -874,6 +880,11 @@ static PyMethodDef keyvalues__KeyValues__methods[] = {
         "Parses the string for a KeyValues structure and loads it in.\n\n"
         "@type  string: str\n"
         "@param string: The string value to parse."},
+    {"save", (PyCFunction)keyvalues__KeyValues__save, METH_VARARGS,
+        "save(file)\n\n"
+        "Saves this KeyValues to a file.\n\n"
+        "@type  file: str or file\n"
+        "@param file: A file object to save to.\n"},
     {"values", (PyCFunction)keyvalues__KeyValues__values, METH_NOARGS,
         "values() -> list\n\n"
         "Returns a list of all the values in the KeyValues."},

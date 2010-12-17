@@ -26,6 +26,7 @@
 #include "systems/ConVarManager.h"
 #include "systems/PluginSys.h"
 #include "IViperForwardSys.h"
+#include "py_clients.h"
 
 static PyObject *
 console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
@@ -35,17 +36,9 @@ console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s#", &message, &len))
         return NULL;
     
-    if (playerhelpers->GetReplyTo() == SM_REPLY_CONSOLE)
-    {
-        int client = g_VCmds.GetCommandClient();
-        if (client <= 0)
-            g_SMAPI->ConPrintf("%s\n", message);
-        else
-            /* We subtract 1 because SetCommandClient adds 1. */
-            g_SMAPI->ClientConPrintf(gamehelpers->EdictOfIndex(client - 1),
-                "%s\n", message);
-    }
-    else
+    int client = ((clients__Client *)self->client)->index;
+    
+    if (playerhelpers->GetReplyTo() == SM_REPLY_CHAT)
     {
         /* Max chat msg length == 192, including NULL */
         if (len >= 191)
@@ -54,13 +47,22 @@ console__ConCommandReply__reply(console__ConCommandReply *self, PyObject *args)
             strncpy(buf, message, 192);
             buf[191] = '\0';
             
-            gamehelpers->TextMsg(g_VCmds.GetCommandClient(),
-                HUD_PRINTTALK, buf);
-            Py_RETURN_NONE;
+            gamehelpers->TextMsg(client, HUD_PRINTTALK, buf);
         }
-        
-        gamehelpers->TextMsg(g_VCmds.GetCommandClient(),
-            HUD_PRINTTALK, message);
+        else
+            gamehelpers->TextMsg(client, HUD_PRINTTALK, message);
+    }
+    else
+    {
+        if (client == 0)
+            g_SMAPI->ConPrintf("%s\n", message);
+        else if (client > 0)
+            g_SMAPI->ClientConPrintf(gamehelpers->EdictOfIndex(client),
+                "%s\n", message);
+        else
+            return PyErr_Format(g_pViperException, "Something went terribly"
+                " wrong: client index is invalid.");
+          
     }
     
     Py_RETURN_NONE;

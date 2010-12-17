@@ -41,6 +41,7 @@
     extern PyTypeObject *_PyBool_Type;
     extern PyTypeObject *_PyDict_Type;
     extern PyTypeObject *_PyList_Type;
+    extern PyTypeObject *_PyFile_Type;
     
 #   undef PyInt_Check
 #   undef PyFloat_Check
@@ -80,6 +81,7 @@
 #   define _PyBool_Type &PyBool_Type
 #   define _PyDict_Type &PyDict_Type
 #   define _PyList_Type &PyList_Type
+#   define _PyFile_Type &PyFile_Type
 
 #   define _PyExc_TypeError PyExc_TypeError
 #   define _PyExc_IndexError PyExc_IndexError
