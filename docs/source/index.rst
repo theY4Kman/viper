@@ -11,16 +11,17 @@ Viper is a SourceMod extension that embeds the CPython interpreter and loads Pyt
 Tutorials and non-API Documentation
 ===================================
 
-Learn the basics of Viper plug-in writing with :doc:`first_plugin`. Learn how to access the Viper menu from the console in :doc:`viper_menu`
+Learn the basics of Viper plug-in writing with :doc:`first_plugin`. Learn how to access the Viper menu from the console in :doc:`viper_menu`. See all the global forwards (such as ``client_connect`` or ``OnClientConnect`` in SourceMod) provided by Viper in :doc:`global_forwards`.
 
 Contents
 ========
 
 ..  toctree::
-    :maxdepth: 3
+    :maxdepth: 2
     
     first_plugin.rst
     viper_menu.rst
+    global_forwards.rst
     sourcemod/index.rst
 
 Indices and tables
