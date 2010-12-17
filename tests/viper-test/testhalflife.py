@@ -48,7 +48,10 @@ class HalfLifeTestCase(unittest.TestCase):
       halflife.SOURCE_SDK_DARKMESSIAH,
       halflife.SOURCE_SDK_EPISODE1,
       halflife.SOURCE_SDK_EPISODE2,
-      halflife.SOURCE_SDK_LEFT4DEAD
+      halflife.SOURCE_SDK_EPISODE2VALVE,
+      halflife.SOURCE_SDK_LEFT4DEAD,
+      halflife.SOURCE_SDK_LEFT4DEAD2,
+      halflife.SOURCE_SDK_ALIENSWARM
     ], 'garbage SDK version guess')
   
   # :TODO: precaching tests

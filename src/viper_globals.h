@@ -50,6 +50,7 @@
 #include <IEngineSound.h>
 #include <icvar.h>
 #include <IRootConsoleMenu.h>
+#include <INativeInvoker.h>
 #include <IGameConfigs.h>
 #include <igameevents.h>
 #include <filesystem.h>
@@ -70,6 +71,8 @@ extern IGameEventManager2 *gameevents;
 extern IEngineSound *enginesound;
 extern SourceMod::IGameConfig *g_pGameConf;
 extern IFileSystem *baseFs;
+
+extern SourceMod::INativeInterface *ninvoke;
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 extern ICvar *g_pCVar;

@@ -147,6 +147,7 @@ ViperConsole::OnRootConsoleCommand(char const *cmdname, const CCommand &command)
 	g_pMenu->DrawGenericOption("credits", "Display credits listing");
 	g_pMenu->DrawGenericOption("cvars", "View convars created by a plugin");
 	g_pMenu->DrawGenericOption("plugins", "Manage plugins");
+	g_pMenu->DrawGenericOption("setinterp", "Set the interpreter command");
 	g_pMenu->DrawGenericOption("version", "Display version information");
 }
 
@@ -165,7 +166,7 @@ ViperConsole::CommandCallback(const CCommand &command)
     
     int plugin_id;
     
-    char *exec = new char[512];
+    char exec[512];
     PyThreadState *tstate = NULL;
     PyObject *globals = NULL;
     
@@ -180,13 +181,15 @@ ViperConsole::CommandCallback(const CCommand &command)
         
         char const *pl_id = command.Arg(1);
         char *cmd = new char[sizeof(exec)];
+        char *old_cmd = cmd;
         
         strcpy(cmd, command.ArgS());
-        cmd = strchr(exec, ' ');
+        cmd = strchr(cmd, ' ');
         
         if (cmd == NULL)
         {
             g_SMAPI->ConPrint("[Viper] Something terrible happened.\n");
+            delete old_cmd;
             return;
         }
         
@@ -194,7 +197,7 @@ ViperConsole::CommandCallback(const CCommand &command)
         cmd += 1;
         
         strcpy(exec, cmd);
-        delete [] cmd;
+        delete old_cmd;
         
         IViperPlugin *pl = g_VPlugins.FindPluginByConsoleArg(pl_id);
         if (pl == NULL)
@@ -225,7 +228,7 @@ ViperConsole::CommandCallback(const CCommand &command)
         }
         
         tstate = m_pThreadState;
-        strcpy(exec, command.ArgS());
+        strcpy((char *)&exec, command.ArgS());
         
         if (m_InterpGlobals == NULL)
         {
@@ -248,7 +251,7 @@ ViperConsole::CommandCallback(const CCommand &command)
     if (exec[0] == '"' && exec[len-1] == '"')
     {
         exec[len-1] = '\0';
-        exec = &exec[1];
+        strcpy((char *)&exec, (char *)&exec[1]);
     }
     
     PyThreadState *_swap = PyThreadState_Get();
@@ -258,7 +261,6 @@ ViperConsole::CommandCallback(const CCommand &command)
         globals = PyEval_GetGlobals();
     
     PyObject *result = PyRun_String(exec, Py_single_input, globals, NULL);
-    delete [] exec;
     
     if (result == NULL)
         PyErr_Print();

@@ -1166,6 +1166,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\python\py_natives.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\python\py_sourcemod.cpp"
 				>
 			</File>

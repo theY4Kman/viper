@@ -233,10 +233,7 @@ CPlugin::CreatePlugin(char const *path, char* error, size_t maxlength)
     assert(pPlugin != NULL);
 
     if (!libsys->PathExists(path))
-    {
         pPlugin->m_status = ViperPlugin_BadLoad;
-        return pPlugin;
-    }
 
     return pPlugin;
 }
@@ -246,7 +243,13 @@ InitializePlugin(char const *path)
 {
     /* Clear sys.path and add the plug-in's folder, as well as Python's libs */
     char *path_string = new char[PLATFORM_MAX_PATH];
-    size_t len = strrchr(path, '/') - path;
+    char const *endpath = strrchr(path, '/');
+    size_t len;
+    if (endpath == NULL)
+        len = sizeof(path_string);
+    else
+        len = endpath - path;
+    
     strncpy(path_string, path, len);
     path_string[len] = '\0';
     

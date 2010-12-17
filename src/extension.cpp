@@ -41,6 +41,8 @@ extern "C" void __cxa_guard_release(long long int *) { return; }
 ViperExtension g_ViperExt;
 SMEXT_LINK(&g_ViperExt);
 
+SourceMod::INativeInterface *ninvoke = NULL;
+
 ICvar *icvar   = NULL;
 #if SOURCE_ENGINE < SE_ORANGEBOX
 ICvar *g_pCVar = NULL;
@@ -110,6 +112,8 @@ InitializePython(void)
 bool
 ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
+    SM_GET_IFACE(NINVOKE, ninvoke);
+
 #ifdef WIN32
     char libpath[PLATFORM_MAX_PATH];
     /* Sets the DLL search path in Windows */
@@ -218,6 +222,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "bool"));
         Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "dict"));
         Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "list"));
+        Py_XINCREF(_PyFile_Type = (PyTypeObject *)PyObject_GetAttrString(builtin, "file"));
     }
     else
     {
@@ -230,6 +235,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         Py_XINCREF(_PyBool_Type = (PyTypeObject *)PyObject_GetAttrString(types, "BooleanType"));
         Py_XINCREF(_PyDict_Type = (PyTypeObject *)PyObject_GetAttrString(types, "DictType"));
         Py_XINCREF(_PyList_Type = (PyTypeObject *)PyObject_GetAttrString(types, "ListType"));
+        Py_XINCREF(_PyFile_Type = (PyTypeObject *)PyObject_GetAttrString(types, "FileType"));
         
         Py_DECREF(types);
     }

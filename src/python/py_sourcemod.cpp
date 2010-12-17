@@ -334,6 +334,7 @@ initsourcemod(void)
     PyModule_AddModuleMacro(datatypes);
     PyModule_AddModuleMacro(usermessages);
     PyModule_AddModuleMacro(bitbuf);
+    PyModule_AddModuleMacro(natives);
         
 #undef  PyModule_AddModuleMacro
     

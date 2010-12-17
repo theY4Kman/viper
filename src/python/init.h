@@ -44,6 +44,7 @@ PyObject *initkeyvalues(void);
 PyObject *initdatatypes(void);
 PyObject *initusermessages(void);
 PyObject *initbitbuf(void);
+PyObject *initnatives(void);
 
 #endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
 
