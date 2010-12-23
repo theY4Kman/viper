@@ -85,17 +85,17 @@ Functions
     
     :type   name: str
     :param  name: The name to assign to the fake client
-    :rtype: :ref:`Client <client-object>`
-    :returns: A valid :ref:`Client Object <client-object>` on success, None otherwise.
+    :rtype: :class:`clients.Client <sourcemod.clients.Client>`
+    :returns: A valid :class:`clients.Client object <sourcemod.clients.Client>` on success, None otherwise.
 
 ..  function:: get_client(index)
     
-    Retrieves the :ref:`Client object <client-object>` with that client index.
+    Retrieves the :class:`clients.Client object <sourcemod.clients.Client>` with that client index.
     
     :type   index: int
     :param  index: The client index
-    :rtype: :ref:`Client <client-object>`
-    :returns: A valid :ref:`Client object <client-object>` on success, None if an invalid client index.
+    :rtype: :class:`clients.Client <sourcemod.clients.Client>`
+    :returns: A valid :class:`clients.Client object <sourcemod.clients.Client>` on success, None if an invalid client index.
     
 ..  function:: get_client_count([in_game_only=True])
     
@@ -107,21 +107,21 @@ Functions
 
 ..  function:: get_client_from_serial(serial)
     
-    Retrieves a :ref:`Client <client-object>` by their serial number.
+    Retrieves a :class:`clients.Client object <sourcemod.clients.Client>` by their serial number.
     
     :type   serial: int
-    :param  serial: The :ref:`Client <client-object>`'s serial number
-    :rtype: :ref:`Client <client-object>`
-    :returns: A valid :ref:`Client object <client-object>` on success, None if an invalid client serial.
+    :param  serial: The :class:`Client <sourcemod.clients.Client>`'s serial number
+    :rtype: :class:`clients.Client <sourcemod.clients.Client>`
+    :returns: A valid :class:`clients.Client object <sourcemod.clients.Client>` on success, None if an invalid client serial.
     
 ..  function:: get_client_from_userid(userid)
     
-    Translates a userid index into a :ref:`Client <client-object>` object
+    Translates a userid index into a :class:`clients.Client object <sourcemod.clients.Client>`
     
     :type   userid: int
     :param  userid: Userid value
-    :rtype: :ref:`Client <client-object>`
-    :returns: A valid :ref:`Client object <client-object>` on success, None if an invalid userid.
+    :rtype: :class:`clients.Client <sourcemod.clients.Client>`
+    :returns: A valid :class:`clients.Client object <sourcemod.clients.Client>` on success, None if an invalid userid.
 
 ..  function:: get_max_clients()
     
@@ -145,11 +145,11 @@ Functions
     :type   pattern: str
     :param  pattern: Target pattern to process.
     :type   admin: clients.Client or int
-    :param  admin: The :ref:`clients.Client object <client-object>` or client index of the client to process the target string from.
+    :param  admin: The :class:`clients.Client object <sourcemod.clients.Client>` or client index of the client to process the target string from.
     :type   flags: int
     :param  flags: :ref:`COMMAND_FILTER flags<command-filter-flags>` to filter the search.
 
-..  _client-object:
+..  class:: Client
 
 Client Objects
 ==============
