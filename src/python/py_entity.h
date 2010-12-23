@@ -21,7 +21,9 @@
 #ifndef _INCLUDE_PYTHON_ENTITY_H_
 #define _INCLUDE_PYTHON_ENTITY_H_
 
-struct edict_t;
+#include <iserverunknown.h>
+#include <edict.h>
+
 struct entity__EntityProps;
 
 extern PyTypeObject entity__EntityType;
@@ -45,6 +47,15 @@ struct entity__Entity {
 PyObject * GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
                                  ViperPropType type, void *propdata=NULL,
                                  int a_prop_offset=-1);
+
+inline CBaseEntity *GetEntity(edict_t *pEdict)
+{
+    IServerUnknown *pUnk = pEdict->GetUnknown();
+    if (pUnk == NULL)
+        return NULL;
+    
+    return pUnk->GetBaseEntity();
+}
 
 #endif//_INCLUDE_PYTHON_ENTITY_H_
 

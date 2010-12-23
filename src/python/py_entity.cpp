@@ -24,7 +24,6 @@ class CBaseEntity;
 #include "viper_metamod_wrappers.h"
 #include "py_entity.h"
 #include <IPlayerHelpers.h>
-#include <edict.h>
 #include <dt_shared.h>
 #include <server_class.h>
 #include <datamap.h>
@@ -54,15 +53,6 @@ enum ViperFieldType
     FIELDTYPE_STRING,
     FIELDTYPE_MAX
 };
-
-inline CBaseEntity *GetEntity(edict_t *pEdict)
-{
-    IServerUnknown *pUnk = pEdict->GetUnknown();
-    if (pUnk == NULL)
-        return NULL;
-    
-    return pUnk->GetBaseEntity();
-}
 
 inline char const *GetTypeString(ViperFieldType type)
 {

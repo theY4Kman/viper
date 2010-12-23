@@ -321,8 +321,17 @@ initsourcemod(void)
         
 #define PyModule_AddModuleMacro(name) { \
     PyObject *_mod_##name = init##name(); \
-    Py_INCREF(_mod_##name); \
-    PyModule_AddObject(sourcemod, #name, _mod_##name); }
+    if (_mod_##name != NULL) \
+    {\
+        Py_INCREF(_mod_##name); \
+        PyModule_AddObject(sourcemod, #name, _mod_##name); \
+    }\
+    else \
+    {\
+        g_pSM->LogError(myself, "Fatal error: could not initialize module sourcemod." #name); \
+        PyErr_SetString(g_pViperException, "Fatal error: could not initialize module sourcemod." #name); \
+        return NULL; \
+    }}
     
     PyModule_AddModuleMacro(console);
     PyModule_AddModuleMacro(forwards);

@@ -30,6 +30,7 @@
 
 #if SOURCE_ENGINE >= SE_LEFT4DEAD
 #define gpGlobals g_SMAPI->GetCGlobals()
+#define pEdicts baseEdict
 #endif
 
 #include <Python.h>
@@ -133,11 +134,11 @@ unsigned int strncopy(char *dest, char const *src, size_t count);
 /* Utility functions for PyObject data types */
 PyObject *CreatePyVector(float x=0.0f, float y=0.0f, float z=0.0f);
 PyObject *CreatePyColor(int r=0, int g=0, int b=0, int a=0);
-inline PyObject *CreatePyVector(const Vector vec)
+inline PyObject *CreatePyVector(const Vector &vec)
 {
     return CreatePyVector(vec.x, vec.y, vec.z);
 }
-inline PyObject *CreatePyVector(const QAngle ang)
+inline PyObject *CreatePyVector(const QAngle &ang)
 {
     return CreatePyVector(ang.x, ang.y, ang.z);
 }

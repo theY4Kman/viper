@@ -508,7 +508,136 @@ PyTypeObject bitbuf__BitBufType = {
 
 
 /* Methods */
+static PyObject *
+bitbuf__BitBufRead__read_angle(bitbuf__BitBufRead *self, PyObject *args,
+                               PyObject *kwds)
+{
+    int numBits = 8;
+    
+    static char *keywdlist[] = {"numBits", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|i", keywdlist, &numBits))
+        return NULL;
+    
+    return PyFloat_FromDouble(self->bf->ReadBitAngle(numBits));
+}
 
+static PyObject *
+bitbuf__BitBufRead__read_angles(bitbuf__BitBufRead *self)
+{
+    QAngle fa;
+    self->bf->ReadBitAngles(fa);
+    
+    return CreatePyVector(fa);
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_bool(bitbuf__BitBufRead *self)
+{
+    return PyBool_FromLong(self->bf->ReadOneBit());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_byte(bitbuf__BitBufRead *self)
+{
+    return PyInt_FromLong(self->bf->ReadByte());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_char(bitbuf__BitBufRead *self)
+{
+    return PyString_FromFormat("%c", self->bf->ReadChar());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_coord(bitbuf__BitBufRead *self)
+{
+    return PyFloat_FromDouble(self->bf->ReadBitCoord());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_entity(bitbuf__BitBufRead *self)
+{
+    int index = self->bf->ReadShort();
+    
+    edict_t *pStoredEdict = gamehelpers->EdictOfIndex(index);
+    CBaseEntity *pStoredEntity = GetEntity(pStoredEdict);
+    if (pStoredEdict == NULL || pStoredEntity == NULL)
+    {
+        PyErr_Format(g_pViperException, "Entity index %d from bitbuffer is"
+            " invalid", index);
+        return NULL;
+    }
+
+    IServerEntity *pSE = pStoredEdict->GetIServerEntity();
+    if (pSE == NULL)
+    {
+        PyErr_Format(g_pViperException, "Entity index %d from bitbuffer is"
+            " invalid", index);
+        return NULL;
+    }
+    
+    entity__Entity *pyEntity = (entity__Entity *)entity__EntityType.tp_new(
+        &entity__EntityType, NULL, NULL);
+    pyEntity->edict = pStoredEdict;
+    
+    return (PyObject *)pyEntity;
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_float(bitbuf__BitBufRead *self)
+{
+    return PyFloat_FromDouble(self->bf->ReadFloat());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_num(bitbuf__BitBufRead *self)
+{
+    return PyInt_FromLong(self->bf->ReadLong());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_short(bitbuf__BitBufRead *self)
+{
+    return PyInt_FromLong(self->bf->ReadShort());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_string(bitbuf__BitBufRead *self, PyObject *args)
+{
+    static char buffer[2048];
+    bool bLines = false;
+    
+    if (!PyArg_ParseTuple(args, "|b", &bLines))
+        return NULL;
+    
+    self->bf->ReadString((char *)&buffer, sizeof(buffer), bLines);
+    
+    return PyString_FromString((char *)&buffer);
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_word(bitbuf__BitBufRead *self)
+{
+    return PyInt_FromLong(self->bf->ReadWord());
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_vec_coord(bitbuf__BitBufRead *self)
+{
+    Vector fa;
+    self->bf->ReadBitVec3Coord(fa);
+    
+    return CreatePyVector(fa);
+}
+
+static PyObject *
+bitbuf__BitBufRead__read_vec_normal(bitbuf__BitBufRead *self)
+{
+    Vector fa;
+    self->bf->ReadBitVec3Normal(fa);
+    
+    return CreatePyVector(fa);
+}
 
 /* Magic methods */
 static PyObject *
@@ -518,7 +647,7 @@ bitbuf__BitBufRead__str__(bitbuf__BitBuf *self)
 }
 
 /* Get/Sets */
-PyObject *
+static PyObject *
 bitbuf__BitBufRead__num_bytes_leftget(bitbuf__BitBufRead *self)
 {
     if (self->bf == NULL)
@@ -532,21 +661,79 @@ bitbuf__BitBufRead__num_bytes_leftget(bitbuf__BitBufRead *self)
 
 PyMethodDef bitbuf__BitBufRead__methods[] = {
 #if NOT_DOCUMENTED_YET
-    {"read_bool"},
-    {"read_byte"},
-    {"read_char"},
-    {"read_short"},
-    {"read_word"},
-    {"read_num"},
-    {"read_float"},
-    {"read_string"},
-    {"read_entity"},
-    {"read_angle"},
-    {"read_coord"},
-    {"read_vec_coord"},
-    {"read_vec_normal"},
-    {"read_angles"},
 #endif
+    {"read_angle", (PyCFunction)bitbuf__BitBufRead__read_angle, METH_KEYWORDS,
+        "read_angle([numBits=8]) -> float\n\n"
+        "Reads a bit angle from the readable bitbuffer.\n"
+        "@type  numBits: int\n"
+        "@param numBits: Optional number of bits to use.\n"
+        "@rtype: float\n"
+        "@return: A bit angle"},
+    {"read_angles", (PyCFunction)bitbuf__BitBufRead__read_angles, METH_NOARGS,
+        "read_angles() -> datatypes.Vector\n\n"
+        "Reads a 3D angle vector from the readable bitbuffer.\n"
+        "@rtype: datatypes.Vector\n"
+        "@return: A datatypes.Vector object representing a 3D angle vector."},
+    {"read_bool", (PyCFunction)bitbuf__BitBufRead__read_bool, METH_NOARGS,
+        "read_bool() -> bool\n\n"
+        "Reads a single bit from the readable bitbuffer.\n"
+        "@rtype: bool\n"
+        "@return: A single bit from the bitbuffer."},
+    {"read_byte", (PyCFunction)bitbuf__BitBufRead__read_byte, METH_NOARGS,
+        "read_byte() -> int\n\n"
+        "Reads a byte from the readable bitbuffer.\n"
+        "@rtype: int\n"
+        "@return: The byte read from the bitbuffer. Only the first 8 bits are used."},
+    {"read_char", (PyCFunction)bitbuf__BitBufRead__read_char, METH_NOARGS,
+        "read_char() -> str[1]\n\n"
+        "Reads a character from the readable bitbuffer.\n"
+        "@rtype: str[1]\n"
+        "@return: A string of length 1 containing the character read."},
+    {"read_coord", (PyCFunction)bitbuf__BitBufRead__read_coord, METH_NOARGS,
+        "read_coord() -> float\n\n"
+        "Reads a coordinate from the readable bitbuffer.\n"
+        "@rtype: float\n"
+        "@return: The coordinate read from the bitbuffer."},
+    {"read_entity", (PyCFunction)bitbuf__BitBufRead__read_entity, METH_NOARGS,
+        "read_entity() -> entity.Entity\n\n"
+        "Reads an entity from the readable bitbuffer.\n"
+        "@rtype: entity.Entity\n"
+        "@return: An entity.Entity object representing an entity read from the bitbuffer."},
+    {"read_float", (PyCFunction)bitbuf__BitBufRead__read_float, METH_NOARGS,
+        "read_float() -> float\n\n"
+        "Reads a floating point number from the readable bitbuffer.\n"
+        "@rtype: float\n"
+        "@return: The floating point number read from the bitbuffer."},
+    {"read_num", (PyCFunction)bitbuf__BitBufRead__read_num, METH_NOARGS,
+        "read_num() -> int\n\n"
+        "Reads a normal integer from the readable bitbuffer.\n"
+        "@rtype: int\n"
+        "@return: The 32-bit integer value read from the bitbuffer."},
+    {"read_short", (PyCFunction)bitbuf__BitBufRead__read_short, METH_NOARGS,
+        "read_short() -> int\n\n"
+        "Reads a 16-bit integer from the readable bitbuffer.\n"
+        "@rtype: int\n"
+        "@return: The 16-bit integer value read from the bitbuffer."},
+    {"read_string", (PyCFunction)bitbuf__BitBufRead__read_string, METH_NOARGS,
+        "read_string() -> str\n\n"
+        "Reads a string from the readable bitbuffer.\n"
+        "@rtype: str\n"
+        "@return: The string value read from the bitbuffer."},
+    {"read_word", (PyCFunction)bitbuf__BitBufRead__read_word, METH_NOARGS,
+        "read_short() -> int\n\n"
+        "Reads a 16-bit unsigned integer from the readable bitbuffer.\n"
+        "@rtype: int\n"
+        "@return: The 16-bit unsigned integer value read from the bitbuffer."},
+    {"read_vec_coord", (PyCFunction)bitbuf__BitBufRead__read_vec_coord, METH_NOARGS,
+        "read_vec_coord() -> datatypes.Vector\n\n"
+        "Reads a 3D vector of coordinates from the readable bitbuffer.\n"
+        "@rtype: datatypes.Vector\n"
+        "@return: A datatypes.Vector object representing a 3D vector of coordinates."},
+    {"read_vec_normal", (PyCFunction)bitbuf__BitBufRead__read_vec_normal, METH_NOARGS,
+        "read_vec_coord() -> datatypes.Vector\n\n"
+        "Reads a 3D normal vector from the readable bitbuffer.\n"
+        "@rtype: datatypes.Vector\n"
+        "@return: A datatypes.Vector object representing a 3D normal vector."},
     {NULL, NULL, 0, NULL}
 };
 
