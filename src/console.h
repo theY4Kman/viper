@@ -29,8 +29,7 @@
 class ViperConsole :
     public SourceMod::IRootConsoleCommand,
     public ViperGlobalClass,
-    public IConCommandBaseAccessor,
-    public ICommandCallback
+    public IConCommandBaseAccessor
 {
 public: // IRootConsoleCommand
 	// Called when an admin runs "sm py"
