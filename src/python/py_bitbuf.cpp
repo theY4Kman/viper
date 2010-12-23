@@ -714,9 +714,12 @@ PyMethodDef bitbuf__BitBufRead__methods[] = {
         "Reads a 16-bit integer from the readable bitbuffer.\n"
         "@rtype: int\n"
         "@return: The 16-bit integer value read from the bitbuffer."},
-    {"read_string", (PyCFunction)bitbuf__BitBufRead__read_string, METH_NOARGS,
-        "read_string() -> str\n\n"
+    {"read_string", (PyCFunction)bitbuf__BitBufRead__read_string, METH_KEYWORDS,
+        "read_string([lines=False]) -> str\n\n"
         "Reads a string from the readable bitbuffer.\n"
+        "@type  lines: bool\n"
+        "@param lines: If True the buffer will be read until it reaches a newline or\n"
+        "    null terminator."
         "@rtype: str\n"
         "@return: The string value read from the bitbuffer."},
     {"read_word", (PyCFunction)bitbuf__BitBufRead__read_word, METH_NOARGS,
