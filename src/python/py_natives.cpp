@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -82,17 +82,11 @@ natives__Ref__valueget(natives__Ref *self)
         return PyInt_FromLong(*self->phys_addr);
     
     case RefType_Float:
-        return PyFloat_FromDouble((float)*self->phys_addr);
+        return PyFloat_FromDouble(sp_ctof(*self->phys_addr));
     
     case RefType_String:
         return PyString_FromString((char const *)self->phys_addr);
     };
-}
-
-static PyObject *
-natives__StringRef__sizeget(natives__Ref *self)
-{
-    return PyInt_FromLong(self->size);
 }
 
 static int
@@ -126,7 +120,7 @@ natives__Ref__valueset(natives__Ref *self, PyObject *val)
                 return -1;
             }
             
-            *(float *)self->phys_addr = PyFloat_AS_DOUBLE(val);
+            *self->phys_addr = sp_ftoc(PyFloat_AS_DOUBLE(val));
             break;
         }
     
@@ -146,6 +140,101 @@ natives__Ref__valueset(natives__Ref *self, PyObject *val)
     };
     
     return 0;
+}
+
+/* Magic Methods */
+
+static int
+natives__Ref__ass_item__(natives__Ref *self, Py_ssize_t n, PyObject *val)
+{
+    if (n > (unsigned int)self->size)
+    {
+        PyErr_Format(_PyExc_IndexError, "%d is out of range, should be"
+            " 0 <= n < %d", n, self->size);
+        return NULL;
+    }
+    
+    if (self->phys_addr == NULL)
+        return 0;
+    
+    switch (self->type)
+    {
+    default:
+    case RefType_Cell:
+        {
+            if (!PyInt_Check(val))
+            {
+                PyErr_Format(_PyExc_TypeError, "expected type int, got %s",
+                    val->ob_type->tp_name);
+                return -1;
+            }
+            
+            self->phys_addr[n] = PyInt_AS_LONG(val);
+            break;
+        }
+    
+    case RefType_Float:
+        {
+            if (!PyFloat_Check(val))
+            {
+                PyErr_Format(_PyExc_TypeError, "expected type float, got %s",
+                    val->ob_type->tp_name);
+                return -1;
+            }
+            
+            self->phys_addr[n] = sp_ftoc(PyFloat_AS_DOUBLE(val));
+            break;
+        }
+    
+    case RefType_String:
+        {
+            if (!PyString_Check(val))
+            {
+                PyErr_Format(_PyExc_TypeError, "expected type str, got %s",
+                    val->ob_type->tp_name);
+                return -1;
+            }
+            
+            strncpy((char *)&self->phys_addr[n], PyString_AS_STRING(val),
+                self->size * sizeof(cell_t) - n);
+            break;
+        }
+    };
+    
+    return 0;
+}
+
+static PyObject *
+natives__Ref__item__(natives__Ref *self, Py_ssize_t n)
+{
+    if (n > self->size)
+    {
+        PyErr_Format(_PyExc_IndexError, "%d is out of range, should be"
+            " 0 <= n < %d", n, self->size);
+        return NULL;
+    }
+    
+    if (self->phys_addr == NULL)
+        Py_RETURN_NONE;
+    
+    switch (self->type)
+    {
+    default:
+    case RefType_Cell:
+        return PyInt_FromLong(self->phys_addr[n]);
+    
+    case RefType_Float:
+        return PyFloat_FromDouble((float)sp_ctof(self->phys_addr[n]));
+    
+    case RefType_String:
+        return PyString_FromString((char const *)&self->phys_addr[n]);
+    };
+}
+
+static Py_ssize_t
+natives__Ref__len__(natives__Ref *self)
+{
+    return self->size;
 }
 
 static int
@@ -213,7 +302,7 @@ natives__Ref__repr__(natives__Ref *self)
             (float)*self->phys_addr);
     
     case RefType_String:
-        return PyString_FromFormat("<String[%d] Reference at %d (%p): %s>",
+        return PyString_FromFormat("<String[%d] Reference at %d (%p): \"%s\">",
             self->size, self->local_addr, self->phys_addr,
             (char const *)self->phys_addr);
     };
@@ -237,10 +326,18 @@ static PyGetSetDef natives__Ref__getsets[] = {
 static PyGetSetDef natives__StringRef__getsets[] = {
     {"value", (getter)natives__Ref__valueget, (setter)natives__Ref__valueset,
         "The value of the reference."},
-    {"size", (getter)natives__StringRef__sizeget, NULL,
-        "The number of bytes allocated for this string reference.\n"
-        "Note that this is not the number of cells as in the other references."},
     {NULL},
+};
+
+PySequenceMethods natives__RefSequenceMethods = {
+    (lenfunc)natives__Ref__len__,                       /* sq_length */
+    0,                                                  /* sq_concat */
+    0,                                                  /* sq_repeat */
+    (ssizeargfunc)natives__Ref__item__,                 /* sq_item */
+    0,                                                  /* sq_slice */
+    (ssizeobjargproc)natives__Ref__ass_item__,          /* sq_ass_item */
+    0,                                                  /* sq_ass_slice */
+//    (objobjarg)natives__Ref__contains__,                /* sq_contains */
 };
 
 PyTypeObject natives__RefType = {
@@ -256,7 +353,7 @@ PyTypeObject natives__RefType = {
     0,                                                      /*tp_compare*/
     (reprfunc)natives__Ref__repr__,                         /*tp_repr*/
     0,                                                      /*tp_as_number*/
-    0,                                                      /*tp_as_sequence*/
+    &natives__RefSequenceMethods,                           /*tp_as_sequence*/
     0,                                                      /*tp_as_mapping*/
     0,                                                      /*tp_hash */
     0,                                                      /*tp_call*/
@@ -358,7 +455,7 @@ PyTypeObject natives__StringRefType = {
     0,                                                      /* tp_iternext */
     0,                                                      /* tp_methods */
     natives__Ref__members,                                  /* tp_members */
-    natives__StringRef__getsets,                            /* tp_getset */
+    0,                                                      /* tp_getset */
     &natives__RefType,                                      /* tp_base */
     0,                                                      /* tp_dict */
     0,                                                      /* tp_descr_get */

@@ -2,7 +2,7 @@
  * =============================================================================
  * Viper
  * Copyright (C) 2010 Brandon "monokrome" Stoner
- * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -344,6 +344,7 @@ initsourcemod(void)
     PyModule_AddModuleMacro(usermessages);
     PyModule_AddModuleMacro(bitbuf);
     PyModule_AddModuleMacro(natives);
+    PyModule_AddModuleMacro(menus);
         
 #undef  PyModule_AddModuleMacro
     

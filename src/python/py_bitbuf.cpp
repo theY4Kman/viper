@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -602,12 +602,14 @@ bitbuf__BitBufRead__read_short(bitbuf__BitBufRead *self)
 }
 
 static PyObject *
-bitbuf__BitBufRead__read_string(bitbuf__BitBufRead *self, PyObject *args)
+bitbuf__BitBufRead__read_string(bitbuf__BitBufRead *self, PyObject *args,
+                                PyObject *kwds)
 {
     static char buffer[2048];
     bool bLines = false;
     
-    if (!PyArg_ParseTuple(args, "|b", &bLines))
+    static char *keywdlist[] = {"lines", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|b", keywdlist, &bLines))
         return NULL;
     
     self->bf->ReadString((char *)&buffer, sizeof(buffer), bLines);

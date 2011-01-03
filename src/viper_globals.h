@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2008-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2008-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -99,7 +99,7 @@ extern PyObject *g_pViperException;
     pPlugin = g_VPlugins.GetPluginOfInterpreterState(tstate->interp); \
     if (pPlugin == NULL) \
     { \
-        PyErr_SetString(g_pViperException, "Error retrieving current plug-in "); \
+        PyErr_SetString(g_pViperException, "Error retrieving current plug-in"); \
         return NULL; \
     } \
 }

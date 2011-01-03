@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -365,7 +365,7 @@ entity__EntityPropsArray__str__(entity__EntityPropsArray *self)
     return strobj;
 }
 
-PySequenceMethods entity__EntityPropsArraySequenceMethods = {
+static PySequenceMethods entity__EntityPropsArraySequenceMethods = {
     (lenfunc)entity__EntityPropsArray__len__,       /* sq_length */
     0,                                              /* sq_concat */
     0,                                              /* sq_repeat */

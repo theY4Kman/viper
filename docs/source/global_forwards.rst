@@ -50,3 +50,6 @@ Global fowards can be hooked with the :func:`forwards.register <sourcemod.forwar
 |                        |                               | from SourcePawn. Return True if the ban is        |
 |                        |                               | handled, and False to continue processing the ban.|
 +------------------------+-------------------------------+---------------------------------------------------+
+| game_frame             | ()                            | Called on every game frame. Don't do any major    |
+|                        |                               | processing here.                                  |
++------------------------+-------------------------------+---------------------------------------------------+

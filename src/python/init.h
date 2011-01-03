@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -45,6 +45,7 @@ PyObject *initdatatypes(void);
 PyObject *initusermessages(void);
 PyObject *initbitbuf(void);
 PyObject *initnatives(void);
+PyObject *initmenus(void);
 
 #endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
 
