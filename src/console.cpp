@@ -1,7 +1,7 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2010 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -275,6 +275,8 @@ ViperConsole::CommandCallback(const CCommand &command)
     char exec[512];
     PyThreadState *tstate = NULL;
     PyObject *globals = NULL;
+    PyObject **history = NULL;
+    PyThreadState *_swap = NULL;
     
     /* interpcmd plugin_id execcmd */
     if (sscanf(command.Arg(1), "%d", &plugin_id) == 1)
@@ -314,6 +316,17 @@ ViperConsole::CommandCallback(const CCommand &command)
         
         tstate = pl->GetThreadState();
         globals = pl->GetPluginDict();
+    
+        _swap = PyThreadState_Get();
+        PyThreadState_Swap(tstate);
+        
+        if (!pl->GetProperty("InterpHistory", (void **)&history))
+        {
+            history = (PyObject **)malloc(sizeof(PyObject **));
+            *history = PyString_FromString("");
+            
+            pl->SetProperty("InterpHistory", (void *)history);
+        }
     }
     
     /* interpcmd execcmd */
@@ -329,6 +342,13 @@ ViperConsole::CommandCallback(const CCommand &command)
         strcpy((char *)&exec, command.ArgS());
         
         globals = m_Interp->GetPluginDict();
+    
+        _swap = PyThreadState_Get();
+        PyThreadState_Swap(tstate);
+        
+        static PyObject *py_interp_history = PyString_FromString("");
+        static PyObject **interp_history = &py_interp_history;
+        history = interp_history;
     }
     
     /* Strip quotes */
@@ -337,15 +357,47 @@ ViperConsole::CommandCallback(const CCommand &command)
     {
         exec[len-1] = '\0';
         strcpy((char *)&exec, (char *)&exec[1]);
+        len -= 2;
     }
     
-    PyThreadState *_swap = PyThreadState_Get();
-    PyThreadState_Swap(tstate);
+    PyObject *py_exec = PyString_FromFormat("%s\n", exec);
+    PyString_ConcatAndDel(history, py_exec);
     
     if (globals == NULL)
         globals = PyEval_GetGlobals();
     
-    PyObject *result = PyRun_String(exec, Py_single_input, globals, NULL);
+    char const *code = PyString_AS_STRING(*history);
+    PyObject *src = Py_CompileString(code, "<stdin>", Py_single_input);
+    
+    PyObject *result = NULL;
+    if (src != NULL)
+    {
+        result = PyEval_EvalCode((PyCodeObject *)src, globals, globals);
+        Py_XDECREF(*history);
+        *history = PyString_FromString("");
+    }
+    else
+    {
+        PyObject *exc, *val, *trb;
+        char *msg;
+        PyObject *obj;
+        
+        PyErr_Fetch(&exc, &val, &trb);
+        
+        if (PyArg_ParseTuple(val, "sO", &msg, &obj) && 
+            strcmp(msg, "unexpected EOF while parsing") == 0)
+        {
+            Py_XDECREF(exc);
+            Py_XDECREF(val);
+            Py_XDECREF(trb);
+        }
+        else
+        {
+            PyErr_Restore(exc, val, trb);
+            result = NULL;
+            *history = PyString_FromString("");
+        }
+    }
     
     if (result == NULL)
         PyErr_Print();
