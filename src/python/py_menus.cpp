@@ -54,17 +54,56 @@
  * string containing the submenu title, or a function that returns a string
  * containing the submenu title. The third element must be a list. The inside
  * of this list carries the same structure as defined above.
+ *
+ * The callback is the function called to handle all menu actions, including
+ * starting, displaying, selection, cancellation, and ending. The prototype of
+ * the callback is so:
+ *    def handlemenu(menu, action, client, extra1, extra2): pass
+ * 
+ * `menu` is the menus.Menu object that's the source of the call. `action` is
+ * a MenuAction constant detailing the type of action the callback is being
+ * called upon to handle. `client` is a clients.Client object representing the
+ * client that the menu is being displayed to. Finally, `extra1` and `extra2`
+ * are dependent on the type of action.
+ * 
+ * MenuAction_Start - 
+ * MenuAction_Display - 
+ * MenuAction_Select - `extra1` is the position of the item in the menu, and
+ *     `extra2` is the optional extra argument passed when creating the menu.
+ *     If no extra argument was passed, this will be None.
+ * MenuAction_Cancel - `extra1` is a MenuCancel constant depicting the reason
+ *     why the menu was canceled. `extra2` is None.
+ * MenuAction_End - 
  */
 
 #include <Python.h>
 #include <sh_list.h>
+#include <IPlayerHelpers.h>
 #include "IViperPluginSys.h"
+#include "PlayerManager.h"
 #include "PluginSys.h"
 #include "viper_globals.h"
+#include "py_clients.h"
 
 using SourceHook::List;
+using SourceMod::IMenuHandler;
+using SourceMod::IBaseMenu;
+using SourceMod::IGamePlayer;
+using SourceMod::ItemDrawInfo;
 
 class ViperMenu;
+
+/* Using bitflags because SourceMod does. Why does it do this?
+ * The world may never know. sawce probably wrote it.
+ */
+enum MenuAction
+{
+    MenuAction_Start = (1<<0),
+    MenuAction_Display = (1<<1),
+    MenuAction_Select = (1<<2),
+    MenuAction_Cancel = (1<<3),
+    MenuAction_End = (1<<4),
+};
 
 struct menus__Menu
 {
@@ -85,33 +124,38 @@ struct ViperMenuStruct
     ViperMenu *menu;
 };
 
-class ViperMenu
+class ViperMenu : public IMenuHandler
 {
 public:
-    ViperMenu(char const *title, IViperPluginFunction *callback)
-        : m_Callback (callback), m_TitleFunc(NULL)
+    ViperMenu(PyObject *myobj, char const *title,
+        IViperPluginFunction *callback)
+        : m_Callback (callback), m_TitleFunc(NULL), m_OptionsFunction(NULL),
+          m_MyObject(myobj)
     {
         m_Title = sm_strdup(title);
         m_Options = new List<ViperMenuStruct>();
     }
     
-    ViperMenu(IViperPluginFunction *title_func, IViperPluginFunction *callback)
-        : m_Callback (callback), m_TitleFunc(title_func), m_Title(NULL)
-    {
-        m_Options = new List<ViperMenuStruct>();
-    }
-    
-    ViperMenu(char const *title, IViperPluginFunction *callback,
-        IViperPluginFunction *options)
-        : m_Callback (callback), m_Options(NULL), m_OptionsFunction(options)
-    {
-        m_Title = sm_strdup(title);
-    }
-    
-    ViperMenu(IViperPluginFunction *title_func, IViperPluginFunction *callback,
-        IViperPluginFunction *options)
+    ViperMenu(PyObject *myobj, IViperPluginFunction *title_func,
+        IViperPluginFunction *callback)
         : m_Callback (callback), m_TitleFunc(title_func), m_Title(NULL),
-          m_OptionsFunction(options), m_Options(NULL)
+          m_OptionsFunction(NULL), m_MyObject(myobj)
+    {
+        m_Options = new List<ViperMenuStruct>();
+    }
+    
+    ViperMenu(PyObject *myobj, char const *title,
+        IViperPluginFunction *callback, IViperPluginFunction *options)
+        : m_Callback (callback), m_Options(NULL), m_OptionsFunction(options),
+          m_MyObject(myobj)
+    {
+        m_Title = sm_strdup(title);
+    }
+    
+    ViperMenu(PyObject *myobj, IViperPluginFunction *title_func,
+        IViperPluginFunction *callback, IViperPluginFunction *options)
+        : m_Callback (callback), m_TitleFunc(title_func), m_Title(NULL),
+          m_OptionsFunction(options), m_Options(NULL), m_MyObject(myobj)
     {
     }
     
@@ -120,17 +164,90 @@ public:
         if (m_TitleFunc == NULL && m_Title != NULL)
             delete [] m_Title;
     }
-    
-    void DisplayMenu()
+
+public: // IMenuHandler
+    virtual void
+    OnMenuSelect(IBaseMenu *menu, int client, unsigned int item)
     {
+        assert(m_Callback != NULL);
+        assert(PyCallable_Check(m_Callback));
+        
+        List<ViperMenuStruct>::iterator iter = m_Options->begin();
+        unsigned int i = 0;
+        for (; iter!=m_Options->end() && i!=item; iter++, i++);
+        
+        PyObject *args = Py_BuildValue("(OiOIO)", m_MyObject, MenuAction_Select,
+            g_Players.GetPythonClient(client), item, (*iter).extra);
+        
+        PyObject *py_result = m_Callback->Execute(args);
+        
+        Py_DECREF(args);
+    }
+
+public:    
+    bool
+    DisplayMenu(int client, unsigned int time)
+    {
+        IBaseMenu *menu = menus->GetDefaultStyle()->CreateMenu(this);
+        menu->SetDefaultTitle(GetTitle());
+        
+        if (m_OptionsFunction == NULL)
+        {
+            List<ViperMenuStruct>::iterator iter = m_Options->begin();
+            unsigned int i = 0;
+            for (; iter!=m_Options->end(); iter++,i++)
+            {
+                ViperMenuStruct &option = (*iter);
+                ItemDrawInfo draw;
+                
+                if (option.menu == NULL)
+                    draw.display = option.title;
+                else
+                    draw.display = option.menu->GetTitle();
+                
+                menu->AppendItem(draw.display, draw);
+            }
+        }
+        
+        return menu->Display(client, time);
     }
     
-    void AddMenuStruct(const ViperMenuStruct &menu)
+    char const *
+    GetTitle()
+    {
+        if (m_TitleFunc == NULL)
+            return m_Title;
+        
+        PyThreadState *_save = PyThreadState_Get();
+        PyThreadState_Swap(m_TitleFunc->GetOwnerPlugin()->GetThreadState());
+        
+        PyObject *args = PyTuple_New(0);
+        PyObject *py_title = m_TitleFunc->Execute(args);
+        Py_XDECREF(args);
+        
+        if (!PyString_Check(py_title))
+        {
+            PyErr_Format(_PyExc_TypeError, "Menu title function returned wrong"
+                " type (expected str, got \"%s\")", py_title->ob_type->tp_name);
+            PyThreadState_Swap(_save);
+            return NULL;
+        }
+        
+        char const *title = PyString_AS_STRING(py_title);
+        
+        PyThreadState_Swap(_save);
+        
+        return title;
+    }
+    
+    void
+    AddMenuStruct(const ViperMenuStruct &menu)
     {
         m_Options->push_back(menu);
     }
     
-    void AddMenuOption(char const *text)
+    void
+    AddMenuOption(char const *text)
     {
         ViperMenuStruct opt;
         opt.title = sm_strdup(text);
@@ -139,7 +256,8 @@ public:
         AddMenuStruct(opt);
     }
     
-    void AddMenuOption(char const *text, IViperPluginFunction *callback)
+    void
+    AddMenuOption(char const *text, IViperPluginFunction *callback)
     {
         ViperMenuStruct opt;
         opt.title = sm_strdup(text);
@@ -148,7 +266,8 @@ public:
         AddMenuStruct(opt);
     }
     
-    void AddMenuOption(char const *text, IViperPluginFunction *callback,
+    void
+    AddMenuOption(char const *text, IViperPluginFunction *callback,
         PyObject *extra)
     {
         ViperMenuStruct opt;
@@ -159,7 +278,8 @@ public:
         AddMenuStruct(opt);
     }
     
-    void AddMenuOption(ViperMenu *menu)
+    void
+    AddMenuOption(ViperMenu *menu)
     {
         ViperMenuStruct opt;
         opt.menu = menu;
@@ -167,7 +287,8 @@ public:
         AddMenuStruct(opt);
     }
     
-    void SetOptionsFunction(IViperPluginFunction *options_func)
+    void
+    SetOptionsFunction(IViperPluginFunction *options_func)
     {
         m_OptionsFunction = options_func;
     }
@@ -178,10 +299,48 @@ private:
     IViperPluginFunction *m_TitleFunc;
     IViperPluginFunction *m_Callback;
     IViperPluginFunction *m_OptionsFunction;
+    
+    PyObject *m_MyObject;
 };
 
+static PyObject *
+menus__Menu__display(menus__Menu *self, PyObject *args)
+{
+    int client;
+    PyObject *py_client;
+    unsigned int time;
+    
+    if (!PyArg_ParseTuple(args, "OI", &py_client, &time))
+        return NULL;
+        
+    if (PyObject_IsInstance(py_client, (PyObject *)&clients__ClientType))
+        client = ((clients__Client*)py_client)->index;
+    else if (PyInt_Check(py_client))
+        client = PyInt_AS_LONG(py_client);
+    else
+    {
+        PyErr_Format(_PyExc_TypeError, "client is wrong type (expected"
+            " clients.Client or int, got \"%s\")", py_client->ob_type->tp_name);
+        return NULL;
+    }
+    
+    IGamePlayer *player = playerhelpers->GetGamePlayer(client);
+    if (player == NULL)
+    {
+        PyErr_Format(g_pViperException, "Client index %d is invalid", client);
+        return NULL;
+    }
+    else if (!player->IsConnected())
+    {
+        PyErr_Format(g_pViperException, "Client %d is not connected", client);
+        return NULL;
+    }
+    
+    return PyBool_FromLong(self->menu->DisplayMenu(client, time));
+}
+
 ViperMenu *
-ParseMenuTuple(PyObject *args)
+ParseMenuTuple(PyObject *args, PyObject *self)
 {
     // Parse arguments for (title, callback, list)
     PyFunction *py_title;
@@ -221,10 +380,11 @@ ParseMenuTuple(PyObject *args)
     {
         IViperPluginFunction *title_func = 
             CPluginFunction::CreatePluginFunction(py_title, pPlugin);
-        menu = new ViperMenu(title_func, func);
+        menu = new ViperMenu(self, title_func, func);
     }
     else if (PyString_Check(py_title))
-        menu = new ViperMenu(PyString_AS_STRING(py_title), func);
+        menu = new ViperMenu(self, PyString_AS_STRING(py_title),
+            func);
     else
     {
         PyErr_Format(_PyExc_TypeError, "title is wrong type (should be str or"
@@ -296,7 +456,7 @@ ParseMenuTuple(PyObject *args)
         if (optlen == 4)
         {
             PyObject *py_submenu = PyTuple_GetSlice(option, 1, optlen);
-            ViperMenu *submenu = ParseMenuTuple(py_submenu);
+            ViperMenu *submenu = ParseMenuTuple(py_submenu, self);
             
             if (submenu == NULL)
             {
@@ -341,7 +501,7 @@ ParseMenuTuple(PyObject *args)
 static int
 menus__Menu__init__(menus__Menu *self, PyObject *args, PyObject *keywds)
 {
-    ViperMenu *menu = ParseMenuTuple(args);
+    ViperMenu *menu = ParseMenuTuple(args, (PyObject *)self);
     if (menu == NULL)
         return -1;
     
@@ -355,6 +515,20 @@ menus__Menu__repr__(menus__Menu *self)
     /* TODO */
     return PyString_FromString("");
 }
+
+static PyMethodDef menus__Menu__methods[] = {
+    {"display", (PyCFunction)menus__Menu__display, METH_VARARGS,
+        "display(client, time) -> bool\n\n"
+        "Displays the menu to a client for the requested amount of time.\n"
+        "@type  client: clients.Client or int\n"
+        "@param client: A Client object or client index representing the client to\n"
+        "    display the menu to.\n"
+        "@type  time: int\n"
+        "@param time: The number of seconds to display the menu for.\n"
+        "@rtype: bool\n"
+        "@return: True if sucessfully displayed, False otherwise"},
+    {NULL, NULL, 0, NULL},
+};
 
 PyTypeObject menus__MenuType = {
     PyObject_HEAD_INIT(_PyType_Type)
@@ -385,7 +559,7 @@ PyTypeObject menus__MenuType = {
     0,                                                      /* tp_weaklistoffset */
     0,                                                      /* tp_iter */
     0,                                                      /* tp_iternext */
-    0,                                                      /* tp_methods */
+    menus__Menu__methods,                                   /* tp_methods */
     0,                                                      /* tp_members */
     0,                                                      /* tp_getset */
     0,                                                      /* tp_base */
@@ -411,6 +585,12 @@ initmenus(void)
     
     Py_INCREF((PyObject *)&menus__MenuType);
     PyModule_AddObject(menus, "Menu", (PyObject *)&menus__MenuType);
+    
+    PyModule_AddIntMacro(menus, MenuAction_Start);
+    PyModule_AddIntMacro(menus, MenuAction_Display);
+    PyModule_AddIntMacro(menus, MenuAction_Select);
+    PyModule_AddIntMacro(menus, MenuAction_Cancel);
+    PyModule_AddIntMacro(menus, MenuAction_End);
     
     return menus;
 }
