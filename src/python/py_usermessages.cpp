@@ -217,9 +217,10 @@ public: // IViperPluginsListener
         for (iter=pList->begin(); iter!=pList->end(); iter++)
         {
             ViperUserMessageListener *listen = (*iter);
-            pList->erase(iter);
             delete listen;
         }
+        
+        delete pList;
     }
 };
 
