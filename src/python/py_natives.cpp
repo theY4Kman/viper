@@ -45,7 +45,7 @@ struct natives__Ref
     
     cell_t local_addr;
     cell_t *phys_addr;
-    size_t size;
+    Py_ssize_t size;
     RefType type;
 };
 
@@ -147,7 +147,7 @@ natives__Ref__valueset(natives__Ref *self, PyObject *val)
 static int
 natives__Ref__ass_item__(natives__Ref *self, Py_ssize_t n, PyObject *val)
 {
-    if (n > (unsigned int)self->size)
+    if (n > self->size)
     {
         PyErr_Format(_PyExc_IndexError, "%d is out of range, should be"
             " 0 <= n < %d", n, self->size);
