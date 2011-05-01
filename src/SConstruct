@@ -26,19 +26,21 @@ SE_EPISODEONE = 1
 SE_DARKMESSIAH = 2
 SE_ORANGEBOX = 3
 SE_LEFT4DEAD = 4
+SE_ORANGEBOXVALVE = 5
 
 ##########################################
 ### USER COMPILATION CONFIGURATION     ###
 ##########################################
 
 ## Directories
-SMSDK = os.environ.get("SMSDK", "../../sourcemod-central")
+SMSDK = os.environ.get("SMSDK", os.path.expanduser("~/Development/sourcemod/sourcemod-central"))
 SRCDS_BASE = os.environ.get("SRCDS", os.path.expanduser("~/srcds"))
 HL2SDK_ORIG = os.environ.get("HL2SDK", "../../hl2sdk")
 HL2SDK_OB = os.environ.get("HL2SDKOB", "../../hl2sdk-ob")
+HL2SDK_OBV = os.environ.get("HL2SDKOBVALVE", os.path.expanduser("~/Development/sourcemod/hl2sdk-ob-valve"))
 HL2SDK_L4D = os.environ.get("HL2SDKL4D", "../../hl2sdk-l4d")
-MMSOURCE17 = os.environ.get("MMSOURCE17", "../../mmsource-1.7")
-PYTHON = os.environ.get("PYTHONSOURCE", "../../../../apps/Python-2.5.4")
+MMSOURCE17 = os.environ.get("MMSOURCECENTRAL", os.path.expanduser("~/Development/sourcemod/mmsource-central"))
+PYTHON = os.environ.get("PYTHONSOURCE", os.path.expanduser("~/Development/Python-2.5.5"))
 
 ##########################################
 ### END USER COMPILATION CONFIGURATION ###
@@ -66,13 +68,14 @@ env_vars = Variables()
 # that just returns the passed value if it's not a string.
 env_var_ENGINE = EnumVariable(
     "ENGINE", "The Source engine version to compile against",
-    None, ("original", "orangebox", "left4dead",
+    None, ("original", "orangebox", "left4dead", "orangeboxvalve",
            # Add the string values of the options because SCons won't shut up
-           str(SE_EPISODEONE), str(SE_ORANGEBOX), str(SE_LEFT4DEAD)),
+           str(SE_EPISODEONE), str(SE_ORANGEBOX), str(SE_LEFT4DEAD), str(SE_ORANGEBOXVALVE)),
     map={
         "original": SE_EPISODEONE,
         "orangebox": SE_ORANGEBOX,
-        "left4dead": SE_LEFT4DEAD
+        "left4dead": SE_LEFT4DEAD,
+        "orangeboxvalve": SE_ORANGEBOXVALVE
     },
     # ignorecase=1 converts the user's supplied value to lowercase
     ignorecase=1
@@ -95,7 +98,7 @@ env_def = Environment(
     DESCRIPTION="A SourceMod extension that exposes the Source engine through Python.",
 
     # Compiling/Linking stuff
-    CXX="gcc-4.1",
+    CXX="gcc",
     CPPDEFINES={"SE_EPISODEONE": SE_EPISODEONE,
                 "SE_DARKMESSIAH": SE_DARKMESSIAH,
                 "SE_ORANGEBOX": SE_ORANGEBOX,
@@ -226,6 +229,14 @@ elif env["ENGINE"] == SE_LEFT4DEAD:
         CPPPATH=[HL2SDK_L4D + "/public/game/server"],
         LIBPATH=[SRCDS_BASE + "/l4d/bin"]
     )
+elif env["ENGINE"] == SE_ORANGEBOXVALVE:
+	env.Append(
+        HL2PUB=HL2SDK_OBV + "/public",
+        HL2LIB=HL2SDK_OBV + "/lib/linux",
+        METAMOD=MMSOURCE17 + "/core",
+        CPPPATH=[HL2SDK_OBV + "/public/game/server"],
+        LIBPATH=[SRCDS_BASE + "/orangebox/bin"]
+    )
 else:
     raise ValueError("'ENGINE' variable has an invalid value.")
 
@@ -247,7 +258,7 @@ env.Default(extension)
 env.Alias("extension", extension)
 
 # This is just a convenience thing for theY4Kman
-install = env.Install(SRCDS_BASE + "/cstrike/addons/sourcemod/extensions/auto.1.ep1/", extension)
+install = env.Install(SRCDS_BASE + "/cstrike/addons/sourcemod/extensions/", extension)
 env.Alias("install", install)
 
 # Packaging
