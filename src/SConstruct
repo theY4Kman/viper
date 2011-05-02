@@ -25,8 +25,11 @@ from SCons.Errors import UserError
 SE_EPISODEONE = 1
 SE_DARKMESSIAH = 2
 SE_ORANGEBOX = 3
-SE_LEFT4DEAD = 4
+SE_BLOODYGOODTIME = 4
 SE_ORANGEBOXVALVE = 5
+SE_LEFT4DEAD = 6
+SE_LEFT4DEAD2 = 7
+SE_ALIENSWARM = 8
 
 ##########################################
 ### USER COMPILATION CONFIGURATION     ###
@@ -102,7 +105,11 @@ env_def = Environment(
     CPPDEFINES={"SE_EPISODEONE": SE_EPISODEONE,
                 "SE_DARKMESSIAH": SE_DARKMESSIAH,
                 "SE_ORANGEBOX": SE_ORANGEBOX,
+                "SE_BLOODYGOODTIME": SE_BLOODYGOODTIME,
+                "SE_ORANGEBOXVALVE": SE_ORANGEBOXVALVE,
                 "SE_LEFT4DEAD": SE_LEFT4DEAD,
+                "SE_LEFT4DEAD2": SE_LEFT4DEAD2,
+                "SE_ALIENSWARM": SE_ALIENSWARM,
                 "SOURCE_ENGINE": "$ENGINE",
                 
                 "SOURCEMOD_BUILD": None,
@@ -119,7 +126,7 @@ env_def = Environment(
                 "_alloca": "alloca",
                 "strcmpi": "strcasecmp"},
     CPPFLAGS="""\
-        -Wall -Werror -Wno-switch -Wno-unused -Wno-uninitialized -Wno-non-virtual-dtor \
+        -Wall -Wno-switch -Wno-unused -Wno-uninitialized -Wno-non-virtual-dtor \
         -mfpmath=sse -msse -m32 \
         -fno-exceptions -fno-rtti -fvisibility=hidden -fvisibility-inlines-hidden""",
     CPPPATH=[".", "../public", "sdk", "systems", "sourcemod",
