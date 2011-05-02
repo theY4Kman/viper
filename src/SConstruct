@@ -36,14 +36,14 @@ SE_ALIENSWARM = 8
 ##########################################
 
 ## Directories
-SMSDK = os.environ.get("SMSDK", os.path.expanduser("~/Development/sourcemod/sourcemod-central"))
+SMSDK = os.environ.get("SMSDK", "../../sourcemod-central")
 SRCDS_BASE = os.environ.get("SRCDS", os.path.expanduser("~/srcds"))
 HL2SDK_ORIG = os.environ.get("HL2SDK", "../../hl2sdk")
 HL2SDK_OB = os.environ.get("HL2SDKOB", "../../hl2sdk-ob")
 HL2SDK_OBV = os.environ.get("HL2SDKOBVALVE", os.path.expanduser("~/Development/sourcemod/hl2sdk-ob-valve"))
 HL2SDK_L4D = os.environ.get("HL2SDKL4D", "../../hl2sdk-l4d")
-MMSOURCE17 = os.environ.get("MMSOURCECENTRAL", os.path.expanduser("~/Development/sourcemod/mmsource-central"))
-PYTHON = os.environ.get("PYTHONSOURCE", os.path.expanduser("~/Development/Python-2.5.5"))
+MMSOURCE17 = os.environ.get("MMSOURCECENTRAL", "../../mmsource-central"))
+PYTHON = os.environ.get("PYTHONSOURCE", "../../../../apps/Python-2.5.4"))
 
 ##########################################
 ### END USER COMPILATION CONFIGURATION ###
