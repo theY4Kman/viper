@@ -126,7 +126,7 @@ env_def = Environment(
                 "_alloca": "alloca",
                 "strcmpi": "strcasecmp"},
     CPPFLAGS="""\
-        -Wall -Wno-switch -Wno-unused -Wno-uninitialized -Wno-non-virtual-dtor \
+        -Wall -Wno-switch -Wno-unused -Wno-uninitialized -Wno-non-virtual-dtor -Wno-write-strings \
         -mfpmath=sse -msse -m32 \
         -fno-exceptions -fno-rtti -fvisibility=hidden -fvisibility-inlines-hidden""",
     CPPPATH=[".", "../public", "sdk", "systems", "sourcemod",
