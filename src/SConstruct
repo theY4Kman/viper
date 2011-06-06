@@ -42,8 +42,8 @@ HL2SDK_ORIG = os.environ.get("HL2SDK", "../../hl2sdk")
 HL2SDK_OB = os.environ.get("HL2SDKOB", "../../hl2sdk-ob")
 HL2SDK_OBV = os.environ.get("HL2SDKOBVALVE", os.path.expanduser("~/Development/sourcemod/hl2sdk-ob-valve"))
 HL2SDK_L4D = os.environ.get("HL2SDKL4D", "../../hl2sdk-l4d")
-MMSOURCE17 = os.environ.get("MMSOURCECENTRAL", "../../mmsource-central"))
-PYTHON = os.environ.get("PYTHONSOURCE", "../../../../apps/Python-2.5.4"))
+MMSOURCE17 = os.environ.get("MMSOURCECENTRAL", "../../mmsource-central")
+PYTHON = os.environ.get("PYTHONSOURCE", "../../../../apps/Python-2.5.4")
 
 ##########################################
 ### END USER COMPILATION CONFIGURATION ###
