@@ -169,8 +169,8 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     }
 #else
     /* We must load in the binary to allow access to it.
-    * Thanks to your-name-here for that bit of info!
-    */
+     * Thanks to your-name-here for that bit of info!
+     */
     if (dlopen("libpython2.5.so.1.0", RTLD_NOW) == NULL)
     {
         strncpy(error, "Unable to load libpython2.5.so.1.0", maxlength);
