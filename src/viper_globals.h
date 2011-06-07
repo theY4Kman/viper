@@ -100,7 +100,7 @@ extern PyObject *g_pViperException;
     if (pPlugin == NULL) \
     { \
         PyErr_SetString(g_pViperException, "Error retrieving current plug-in"); \
-        return NULL; \
+        return 0; \
     } \
 }
 

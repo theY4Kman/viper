@@ -151,7 +151,7 @@ natives__Ref__ass_item__(natives__Ref *self, Py_ssize_t n, PyObject *val)
     {
         PyErr_Format(_PyExc_IndexError, "%d is out of range, should be"
             " 0 <= n < %d", n, self->size);
-        return NULL;
+        return 0;
     }
     
     if (self->phys_addr == NULL)

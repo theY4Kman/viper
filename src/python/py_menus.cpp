@@ -132,7 +132,7 @@ class ViperMenu : public IMenuHandler
 public:
     ViperMenu(PyObject *myobj, char const *title,
         IViperPluginFunction *callback)
-        : m_Callback (callback), m_TitleFunc(NULL), m_OptionsFunction(NULL),
+        : m_TitleFunc(NULL), m_Callback (callback), m_OptionsFunction(NULL),
           m_MyObject(myobj)
     {
         m_Title = sm_strdup(title);
@@ -141,7 +141,7 @@ public:
     
     ViperMenu(PyObject *myobj, IViperPluginFunction *title_func,
         IViperPluginFunction *callback)
-        : m_Callback (callback), m_TitleFunc(title_func), m_Title(NULL),
+        : m_Title(NULL), m_TitleFunc(title_func), m_Callback (callback),
           m_OptionsFunction(NULL), m_MyObject(myobj)
     {
         m_Options = new List<ViperMenuStruct>();
@@ -149,7 +149,7 @@ public:
     
     ViperMenu(PyObject *myobj, char const *title,
         IViperPluginFunction *callback, IViperPluginFunction *options)
-        : m_Callback (callback), m_Options(NULL), m_OptionsFunction(options),
+        : m_Options(NULL), m_Callback (callback), m_OptionsFunction(options),
           m_MyObject(myobj)
     {
         m_Title = sm_strdup(title);
@@ -157,8 +157,8 @@ public:
     
     ViperMenu(PyObject *myobj, IViperPluginFunction *title_func,
         IViperPluginFunction *callback, IViperPluginFunction *options)
-        : m_Callback (callback), m_TitleFunc(title_func), m_Title(NULL),
-          m_OptionsFunction(options), m_Options(NULL), m_MyObject(myobj)
+        : m_Options(NULL), m_Title(NULL), m_TitleFunc(title_func),
+          m_Callback (callback), m_OptionsFunction(options), m_MyObject(myobj)
     {
     }
     
@@ -173,7 +173,7 @@ public: // IMenuHandler
     OnMenuSelect(IBaseMenu *menu, int client, unsigned int item)
     {
         assert(m_Callback != NULL);
-        assert(PyCallable_Check(m_Callback));
+        assert(PyCallable_Check(m_Callback->GetFunction()));
         
         List<ViperMenuStruct>::iterator iter = m_Options->begin();
         unsigned int i = 0;

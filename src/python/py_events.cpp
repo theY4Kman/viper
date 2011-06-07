@@ -203,7 +203,7 @@ events__Event__len__(events__Event *self)
     if (self->event == NULL)
     {
         PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
+        return 0;
     }
     
     self->fields = g_EventManager.GetEventFields(self->event->GetName());
@@ -211,7 +211,7 @@ events__Event__len__(events__Event *self)
     {
         PyErr_Format(g_pViperException, "UH-OH! Could not retrieve field "
             " type list for game event \"%s\".", self->event->GetName());
-        return NULL;
+        return 0;
     }
     
     return self->fields->size();
@@ -231,7 +231,7 @@ events__Event__ass_subscript__(events__Event *self, PyObject *key,
     if (self->event == NULL)
     {
         PyErr_SetString(g_pViperException, "Invalid game event.");
-        return NULL;
+        return 0;
     }
     
     if (self->fields == NULL)

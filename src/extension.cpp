@@ -31,6 +31,7 @@
 #include "viper.h"
 #include "console.h"
 #include <IForwardSys.h>
+#include <dt_send.h>
 
 #if defined __linux__
 /* I wish sawce would get out of GCC, so it wouldn't be so horrible. btw, hax */
@@ -156,16 +157,6 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     _PyExc_SystemExit = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_SystemExit"));
     _PyExc_StopIteration = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_StopIteration"));
     
-    g_pSendProxy_EHandleToInt = memutils->FindPattern(g_SMAPI->GetServerFactory(false),
-        "\x8B\x2A\x2A\x2A\x85\x2A\x74\x2A\x8B\x2A\x83\x2A\x2A\x74\x2A\x8B\x2A\x81\x2A"
-        "\xFF\x0F", 21);
-    
-    if (g_pSendProxy_EHandleToInt == NULL)
-    {
-        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
-                "autodetection would fail without it. Unloading.", maxlength);
-        return false;
-    }
 #else
     /* We must load in the binary to allow access to it.
      * Thanks to your-name-here for that bit of info!
@@ -175,33 +166,24 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         strncpy(error, "Unable to load libpython2.5.so.1.0", maxlength);
         return false;
     }
-    
-    Dl_info info;
-    if (dladdr((void*)g_SMAPI->GetServerFactory(false), &info) == 0)
+
+#endif /* WIN32 */
+
+    SourceMod::sm_sendprop_info_t propinfo;
+    bool ret = gamehelpers->FindSendPropInfo("CBaseEntity", "m_hOwnerEntity", &propinfo);
+    if (!ret)
     {
-        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
+        strncpy(error, "Could not fetch SendProp info: entity property type "
                 "autodetection would fail without it. Unloading.", maxlength);
-        return false;
     }
     
-    void *handle = dlopen(info.dli_fname, RTLD_NOW);
-    if (handle == NULL)
-    {
-        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
-                "autodetection would fail without it. Unloading.", maxlength);
-        return false;
-    }
-    
-    g_pSendProxy_EHandleToInt = dlsym(handle, "_Z22SendProxy_EHandleToIntPK8SendPropPKvS3_P8DVariantii");
-    dlclose(handle);
-    
+    g_pSendProxy_EHandleToInt = (void*)propinfo.prop->GetProxyFn();
     if (g_pSendProxy_EHandleToInt == NULL)
     {
         strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
                 "autodetection would fail without it. Unloading.", maxlength);
         return false;
     }
-#endif
     
     InitializePython();
     

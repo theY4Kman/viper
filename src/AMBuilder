@@ -1,0 +1,39 @@
+import os
+
+sdk = Viper.sdkInfo['ep2v']
+
+compiler = Viper.DefaultHL2Compiler('src', 'ep2v')
+compiler['CXXINCLUDES'].extend([os.path.join(AMBuild.sourceFolder, 'src', path) for path in ['', 'sdk', 'systems', 'sourcemod']])
+compiler['CXXINCLUDES'].extend([os.path.join(AMBuild.cache['PYTHONSOURCE'], path) for path in ['', 'Include']])
+compiler.AddToListVar('CXXINCLUDES', os.path.join(AMBuild.sourceFolder, 'public'))
+
+compiler.AddToListVar('CFLAGS', '-Wno-write-strings')
+compiler['POSTLINKFLAGS'].extend([
+    '-L'+AMBuild.cache['PYTHONSOURCE'], 
+    '-lpython2.5', 
+    '-lutil', 
+    '-Wl,--rpath,\$$ORIGIN/viper/lib/plat-linux2']
+    )
+
+name = 'viper.ext.' + sdk['ext']
+extension = AMBuild.AddJob(name)
+binary = Cpp.LibraryBuilder(name, AMBuild, extension, compiler)
+
+Viper.PreSetupHL2Job(extension, binary, 'ep2v')
+
+binary.AddSourceFiles('src', '''
+sdk/smsdk_ext.cpp extension.cpp viper.cpp console.cpp sourcemod/sm_trie.cpp
+
+systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventManager.cpp
+systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp
+systems/HalfLife2.cpp
+
+python/py_clients.cpp python/py_events.cpp python/py_console.cpp
+python/py_forwards.cpp python/py_sourcemod.cpp python/py_entity.cpp
+python/py_halflife.cpp python/py_keyvalues.cpp python/py_datatypes.cpp
+python/py_usermessages.cpp python/py_bitbuf.cpp python/py_natives.cpp
+python/py_menus.cpp
+'''.split())
+
+Viper.PostSetupHL2Job(extension, binary, 'ep2v')
+binary.SendToJob()
