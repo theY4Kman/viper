@@ -90,6 +90,9 @@ using SourceMod::IMenuHandler;
 using SourceMod::IBaseMenu;
 using SourceMod::IGamePlayer;
 using SourceMod::ItemDrawInfo;
+using SourceMod::MenuCancelReason;
+using SourceMod::MenuEndReason;
+using SourceMod::IMenuPanel;
 
 class ViperMenu;
 
@@ -182,12 +185,79 @@ public: // IMenuHandler
         PyObject *py_result = m_Callback->Execute(args);
         
         Py_DECREF(args);
+        
+        if (PyInt_Check(py_result))
+        {
+            int result = PyInt_AS_LONG(py_result);
+            if (result != Pl_Continue)
+                return;
+        }
+        
+        if ((*iter).menu != NULL)
+            (*iter).menu->DisplayMenu(client, m_LastDisplayTime);
+    }
+    
+    virtual void OnMenuStart(IBaseMenu *menu)
+    {
+        assert(m_Callback != NULL);
+        assert(PyCallable_Check(m_Callback));
+        
+        PyObject *args = Py_BuildValue("(OiOOO)", m_MyObject, MenuAction_Start,
+            Py_None, Py_None, Py_None);
+        
+        PyObject *py_result = m_Callback->Execute(args);
+        
+        Py_DECREF(args);
+    }
+    
+    virtual void OnMenuDisplay(IBaseMenu *menu, int client, IMenuPanel *display)
+    {
+        assert(m_Callback != NULL);
+        assert(PyCallable_Check(m_Callback));
+        
+        /* TODO: IMenuPanel object */
+        
+        PyObject *args = Py_BuildValue("(OiOOO)", m_MyObject, MenuAction_Display,
+            g_Players.GetPythonClient(client), Py_None, Py_None);
+        
+        PyObject *py_result = m_Callback->Execute(args);
+        
+        Py_DECREF(args);
+    }
+    
+    virtual void OnMenuCancel(IBaseMenu *menu, int client,
+        MenuCancelReason reason)
+    {
+        assert(m_Callback != NULL);
+        assert(PyCallable_Check(m_Callback));
+        
+        PyObject *args = Py_BuildValue("(OiOiO)", m_MyObject, MenuAction_Cancel,
+            g_Players.GetPythonClient(client), reason, Py_None);
+        
+        PyObject *py_result = m_Callback->Execute(args);
+        
+        Py_DECREF(args);
+    }
+    
+    virtual void OnMenuEnd(IBaseMenu *menu, MenuEndReason reason)
+    {
+        assert(m_Callback != NULL);
+        assert(PyCallable_Check(m_Callback));
+        
+        PyObject *args = Py_BuildValue("(OiOiO)", m_MyObject, MenuAction_End,
+            Py_None, reason, Py_None);
+        
+        PyObject *py_result = m_Callback->Execute(args);
+        
+        Py_DECREF(args);
     }
 
 public:    
     bool
     DisplayMenu(int client, unsigned int time)
     {
+        m_LastDisplayTime = time;
+        
         IBaseMenu *menu = menus->GetDefaultStyle()->CreateMenu(this);
         menu->SetDefaultTitle(GetTitle());
         
@@ -299,6 +369,8 @@ private:
     IViperPluginFunction *m_TitleFunc;
     IViperPluginFunction *m_Callback;
     IViperPluginFunction *m_OptionsFunction;
+    
+    unsigned int m_LastDisplayTime;
     
     PyObject *m_MyObject;
 };
@@ -591,6 +663,19 @@ initmenus(void)
     PyModule_AddIntMacro(menus, MenuAction_Select);
     PyModule_AddIntMacro(menus, MenuAction_Cancel);
     PyModule_AddIntMacro(menus, MenuAction_End);
+	
+    PyModule_AddIntMacro(menus, SourceMod::MenuCancel_Disconnected);
+    PyModule_AddIntMacro(menus, SourceMod::MenuCancel_Interrupted);
+    PyModule_AddIntMacro(menus, SourceMod::MenuCancel_NoDisplay);
+    PyModule_AddIntMacro(menus, SourceMod::MenuCancel_Timeout);
+    PyModule_AddIntMacro(menus, SourceMod::MenuCancel_ExitBack);
+    
+    PyModule_AddIntMacro(menus, SourceMod::MenuEnd_Selected);
+    PyModule_AddIntMacro(menus, SourceMod::MenuEnd_VotingDone);
+    PyModule_AddIntMacro(menus, SourceMod::MenuEnd_VotingCancelled);
+    PyModule_AddIntMacro(menus, SourceMod::MenuEnd_Cancelled);
+    PyModule_AddIntMacro(menus, SourceMod::MenuEnd_Exit);
+    PyModule_AddIntMacro(menus, SourceMod::MenuEnd_ExitBack);
     
     return menus;
 }
