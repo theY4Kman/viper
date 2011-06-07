@@ -178,7 +178,7 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     }
 
     SourceMod::sm_sendprop_info_t propinfo;
-    bool ret = gamehelpers->FindSendPropInfo("CBasePlayer", "m_hOwnerEntity", &propinfo);
+    bool ret = gamehelpers->FindSendPropInfo("CBaseEntity", "m_hOwnerEntity", &propinfo);
     if (!ret)
     {
         strncpy(error, "Could not fetch SendProp info: entity property type "
