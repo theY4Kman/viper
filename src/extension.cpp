@@ -157,16 +157,6 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
     _PyExc_SystemExit = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_SystemExit"));
     _PyExc_StopIteration = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_StopIteration"));
     
-    g_pSendProxy_EHandleToInt = memutils->FindPattern(g_SMAPI->GetServerFactory(false),
-        "\x8B\x2A\x2A\x2A\x85\x2A\x74\x2A\x8B\x2A\x83\x2A\x2A\x74\x2A\x8B\x2A\x81\x2A"
-        "\xFF\x0F", 21);
-    
-    if (g_pSendProxy_EHandleToInt == NULL)
-    {
-        strncpy(error, "Could not find SendProxy_EHandleToInt: entity property type "
-                "autodetection would fail without it. Unloading.", maxlength);
-        return false;
-    }
 #else
     /* We must load in the binary to allow access to it.
      * Thanks to your-name-here for that bit of info!
@@ -176,6 +166,8 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
         strncpy(error, "Unable to load libpython2.5.so.1.0", maxlength);
         return false;
     }
+
+#endif /* WIN32 */
 
     SourceMod::sm_sendprop_info_t propinfo;
     bool ret = gamehelpers->FindSendPropInfo("CBaseEntity", "m_hOwnerEntity", &propinfo);
@@ -192,7 +184,6 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
                 "autodetection would fail without it. Unloading.", maxlength);
         return false;
     }
-#endif
     
     InitializePython();
     
