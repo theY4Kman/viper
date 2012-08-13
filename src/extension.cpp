@@ -61,6 +61,8 @@ SourceMod::IForward *g_pSMOnBanClient = NULL;
 extern ViperConsole g_VConsole;
 
 #ifdef WIN32
+Py_ssize_t *__imp___PyRefTotal = NULL;
+
 PyObject *Py_None = NULL;
 PyObject *Py_True = NULL;
 PyObject *Py_False = NULL;
@@ -117,14 +119,14 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 #ifdef WIN32
     char libpath[PLATFORM_MAX_PATH];
+
     /* Sets the DLL search path in Windows */
-    
     g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
         "extensions/viper/lib/plat-win/");
     SetDllDirectory(libpath);
     
-    HMODULE python25_DLL = LoadLibrary("python25.dll");
-    if (python25_DLL == NULL)
+    HMODULE python27_DLL = LoadLibrary("python27.dll");
+    if (python27_DLL == NULL)
     {
         LPVOID errorMsg;
         FormatMessage(
@@ -138,32 +140,34 @@ ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
           0, NULL
         );
         
-        size_t written = UTIL_Format(error, maxlength, "Unable to load python25.dll (0x%x): %s", GetLastError(), errorMsg);
+        size_t written = UTIL_Format(error, maxlength, "Unable to load python27.dll (0x%x): %s", GetLastError(), errorMsg);
         error[written-2] = '\0';
         return false;
     }
     
-    Py_None = (PyObject*)GetProcAddress(python25_DLL, "_Py_NoneStruct");
-    Py_True = (PyObject*)GetProcAddress(python25_DLL, "_Py_TrueStruct");
-    Py_False = (PyObject*)GetProcAddress(python25_DLL, "_Py_ZeroStruct");
-    Py_NotImplemented = (PyObject*)GetProcAddress(python25_DLL, "_Py_NotImplementedStruct");
-    
-    _PyExc_TypeError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_TypeError"));
-    _PyExc_IndexError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_IndexError"));
-    _PyExc_IOError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_IOError"));
-    _PyExc_RuntimeError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeError"));
-    _PyExc_KeyError = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_KeyError"));
-    _PyExc_RuntimeWarning = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_RuntimeWarning"));
-    _PyExc_SystemExit = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_SystemExit"));
-    _PyExc_StopIteration = *((PyObject**)GetProcAddress(python25_DLL, "PyExc_StopIteration"));
+    Py_None = (PyObject*)GetProcAddress(python27_DLL, "_Py_NoneStruct");
+    Py_True = (PyObject*)GetProcAddress(python27_DLL, "_Py_TrueStruct");
+    Py_False = (PyObject*)GetProcAddress(python27_DLL, "_Py_ZeroStruct");
+    Py_NotImplemented = (PyObject*)GetProcAddress(python27_DLL, "_Py_NotImplementedStruct");
+
+	__imp___PyRefTotal = (Py_ssize_t *)GetProcAddress(python27_DLL, "_Py_RefTotal");
+
+    _PyExc_TypeError = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_TypeError"));
+    _PyExc_IndexError = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_IndexError"));
+    _PyExc_IOError = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_IOError"));
+    _PyExc_RuntimeError = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_RuntimeError"));
+    _PyExc_KeyError = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_KeyError"));
+    _PyExc_RuntimeWarning = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_RuntimeWarning"));
+    _PyExc_SystemExit = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_SystemExit"));
+    _PyExc_StopIteration = *((PyObject **)GetProcAddress(python27_DLL, "PyExc_StopIteration"));
     
 #else
     /* We must load in the binary to allow access to it.
      * Thanks to your-name-here for that bit of info!
      */
-    if (dlopen("libpython2.5.so.1.0", RTLD_NOW) == NULL)
+    if (dlopen("libpython2.7.so.1.0", RTLD_NOW) == NULL)
     {
-        strncpy(error, "Unable to load libpython2.5.so.1.0", maxlength);
+        strncpy(error, "Unable to load libpython2.7.so.1.0", maxlength);
         return false;
     }
 

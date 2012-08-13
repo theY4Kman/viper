@@ -200,7 +200,7 @@ public: // IMenuHandler
     virtual void OnMenuStart(IBaseMenu *menu)
     {
         assert(m_Callback != NULL);
-        assert(PyCallable_Check(m_Callback));
+        assert(PyCallable_Check(m_Callback->GetFunction()));
         
         PyObject *args = Py_BuildValue("(OiOOO)", m_MyObject, MenuAction_Start,
             Py_None, Py_None, Py_None);
@@ -213,7 +213,7 @@ public: // IMenuHandler
     virtual void OnMenuDisplay(IBaseMenu *menu, int client, IMenuPanel *display)
     {
         assert(m_Callback != NULL);
-        assert(PyCallable_Check(m_Callback));
+        assert(PyCallable_Check(m_Callback->GetFunction()));
         
         /* TODO: IMenuPanel object */
         
@@ -229,7 +229,7 @@ public: // IMenuHandler
         MenuCancelReason reason)
     {
         assert(m_Callback != NULL);
-        assert(PyCallable_Check(m_Callback));
+        assert(PyCallable_Check(m_Callback->GetFunction()));
         
         PyObject *args = Py_BuildValue("(OiOiO)", m_MyObject, MenuAction_Cancel,
             g_Players.GetPythonClient(client), reason, Py_None);
@@ -242,7 +242,7 @@ public: // IMenuHandler
     virtual void OnMenuEnd(IBaseMenu *menu, MenuEndReason reason)
     {
         assert(m_Callback != NULL);
-        assert(PyCallable_Check(m_Callback));
+        assert(PyCallable_Check(m_Callback->GetFunction()));
         
         PyObject *args = Py_BuildValue("(OiOiO)", m_MyObject, MenuAction_End,
             Py_None, reason, Py_None);

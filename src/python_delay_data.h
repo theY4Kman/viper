@@ -31,6 +31,8 @@
     extern PyObject *Py_True;
     extern PyObject *Py_False;
     extern PyObject *Py_NotImplemented;
+
+	extern Py_ssize_t *__imp___PyRefTotal;
     
     extern PyTypeObject *_PyInt_Type;
     extern PyTypeObject *_PyString_Type;
