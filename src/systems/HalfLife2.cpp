@@ -22,11 +22,13 @@
 #include "HalfLife2.h"
 #include <IGameConfigs.h>
 
+using namespace Viper;
+
+ViperHalfLife2 g_HL2;
+
+SourceMod::IGameConfig *g_pGameConf = NULL;
+
 namespace Viper {
-	ViperHalfLife2 g_HL2;
-
-	SourceMod::IGameConfig *g_pGameConf = NULL;
-
 	void
 	ViperHalfLife2::OnViperStartup(bool late)
 	{

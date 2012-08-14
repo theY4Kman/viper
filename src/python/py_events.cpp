@@ -41,7 +41,7 @@ namespace Viper {
 				return NULL;
 			}
     
-			gameevents->FreeEvent(self->event);
+			g_pGameEvents->FreeEvent(self->event);
     
 			/* Invalidate this object */
 			self->event = NULL;
@@ -62,7 +62,7 @@ namespace Viper {
 			if (!PyArg_ParseTuple(args, "|b", &dont_broadcast))
 				return NULL;
     
-			gameevents->FireEvent(self->event, dont_broadcast);
+			g_pGameEvents->FireEvent(self->event, dont_broadcast);
     
 			/* Invalidate this object */
 			self->event = NULL;
@@ -403,7 +403,7 @@ namespace Viper {
 			if (!PyArg_ParseTuple(args, "s|b", &name, &force))
 				return NULL;
     
-			IGameEvent *pEvent = gameevents->CreateEvent(name, force);
+			IGameEvent *pEvent = g_pGameEvents->CreateEvent(name, force);
 			if (pEvent == NULL)
 				Py_RETURN_NONE;
     

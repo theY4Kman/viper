@@ -43,13 +43,13 @@ SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *,
 SH_DECL_HOOK1_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *);
 #endif
 
+IViperForward *g_pViperOnBanClient;
+
+/** Used for the OnClientConnect forward */
+char *g_RejectMsg = NULL;
+int g_RejectMsgLen = 0;
+
 namespace Viper {
-	IViperForward *g_pViperOnBanClient;
-
-	/** Used for the OnClientConnect forward */
-	char *g_RejectMsg = NULL;
-	int g_RejectMsgLen = 0;
-
 	ViperPlayerManager::ViperPlayerManager()
 	{
 	}
@@ -100,7 +100,7 @@ namespace Viper {
     
 		Py_DECREF(pyBanClientArgs);
     
-		SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, serverClients,
+		SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, g_pServerClients,
 			this, &ViperPlayerManager::OnClientCommand, false);
     
 		playerhelpers->AddClientListener(this);
@@ -124,7 +124,7 @@ namespace Viper {
 		g_Forwards.ReleaseForward(m_OnServerActivate);
 		g_Forwards.ReleaseForward(m_OnMapStart);
     
-		SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientCommand, serverClients,
+		SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientCommand, g_pServerClients,
 			this, &ViperPlayerManager::OnClientCommand, false);
     
 		for (unsigned int i=0; i<sizeof(m_Clients); i++)

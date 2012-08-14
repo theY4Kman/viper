@@ -29,11 +29,13 @@
 #include "ForwardSys.h"
 #include "extension.h"
 
-namespace Viper {
-	extern IViperForward *g_pViperOnBanClient;
-	extern SourceMod::IForward *g_pSMOnBanIdentity;
-	extern SourceMod::IForward *g_pSMOnBanClient;
+using namespace Viper;
 
+extern IViperForward *g_pViperOnBanClient;
+extern SourceMod::IForward *g_pSMOnBanIdentity;
+extern SourceMod::IForward *g_pSMOnBanClient;
+
+namespace Viper {
 	ViperResultType InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
 												   IViperPluginFunction *func);
 

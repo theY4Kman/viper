@@ -25,21 +25,20 @@
 #include "systems/ViperPluginSys.h"
 
 SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
+
+SourceMod::IRootConsole *g_pMenu = NULL;
+SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch = NULL;
 namespace Viper {
-	SourceMod::IRootConsole *g_pMenu = NULL;
-	SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch = NULL;
-	
-	bool BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
-{
-    g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
-    SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
-    
-    m_EmptyTuple = PyTuple_New(0);
-    
-    StartViper();
-    
-    return true;
-}
+	bool BaseViper::OnViperLoad(char *error, size_t maxlength, bool late) {
+		g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
+		SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
+
+		m_EmptyTuple = PyTuple_New(0);
+
+		StartViper();
+
+		return true;
+	}
 
 	void BaseViper::StartViper()
 	{

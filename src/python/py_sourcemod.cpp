@@ -31,9 +31,9 @@
 #include "python/init.h"
 #include "viper.h"
 
-namespace Viper {
-	PyObject *g_pViperException = NULL;
+PyObject *g_pViperException = NULL;
 
+namespace Viper {
 	namespace Python {
 		static PyObject *
 		sourcemod__get_game_path(PyObject *self, PyObject *args)

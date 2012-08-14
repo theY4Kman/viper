@@ -52,7 +52,7 @@ namespace Viper {
 		g_pSM->BuildPath(SourceMod::Path_Game, respath, sizeof(respath), "resource/modevents.res");
     
 		KeyValues *kv = new KeyValues("modevents.res");
-		if (!kv->LoadFromFile(baseFs, respath))
+		if (!kv->LoadFromFile(g_pBaseFilesystem, respath))
 		{
 			g_pSM->LogError(myself, "Unable to open \"%s\": mod events will not work!\n", respath);
 			return;
@@ -103,23 +103,23 @@ namespace Viper {
 	void
 	ViperEventManager::OnViperAllInitialized()
 	{
-		SH_ADD_HOOK_MEMFUNC(IGameEventManager2, FireEvent, gameevents, this,
+		SH_ADD_HOOK_MEMFUNC(IGameEventManager2, FireEvent, g_pGameEvents, this,
 			&ViperEventManager::OnFireEvent, false);
-		SH_ADD_HOOK_MEMFUNC(IGameEventManager2, FireEvent, gameevents, this,
+		SH_ADD_HOOK_MEMFUNC(IGameEventManager2, FireEvent, g_pGameEvents, this,
 			&ViperEventManager::OnFireEvent_Post, true);
 	}
 
 	void
 	ViperEventManager::OnViperShutdown()
 	{
-		SH_REMOVE_HOOK_MEMFUNC(IGameEventManager2, FireEvent, gameevents, this,
+		SH_REMOVE_HOOK_MEMFUNC(IGameEventManager2, FireEvent, g_pGameEvents, this,
 			&ViperEventManager::OnFireEvent, false);
-		SH_REMOVE_HOOK_MEMFUNC(IGameEventManager2, FireEvent, gameevents, this,
+		SH_REMOVE_HOOK_MEMFUNC(IGameEventManager2, FireEvent, g_pGameEvents, this,
 			&ViperEventManager::OnFireEvent_Post, true);
     
 		Py_DECREF(m_HookParams);
     
-		gameevents->RemoveListener(this);
+		g_pGameEvents->RemoveListener(this);
 	}
 
 	void
@@ -164,9 +164,9 @@ namespace Viper {
 	ViperEventManager::HookEvent(char const *name, IViperPluginFunction *pFunc,
 								 ViperEventHookMode mode)
 	{
-		if (!gameevents->FindListener(this, name))
+		if (!g_pGameEvents->FindListener(this, name))
 		{
-			if (!gameevents->AddListener(this, name, true))
+			if (!g_pGameEvents->AddListener(this, name, true))
 			{
 				/* sawce was too lazy to create this event. It doesn't exist. */
 				return EventHookErr_InvalidEvent;
@@ -350,11 +350,11 @@ namespace Viper {
 			}
         
 			if (pHook->postCopy)
-				m_EventCopies.push(gameevents->DuplicateEvent(pEvent));
+				m_EventCopies.push(g_pGameEvents->DuplicateEvent(pEvent));
         
 			if (res)
 			{
-				gameevents->FreeEvent(pEvent);
+				g_pGameEvents->FreeEvent(pEvent);
 				RETURN_META_VALUE(MRES_IGNORED, false);
 			}
 		}
@@ -400,7 +400,7 @@ namespace Viper {
         
 			if (pHook->postCopy)
 			{
-				gameevents->FreeEvent(pEventCopy);
+				g_pGameEvents->FreeEvent(pEventCopy);
 				m_EventCopies.pop();
 			}
         

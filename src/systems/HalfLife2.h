@@ -52,9 +52,9 @@ namespace Viper {
 		int m_HintTextMsg;
 		int m_VGUIMenu;
 	};
-
-	extern ViperHalfLife2 g_HL2;
 }
+
+extern Viper::ViperHalfLife2 g_HL2;
 
 #endif//_INCLUDE_VIPER_HALFLIFE2_H_
 

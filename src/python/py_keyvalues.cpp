@@ -1019,7 +1019,7 @@ namespace Viper {
 			{
 				KeyValues *kv = new KeyValues("");
 				kv->UsesEscapeSequences(use_escape_sequences);
-				if (!kv->LoadFromFile(baseFs, PyString_AS_STRING(file), NULL))
+				if (!kv->LoadFromFile(g_pBaseFilesystem, PyString_AS_STRING(file), NULL))
 				{
 					kv->deleteThis();
 					return PyErr_Format(g_pViperException, "error loading from \"%s\"", 

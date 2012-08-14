@@ -58,7 +58,7 @@ namespace Viper {
 			IPluginRuntime *runtime;
 			if (!pPlugin->GetProperty("NativeInvokeRuntime", (void **)&runtime))
 			{
-				runtime = ninvoke->CreateRuntime("Viper Natives", NINVOKE_DEFAULT_MEMORY);
+				runtime = g_pNInvoke->CreateRuntime("Viper Natives", NINVOKE_DEFAULT_MEMORY);
 				if (runtime == NULL)
 				{
 					PyErr_SetString(g_pViperException, "Unable to create SourcePawn"
@@ -503,7 +503,7 @@ namespace Viper {
 			GET_THREAD_PLUGIN();
 			runtime = GetOrCreateRuntime(pPlugin);
     
-			ninv = ninvoke->CreateInvoker();
+			ninv = g_pNInvoke->CreateInvoker();
 			if (!ninv->Start(runtime->GetDefaultContext(), native))
 			{
 				PyErr_Format(g_pViperException, "Native \"%s\" does not exist", native);

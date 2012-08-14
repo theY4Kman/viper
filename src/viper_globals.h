@@ -65,27 +65,27 @@ extern ICvar *icvar;
 
 using namespace Viper::Python;
 
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+extern ICvar *g_pCVar;
+#endif
+
+/* Interface declaration */
+extern IUniformRandomStream *g_pRandom;
+extern SourceMod::IRootConsole *g_pMenu;
+extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
+extern IServerPluginHelpers *g_pServerPluginHelpers;
+extern IServerGameClients *g_pServerClients;
+extern IGameEventManager2 *g_pGameEvents;
+extern IEngineSound *enginesound;
+extern SourceMod::IGameConfig *g_pGameConf;
+extern IFileSystem *g_pBaseFilesystem;
+
+extern SourceMod::INativeInterface *g_pNInvoke;
+
+extern PyThreadState *g_pGlobalThreadState;
+extern PyObject *g_pViperException;
+
 namespace Viper {
-	/* Interface declaration */
-	extern IUniformRandomStream *g_pRandom;
-	extern SourceMod::IRootConsole *g_pMenu;
-	extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
-	extern IServerPluginHelpers *g_pServerPluginHelpers;
-	extern IServerGameClients *serverClients;
-	extern IGameEventManager2 *gameevents;
-	extern IEngineSound *enginesound;
-	extern SourceMod::IGameConfig *g_pGameConf;
-	extern IFileSystem *baseFs;
-
-	extern SourceMod::INativeInterface *ninvoke;
-
-	#if SOURCE_ENGINE >= SE_ORANGEBOX
-	extern ICvar *g_pCVar;
-	#endif
-
-	extern PyThreadState *g_pGlobalThreadState;
-	extern PyObject *g_pViperException;
-
 	#if SOURCE_ENGINE < SE_ORANGEBOX
 	#   define GetEngineFactory engineFactory
 	#endif

@@ -51,24 +51,26 @@ ICvar *icvar   = NULL;
 	Py_ssize_t *__Py_RefTotal = NULL;
 #endif
 
-namespace Viper {
-	SourceMod::INativeInterface *ninvoke = NULL;
-
-	#if SOURCE_ENGINE >= SE_ORANGEBOX
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 	ICvar *g_pCVar = NULL;
-	#endif
-	IServerPluginHelpers *g_pServerPluginHelpers = NULL;
-	IServerGameClients *serverClients = NULL;
-	IUniformRandomStream *g_pRandom = NULL;
-	IGameEventManager2 *gameevents = NULL;
-	IEngineSound *enginesound = NULL;
-	IFileSystem *baseFs = NULL;
+#endif
 
-	SourceMod::IForward *g_pSMOnBanIdentity = NULL;
-	SourceMod::IForward *g_pSMOnBanClient = NULL;
+SourceMod::INativeInterface *g_pNInvoke = NULL;
+IServerPluginHelpers *g_pServerPluginHelpers = NULL;
+IServerGameClients *g_pServerClients = NULL;
+IUniformRandomStream *g_pRandom = NULL;
+IGameEventManager2 *g_pGameEvents = NULL;
+IEngineSound *enginesound = NULL;
+IFileSystem *g_pBaseFilesystem = NULL;
 
-	extern ViperConsole g_VConsole;
+SourceMod::IForward *g_pSMOnBanIdentity = NULL;
+SourceMod::IForward *g_pSMOnBanClient = NULL;
 
+extern ViperConsole g_VConsole;
+
+PyThreadState *g_pGlobalThreadState = NULL;
+
+namespace Viper {
 	namespace Python {
 #ifdef WIN32
 		PyObject *Py_None = NULL;
@@ -98,8 +100,6 @@ namespace Viper {
 #endif
 	}
 
-	PyThreadState *g_pGlobalThreadState = NULL;
-
 	void
 	InitializePython(void)
 	{
@@ -124,7 +124,7 @@ namespace Viper {
 	bool
 	ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	{
-		SM_GET_IFACE(NINVOKE, ninvoke);
+		SM_GET_IFACE(NINVOKE, g_pNInvoke);
 
 	#ifdef WIN32
 		char libpath[PLATFORM_MAX_PATH];
@@ -308,13 +308,13 @@ namespace Viper {
 			VENGINE_SERVER_RANDOM_INTERFACE_VERSION);
 		GET_V_IFACE_CURRENT(GetEngineFactory, g_pServerPluginHelpers,
 			IServerPluginHelpers, INTERFACEVERSION_ISERVERPLUGINHELPERS);
-		GET_V_IFACE_CURRENT(GetEngineFactory, gameevents, IGameEventManager2,
+		GET_V_IFACE_CURRENT(GetEngineFactory, g_pGameEvents, IGameEventManager2,
 			INTERFACEVERSION_GAMEEVENTSMANAGER2);
 		GET_V_IFACE_CURRENT(GetEngineFactory, enginesound, IEngineSound,
 			IENGINESOUND_SERVER_INTERFACE_VERSION);
-		GET_V_IFACE_CURRENT(GetEngineFactory, baseFs, IFileSystem,
+		GET_V_IFACE_CURRENT(GetEngineFactory, g_pBaseFilesystem, IFileSystem,
 			FILESYSTEM_INTERFACE_VERSION);
-		GET_V_IFACE_ANY(GetServerFactory, serverClients, IServerGameClients,
+		GET_V_IFACE_ANY(GetServerFactory, g_pServerClients, IServerGameClients,
 			INTERFACEVERSION_SERVERGAMECLIENTS);
 
     
