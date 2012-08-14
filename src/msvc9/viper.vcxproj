@@ -134,7 +134,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">E:\srcds\css\cstrike\addons\sourcemod\extensions</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release - Orange Box Valve|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
@@ -224,8 +224,8 @@
       <PreprocessorDefinitions>BINARY_NAME="$(TargetFileName)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>"C:\Program Files\Microsoft Visual Studio 10.0\VC\lib\delayimp.lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(HL2SDK)\lib\public\tier0.lib;$(HL2SDK)\lib\public\tier1.lib;$(HL2SDK)\lib\public\vstdlib.lib;$(HL2SDK)\lib\public\mathlib.lib;C:\Users\Anthony\Git\Python-2.5.4\PCbuild8\Win32Debug\python25_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>"$(VcInstallDir)\lib\delayimp.lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>$(HL2SDK)\lib\public\tier0.lib;$(HL2SDK)\lib\public\tier1.lib;$(HL2SDK)\lib\public\vstdlib.lib;$(HL2SDK)\lib\public\mathlib.lib;E:\Programming\Python-2.5.4\PCbuild8\Win32Debug\python25_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(Outdir)viper.ext.2.ep2v.dll</OutputFile>
       <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio 9.0\VC\lib;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -724,6 +724,9 @@
     <ClCompile Include="..\viper_globals.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\sourcemod\convar_sm.h" />
+    <ClInclude Include="..\sourcemod\convar_sm_l4d.h" />
+    <ClInclude Include="..\sourcemod\convar_sm_ob.h" />
     <ClInclude Include="..\systems\ConCmdManager.h" />
     <ClInclude Include="..\systems\ConVarManager.h" />
     <ClInclude Include="..\systems\EventManager.h" />
@@ -738,9 +741,6 @@
     <ClInclude Include="..\..\public\IViperForwardSys.h" />
     <ClInclude Include="..\..\public\IViperPluginSys.h" />
     <ClInclude Include="..\..\public\IViperShareSys.h" />
-    <ClInclude Include="..\sourcemod\convar_sm.h" />
-    <ClInclude Include="..\sourcemod\convar_sm_l4d.h" />
-    <ClInclude Include="..\sourcemod\convar_sm_ob.h" />
     <ClInclude Include="..\sourcemod\sm_trie.h" />
     <ClInclude Include="..\python\init.h" />
     <ClInclude Include="..\python\py_bitbuf.h" />

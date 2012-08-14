@@ -129,15 +129,6 @@
     <ClInclude Include="..\..\public\IViperShareSys.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="..\sourcemod\convar_sm.h">
-      <Filter>SourceMod</Filter>
-    </ClInclude>
-    <ClInclude Include="..\sourcemod\convar_sm_l4d.h">
-      <Filter>SourceMod</Filter>
-    </ClInclude>
-    <ClInclude Include="..\sourcemod\convar_sm_ob.h">
-      <Filter>SourceMod</Filter>
-    </ClInclude>
     <ClInclude Include="..\sourcemod\sm_trie.h">
       <Filter>SourceMod</Filter>
     </ClInclude>
@@ -174,6 +165,15 @@
     <ClInclude Include="..\viper_metamod_wrappers.h" />
     <ClInclude Include="..\systems\ViperPluginSys.h">
       <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\convar_sm.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\convar_sm_l4d.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\convar_sm_ob.h">
+      <Filter>SourceMod</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

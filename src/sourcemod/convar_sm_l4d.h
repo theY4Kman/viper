@@ -24,7 +24,7 @@
 
 #ifdef _WIN32
 #define FORCEINLINE_CVAR FORCEINLINE
-#elif _LINUX
+#elif defined _LINUX || defined __APPLE__
 #define FORCEINLINE_CVAR inline
 #else
 #error "implement me"
@@ -386,7 +386,7 @@ public:
 	virtual void				SetValue( const char *value );
 	virtual void				SetValue( float value );
 	virtual void				SetValue( int value );
-#if SOURCE_ENGINE == SE_LEFT4DEAD2
+#if SOURCE_ENGINE >= SE_LEFT4DEAD2
 	virtual void				SetValue( Color value );
 #endif
 	
@@ -404,6 +404,9 @@ private:
 	// For CVARs marked FCVAR_NEVER_AS_STRING
 	virtual void				InternalSetFloatValue( float fNewValue );
 	virtual void				InternalSetIntValue( int nValue );
+#if SOURCE_ENGINE >= SE_LEFT4DEAD2
+	virtual void				InternalSetColorValue( Color value );
+#endif
 
 	virtual bool				ClampValue( float& value );
 	virtual void				ChangeStringValue( const char *tempVal, float flOldValue );
