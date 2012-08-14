@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -28,52 +29,52 @@
 #include <IViperForwardSys.h>
 #include <IForwardSys.h>
 
-struct CachedCommandInfo
-{
-    const CCommand *args;
-#if SOURCE_ENGINE < SE_ORANGEBOX
-    char cmd[300];
-#endif
-};
+namespace Viper {
+	struct CachedCommandInfo {
+		const CCommand *args;
+	#if SOURCE_ENGINE < SE_ORANGEBOX
+		char cmd[300];
+	#endif
+	};
 
-class BaseViper : public IBaseViper
-{
-friend class ViperExtension;
-friend PyObject *initsourcemod(void);
-public: // IBaseViper
-    virtual void PushCommandStack(const CCommand *cmd);
-    virtual const CCommand *PeekCommandStack();
-    virtual void PopCommandStack();
-    virtual char const *CurrentCommandName();
+	class BaseViper : public IBaseViper {
+	friend class ViperExtension;
+	//friend PyObject *Python::initsourcemod(void);
+	public: // IBaseViper
+		virtual void PushCommandStack(const CCommand *cmd);
+		virtual const CCommand *PeekCommandStack();
+		virtual void PopCommandStack();
+		virtual char const *CurrentCommandName();
 
-private:
-    /**
-     * @brief   Called when the extension is loaded; initializes Viper
-     */
-    bool OnViperLoad(char *error, size_t maxlength, bool late);
+	private:
+		/**
+		 * @brief   Called when the extension is loaded; initializes Viper
+		 */
+		bool OnViperLoad(char *error, size_t maxlength, bool late);
     
-    /**
-     * @brief   Called when the extension is unloaded
-     */
-    void OnViperUnload();
+		/**
+		 * @brief   Called when the extension is unloaded
+		 */
+		void OnViperUnload();
     
-    /**
-     * @brief   Called after Viper has been initialized and begins running it
-     */
-    void StartViper();
+		/**
+		 * @brief   Called after Viper has been initialized and begins running it
+		 */
+		void StartViper();
     
-    /**
-     * @brief   Called on each game frame
-     */
-    void GameFrame(bool simulating);
+		/**
+		 * @brief   Called on each game frame
+		 */
+		void GameFrame(bool simulating);
     
-private:
-    SourceHook::CStack<CachedCommandInfo> m_CommandStack;
+	private:
+		SourceHook::CStack<CachedCommandInfo> m_CommandStack;
 	
-    IViperForward *m_GameFrame;
-    PyObject *m_EmptyTuple;
-};
+		IViperForward *m_GameFrame;
+		PyObject *m_EmptyTuple;
+	};
 
-extern BaseViper g_Viper;
+	extern BaseViper g_Viper;
+};
 
 #endif /* _INCLUDE_VIPER_VIPER_H_ */

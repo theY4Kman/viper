@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -21,77 +22,78 @@
 #include "HalfLife2.h"
 #include <IGameConfigs.h>
 
-ViperHalfLife2 g_HL2;
+namespace Viper {
+	ViperHalfLife2 g_HL2;
 
-SourceMod::IGameConfig *g_pGameConf = NULL;
+	SourceMod::IGameConfig *g_pGameConf = NULL;
 
-void
-ViperHalfLife2::OnViperStartup(bool late)
-{
-    gameconfs->LoadGameConfigFile("core.games", &g_pGameConf, NULL, 0);
+	void
+	ViperHalfLife2::OnViperStartup(bool late)
+	{
+		gameconfs->LoadGameConfigFile("core.games", &g_pGameConf, NULL, 0);
+	}
+
+	void
+	ViperHalfLife2::OnViperAllInitialized()
+	{
+		m_HintTextMsg = usermsgs->GetMessageIndex("HintText");
+		m_VGUIMenu = usermsgs->GetMessageIndex("VGUIMenu");
+	}
+
+	bool
+	ViperHalfLife2::HintTextMsg(cell_t clients[], char const *msg)
+	{
+		bf_write *pBitBuf = usermsgs->StartMessage(m_HintTextMsg, clients, 1,
+			USERMSG_RELIABLE);
+    
+		if (pBitBuf == NULL)
+			return false;
+    
+		char const *pre_byte = g_pGameConf->GetKeyValue("HintTextPreByte");
+		if (pre_byte != NULL && strcmp(pre_byte, "yes") == 0)
+			pBitBuf->WriteByte(1);
+    
+		pBitBuf->WriteString(msg);
+		usermsgs->EndMessage();
+    
+		return true;
+	}
+
+	bool
+	ViperHalfLife2::ShowVGUIMenu(cell_t clients[], char const *name,
+								 KeyValues *data, bool show)
+	{
+		bf_write *pBitBuf = usermsgs->StartMessage(m_VGUIMenu, clients, 1,
+			USERMSG_RELIABLE);
+    
+		if (pBitBuf == NULL)
+			return false;
+    
+		KeyValues *SubKey = NULL;
+		size_t count = 0;
+		if (data)
+		{
+			SubKey = data->GetFirstSubKey();
+			while (SubKey)
+			{
+				count++;
+				SubKey = SubKey->GetNextKey();
+			}
+			SubKey = data->GetFirstSubKey();
+		}
+    
+		pBitBuf->WriteString(name);
+		pBitBuf->WriteByte((show) ? 1 : 0);
+		pBitBuf->WriteByte(count);
+    
+		while (SubKey)
+		{
+			pBitBuf->WriteString(SubKey->GetName());
+			pBitBuf->WriteString(SubKey->GetString());
+			SubKey = SubKey->GetNextKey();
+		}
+    
+		usermsgs->EndMessage();
+		return true;
+	}
 }
-
-void
-ViperHalfLife2::OnViperAllInitialized()
-{
-    m_HintTextMsg = usermsgs->GetMessageIndex("HintText");
-    m_VGUIMenu = usermsgs->GetMessageIndex("VGUIMenu");
-}
-
-bool
-ViperHalfLife2::HintTextMsg(cell_t clients[], char const *msg)
-{
-    bf_write *pBitBuf = usermsgs->StartMessage(m_HintTextMsg, clients, 1,
-        USERMSG_RELIABLE);
-    
-    if (pBitBuf == NULL)
-        return false;
-    
-    char const *pre_byte = g_pGameConf->GetKeyValue("HintTextPreByte");
-    if (pre_byte != NULL && strcmp(pre_byte, "yes") == 0)
-        pBitBuf->WriteByte(1);
-    
-    pBitBuf->WriteString(msg);
-    usermsgs->EndMessage();
-    
-    return true;
-}
-
-bool
-ViperHalfLife2::ShowVGUIMenu(cell_t clients[], char const *name,
-                             KeyValues *data, bool show)
-{
-    bf_write *pBitBuf = usermsgs->StartMessage(m_VGUIMenu, clients, 1,
-        USERMSG_RELIABLE);
-    
-    if (pBitBuf == NULL)
-        return false;
-    
-    KeyValues *SubKey = NULL;
-    size_t count = 0;
-    if (data)
-    {
-        SubKey = data->GetFirstSubKey();
-        while (SubKey)
-        {
-            count++;
-            SubKey = SubKey->GetNextKey();
-        }
-        SubKey = data->GetFirstSubKey();
-    }
-    
-    pBitBuf->WriteString(name);
-    pBitBuf->WriteByte((show) ? 1 : 0);
-    pBitBuf->WriteByte(count);
-    
-    while (SubKey)
-    {
-        pBitBuf->WriteString(SubKey->GetName());
-        pBitBuf->WriteString(SubKey->GetString());
-        SubKey = SubKey->GetNextKey();
-    }
-    
-    usermsgs->EndMessage();
-    return true;
-}
-

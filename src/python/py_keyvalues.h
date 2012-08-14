@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -24,19 +25,23 @@
 #include <Python.h>
 #include <viper_keyvalues.h>
 
-extern PyTypeObject keyvalues__KeyValuesType;
+namespace Viper {
+	namespace Python {
+		extern PyTypeObject keyvalues__KeyValuesType;
 
-struct keyvalues__KeyValues
-{
-    PyObject_HEAD
+		struct keyvalues__KeyValues
+		{
+			PyObject_HEAD
     
-    KeyValues *kv;
-};
+			KeyValues *kv;
+		};
 
-/* Function to retrieve cached KeyValues objects */
-PyObject *GetPyObjectFromKeyValues(KeyValues *kv);
-void AddKeyValuesToCache(KeyValues *kv, PyObject *kvpy);
-void RemoveKeyValuesFromCache(KeyValues *kv);
+		/* Function to retrieve cached KeyValues objects */
+		PyObject *GetPyObjectFromKeyValues(KeyValues *kv);
+		void AddKeyValuesToCache(KeyValues *kv, PyObject *kvpy);
+		void RemoveKeyValuesFromCache(KeyValues *kv);
+	}
+}
 
 #endif//_INCLUDE_PYTHON_KEYVALUES_H_
 

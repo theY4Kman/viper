@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -25,32 +26,35 @@
 #include "viper_globals.h"
 #include <IViperForwardSys.h>
 
-extern PyTypeObject console__ConCommandReplyType;
+namespace Viper {
+	namespace Python {
+		extern PyTypeObject console__ConCommandReplyType;
 
-typedef struct {
-    PyObject_HEAD
-    /* ConCommand arguments passed */
-    PyListObject *args;
-    /* Arg string */
-    char const *argstring;
-    /* Name of the ConCommand */
-    char const *name;
-    /* How the command was executed: 0 console, 1 chat */
-    unsigned int reply_to;
-    /* The client whom called the ConCommand */
-    PyObject *client;
-} console__ConCommandReply;
+		typedef struct {
+			PyObject_HEAD
+			/* ConCommand arguments passed */
+			PyListObject *args;
+			/* Arg string */
+			char const *argstring;
+			/* Name of the ConCommand */
+			char const *name;
+			/* How the command was executed: 0 console, 1 chat */
+			unsigned int reply_to;
+			/* The client whom called the ConCommand */
+			PyObject *client;
+		} console__ConCommandReply;
 
-extern PyTypeObject console__ConVarType;
+		extern PyTypeObject console__ConVarType;
 
-typedef struct {
-    PyObject_HEAD
+		typedef struct {
+			PyObject_HEAD
     
-    char const *name;
+			char const *name;
     
-    ConVar *pVar;
-    IViperForward *cvarChangeHooks; /**< Forward associated with cvar */
-    bool byViper;                   /**< Whether or not the cvar was created by a Viper plugin */
-} console__ConVar;
-
+			ConVar *pVar;
+			IViperForward *cvarChangeHooks; /**< Forward associated with cvar */
+			bool byViper;                   /**< Whether or not the cvar was created by a Viper plugin */
+		} console__ConVar;
+	}
+}
 #endif // _INCLUDE_VIPER_PY_CONSOLE_H_

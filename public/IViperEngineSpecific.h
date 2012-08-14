@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -26,18 +27,19 @@
 #ifndef _INCLUDE_IENGINESPECIFIC_H_
 #define _INCLUDE_IENGINESPECIFIC_H_
 
-class IEngineSpecific
-{
-public:
-    /**
-     * Get the name of the current map
-     */
-    virtual char const *GetCurrentMap(void) = 0;
+namespace Viper {
+	class IEngineSpecific {
+	public:
+		/**
+		 * Get the name of the current map
+		 */
+		virtual char const *GetCurrentMap(void) = 0;
     
-    /**
-     * Get the game time based on the tick
-     */
-    virtual float GetGameTime(void) = 0;
+		/**
+		 * Get the game time based on the tick
+		 */
+		virtual float GetGameTime(void) = 0;
+	};
 };
 
 #endif /* _INCLUDE_IENGINESPECIFIC_H_ */

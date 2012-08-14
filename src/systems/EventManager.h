@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -29,122 +30,124 @@
 #include <IViperForwardSys.h>
 #include <IViperPluginSys.h>
 
-struct ViperEventHook
-{
-    ViperEventHook()
-    {
-        pPreHook = NULL;
-        pPostHook = NULL;
-        postCopy = false;
-        refcnt = 0;
-    }
+namespace Viper {
+	struct ViperEventHook
+	{
+		ViperEventHook()
+		{
+			pPreHook = NULL;
+			pPostHook = NULL;
+			postCopy = false;
+			refcnt = 0;
+		}
     
-    IViperForward *pPreHook;
-    IViperForward *pPostHook;
-    bool postCopy;
-    unsigned int refcnt;
-    char *name;
-};
+		IViperForward *pPreHook;
+		IViperForward *pPostHook;
+		bool postCopy;
+		unsigned int refcnt;
+		char *name;
+	};
 
-enum ModEventType
-{
-    ModEventType_Unknown = -1,
-    ModEventType_String = 0,
-    ModEventType_Bool,
-    ModEventType_Byte,
-    ModEventType_Short,
-    ModEventType_Long,
-    ModEventType_Float,
-    ModEventType_Local 
-};
+	enum ModEventType
+	{
+		ModEventType_Unknown = -1,
+		ModEventType_String = 0,
+		ModEventType_Bool,
+		ModEventType_Byte,
+		ModEventType_Short,
+		ModEventType_Long,
+		ModEventType_Float,
+		ModEventType_Local 
+	};
 
-static char const *ModEventTypeStrings[] =
-{
-    "string",
-    "bool",
-    "byte",
-    "short",
-    "long",
-    "float",
-    "local"
-};
+	static char const *ModEventTypeStrings[] =
+	{
+		"string",
+		"bool",
+		"byte",
+		"short",
+		"long",
+		"float",
+		"local"
+	};
 
-struct ModEventField
-{
-    ModEventField()
-    {
-        name = NULL;
-        type = ModEventType_String;
-    }
+	struct ModEventField
+	{
+		ModEventField()
+		{
+			name = NULL;
+			type = ModEventType_String;
+		}
     
-    ~ModEventField()
-    {
-        if (name != NULL)
-            delete [] name;
-    }
+		~ModEventField()
+		{
+			if (name != NULL)
+				delete [] name;
+		}
     
-    char const *name;
-    ModEventType type;
-};
+		char const *name;
+		ModEventType type;
+	};
 
-typedef SourceHook::List<ModEventField *> ModEventFieldList;
+	typedef SourceHook::List<ModEventField *> ModEventFieldList;
 
-enum ViperEventHookMode
-{
-    EventHookMode_Pre,
-    EventHookMode_Post,
-    EventHookMode_PostNoCopy,
-};
+	enum ViperEventHookMode
+	{
+		EventHookMode_Pre,
+		EventHookMode_Post,
+		EventHookMode_PostNoCopy,
+	};
 
-enum ViperEventHookError
-{
-    EventHookErr_Okay = 0,          /**< No error */
-    EventHookErr_InvalidEvent,      /**< Event does not exist */
-    EventHookErr_NotActive,         /**< Event has no active hook */
-    EventHookErr_InvalidCallback,   /**< Event does not fire specified callback */
-};
+	enum ViperEventHookError
+	{
+		EventHookErr_Okay = 0,          /**< No error */
+		EventHookErr_InvalidEvent,      /**< Event does not exist */
+		EventHookErr_NotActive,         /**< Event has no active hook */
+		EventHookErr_InvalidCallback,   /**< Event does not fire specified callback */
+	};
 
-class ViperEventManager :
-    public ViperGlobalClass,
-    public IViperPluginsListener,
-    public IGameEventListener2
-{
-public:
-    ViperEventManager();
-    ~ViperEventManager();
-public: // ViperGlobalClass
-    virtual void OnViperStartup(bool late);
-    virtual void OnViperAllInitialized();
-    virtual void OnViperShutdown();
-public: // IViperPluginsListener
-    virtual void OnPluginUnloaded(IViperPlugin *pl);
-public: // IGameEventListener2
-	void FireGameEvent(IGameEvent *pEvent);
-public:
-    ViperEventHookError HookEvent(char const *name, IViperPluginFunction *pFunc,
-        ViperEventHookMode mode=EventHookMode_Post);
-    ViperEventHookError UnhookEvent(char const *name, IViperPluginFunction *pFunc,
-        ViperEventHookMode mode=EventHookMode_Post);
-    /** Retrieves a list of fields from the modevents.res trie */
-    ModEventFieldList *GetEventFields(char const *name);
-    /** Retrieves the type of a modevents.res event field from a list of fields */
-    ModEventType GetFieldType(SourceHook::List<ModEventField *> *fields,
-        char const *name);
+	class ViperEventManager :
+		public ViperGlobalClass,
+		public IViperPluginsListener,
+		public IGameEventListener2
+	{
+	public:
+		ViperEventManager();
+		~ViperEventManager();
+	public: // ViperGlobalClass
+		virtual void OnViperStartup(bool late);
+		virtual void OnViperAllInitialized();
+		virtual void OnViperShutdown();
+	public: // IViperPluginsListener
+		virtual void OnPluginUnloaded(IViperPlugin *pl);
+	public: // IGameEventListener2
+		void FireGameEvent(IGameEvent *pEvent);
+	public:
+		ViperEventHookError HookEvent(char const *name, IViperPluginFunction *pFunc,
+			ViperEventHookMode mode=EventHookMode_Post);
+		ViperEventHookError UnhookEvent(char const *name, IViperPluginFunction *pFunc,
+			ViperEventHookMode mode=EventHookMode_Post);
+		/** Retrieves a list of fields from the modevents.res trie */
+		ModEventFieldList *GetEventFields(char const *name);
+		/** Retrieves the type of a modevents.res event field from a list of fields */
+		ModEventType GetFieldType(SourceHook::List<ModEventField *> *fields,
+			char const *name);
 
-private: // IGameEventManager2 hooks
-	bool OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast);
-	bool OnFireEvent_Post(IGameEvent *pEvent, bool bDontBroadcast);
-private:
-    PyObject *m_HookParams;
-    Trie *m_EventHooks;
-    SourceHook::CStack<IGameEvent *> m_EventCopies;
-    SourceHook::CStack<ViperEventHook *> m_EventHookStack;
+	private: // IGameEventManager2 hooks
+		bool OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast);
+		bool OnFireEvent_Post(IGameEvent *pEvent, bool bDontBroadcast);
+	private:
+		PyObject *m_HookParams;
+		Trie *m_EventHooks;
+		SourceHook::CStack<IGameEvent *> m_EventCopies;
+		SourceHook::CStack<ViperEventHook *> m_EventHookStack;
     
-    /** modevents.res will be parsed and placed in here. */
-    Trie *m_ModEvents;
-};
+		/** modevents.res will be parsed and placed in here. */
+		Trie *m_ModEvents;
+	};
 
-extern ViperEventManager g_EventManager;
+	extern ViperEventManager g_EventManager;
+}
 
 #endif // _INCLUDE_VIPER_EVENTMANAGER_H_
 

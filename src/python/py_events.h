@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -25,18 +26,22 @@
 #include <igameevents.h>
 #include "EventManager.h"
 
-extern PyTypeObject events__EventType;
+namespace Viper {
+	namespace Python {
+		extern PyTypeObject events__EventType;
 
-struct events__Event {
-    PyObject_HEAD
+		struct events__Event {
+			PyObject_HEAD
     
-    IGameEvent *event;
-    bool bDontBroadcast;
+			IGameEvent *event;
+			bool bDontBroadcast;
     
-    ModEventFieldList *fields;
-    /** A dict containing  */
-    PyObject *py_fields;
-};
+			ModEventFieldList *fields;
+			/** A dict containing  */
+			PyObject *py_fields;
+		};
+	}
+}
 
 #endif // _INCLUDE_PYTHON_EVENTS_H_
 

@@ -2,7 +2,8 @@
  * =============================================================================
  * Viper
  * Copyright (C) 2010 Brandon "monokrome" Stoner
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -28,64 +29,66 @@
 #include "ForwardSys.h"
 #include "extension.h"
 
-extern IViperForward *g_pViperOnBanClient;
-extern SourceMod::IForward *g_pSMOnBanIdentity;
-extern SourceMod::IForward *g_pSMOnBanClient;
+namespace Viper {
+	extern IViperForward *g_pViperOnBanClient;
+	extern SourceMod::IForward *g_pSMOnBanIdentity;
+	extern SourceMod::IForward *g_pSMOnBanClient;
 
-ViperResultType InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
-                                               IViperPluginFunction *func);
+	ViperResultType InterceptClientConnectCallback(IViperForward *fwd, PyObject *ret,
+												   IViperPluginFunction *func);
 
-class ViperPlayerManager :
-    public ViperGlobalClass,
-    public SourceMod::IClientListener
-{
-public:
-    ViperPlayerManager();
-#if SOURCE_ENGINE >= SE_ORANGEBOX
-    void OnClientCommand(edict_t *pEntity, const CCommand &args);
-#else
-    void OnClientCommand(edict_t *pEntity);
-#endif
-public: // ViperGlobalClass
-    virtual void OnViperStartup(bool late);
-    virtual void OnViperShutdown();
-public: // IClientListener
-    virtual bool InterceptClientConnect(int client, char *reject, size_t maxrejectlen);
-    virtual void OnClientConnected(int client);
-    virtual void OnClientPutInServer(int client);
-    virtual void OnClientDisconnecting(int client);
-    virtual void OnClientDisconnected(int client);
-    virtual void OnClientAuthorized(int client, char const *authstring);
+	class ViperPlayerManager :
+		public ViperGlobalClass,
+		public SourceMod::IClientListener
+	{
+	public:
+		ViperPlayerManager();
+	#if SOURCE_ENGINE >= SE_ORANGEBOX
+		void OnClientCommand(edict_t *pEntity, const CCommand &args);
+	#else
+		void OnClientCommand(edict_t *pEntity);
+	#endif
+	public: // ViperGlobalClass
+		virtual void OnViperStartup(bool late);
+		virtual void OnViperShutdown();
+	public: // IClientListener
+		virtual bool InterceptClientConnect(int client, char *reject, size_t maxrejectlen);
+		virtual void OnClientConnected(int client);
+		virtual void OnClientPutInServer(int client);
+		virtual void OnClientDisconnecting(int client);
+		virtual void OnClientDisconnected(int client);
+		virtual void OnClientAuthorized(int client, char const *authstring);
     
-    virtual bool OnClientPreAdminCheck(int client);
-    virtual void OnClientPostAdminCheck(int client);
+		virtual bool OnClientPreAdminCheck(int client);
+		virtual void OnClientPostAdminCheck(int client);
     
-    virtual void OnServerActivate(int clientMax);
-public:
-    /**
-     * @brief Returns the sourcemod.clients.Client object for that client index
-     * @note: This returns a NEW REFERENCE
-     */
-    PyObject *GetPythonClient(int client);
+		virtual void OnServerActivate(int clientMax);
+	public:
+		/**
+		 * @brief Returns the sourcemod.clients.Client object for that client index
+		 * @note: This returns a NEW REFERENCE
+		 */
+		PyObject *GetPythonClient(int client);
 
-private:
-    IViperForward *m_OnClientConnect;
-    IViperForward *m_OnClientConnected;
-    IViperForward *m_OnClientPutInServer;
-    IViperForward *m_OnClientDisconnecting;
-    IViperForward *m_OnClientDisconnected;
-    IViperForward *m_OnClientAuthorized;
+	private:
+		IViperForward *m_OnClientConnect;
+		IViperForward *m_OnClientConnected;
+		IViperForward *m_OnClientPutInServer;
+		IViperForward *m_OnClientDisconnecting;
+		IViperForward *m_OnClientDisconnected;
+		IViperForward *m_OnClientAuthorized;
     
-    IViperForward *m_OnClientPreAdminCheck;
-    IViperForward *m_OnClientPostAdminCheck;
+		IViperForward *m_OnClientPreAdminCheck;
+		IViperForward *m_OnClientPostAdminCheck;
     
-    IViperForward *m_OnServerActivate;
-    IViperForward *m_OnMapStart;
+		IViperForward *m_OnServerActivate;
+		IViperForward *m_OnMapStart;
     
-    PyObject **m_Clients;
-};
+		PyObject **m_Clients;
+	};
 
-extern ViperPlayerManager g_Players;
+	extern ViperPlayerManager g_Players;
+}
 
 #endif // _INCLUDE_VIPER_PLAYERMANAGER_H_
 

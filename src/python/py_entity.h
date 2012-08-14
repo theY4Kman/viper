@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -24,37 +25,41 @@
 #include <iserverunknown.h>
 #include <edict.h>
 
-struct entity__EntityProps;
+namespace Viper {
+	namespace Python {
+		struct entity__EntityProps;
 
-extern PyTypeObject entity__EntityType;
-extern void *g_pSendProxy_EHandleToInt;
+		extern PyTypeObject entity__EntityType;
+		extern void *g_pSendProxy_EHandleToInt;
 
-enum ViperPropType
-{
-    Prop_Send = 0,
-    Prop_Data
-};
+		enum ViperPropType
+		{
+			Prop_Send = 0,
+			Prop_Data
+		};
 
-struct entity__Entity {
-    PyObject_HEAD
+		struct entity__Entity {
+			PyObject_HEAD
     
-    edict_t *edict;
+			edict_t *edict;
     
-    entity__EntityProps *sendprops;
-    entity__EntityProps *datamaps;
-};
+			entity__EntityProps *sendprops;
+			entity__EntityProps *datamaps;
+		};
 
-PyObject * GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
-                                 ViperPropType type, void *propdata=NULL,
-                                 int a_prop_offset=-1);
+		PyObject * GetEntityPropPyObject(entity__Entity *pyEnt, char const *prop,
+										 ViperPropType type, void *propdata=NULL,
+										 int a_prop_offset=-1);
 
-inline CBaseEntity *GetEntity(edict_t *pEdict)
-{
-    IServerUnknown *pUnk = pEdict->GetUnknown();
-    if (pUnk == NULL)
-        return NULL;
+		inline CBaseEntity *GetEntity(edict_t *pEdict)
+		{
+			IServerUnknown *pUnk = pEdict->GetUnknown();
+			if (pUnk == NULL)
+				return NULL;
     
-    return pUnk->GetBaseEntity();
+			return pUnk->GetBaseEntity();
+		}
+	}
 }
 
 #endif//_INCLUDE_PYTHON_ENTITY_H_

@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -26,32 +27,34 @@
 
 class KeyValues;
 
-class ViperHalfLife2 : public ViperGlobalClass
-{
-public: // ViperGlobalClass
-    virtual void OnViperStartup(bool late);
-    virtual void OnViperAllInitialized();
-public:
-    bool HintTextMsg(cell_t clients[], char const *msg);
-    inline bool HintTextMsg(int client, char const *msg)
-    {
-        cell_t players[] = {client};
-        return HintTextMsg(players, msg);
-    }
+namespace Viper {
+	class ViperHalfLife2 : public ViperGlobalClass
+	{
+	public: // ViperGlobalClass
+		virtual void OnViperStartup(bool late);
+		virtual void OnViperAllInitialized();
+	public:
+		bool HintTextMsg(cell_t clients[], char const *msg);
+		inline bool HintTextMsg(int client, char const *msg)
+		{
+			cell_t players[] = {client};
+			return HintTextMsg(players, msg);
+		}
     
-    bool ShowVGUIMenu(cell_t clients[], char const *name, KeyValues *data, bool show);
-    inline bool ShowVGUIMenu(int client, char const *name, KeyValues *data, bool show)
-    {
-        cell_t players[] = {client};
-        return ShowVGUIMenu(players, name, data, show);
-    }
+		bool ShowVGUIMenu(cell_t clients[], char const *name, KeyValues *data, bool show);
+		inline bool ShowVGUIMenu(int client, char const *name, KeyValues *data, bool show)
+		{
+			cell_t players[] = {client};
+			return ShowVGUIMenu(players, name, data, show);
+		}
 
-private:
-    int m_HintTextMsg;
-    int m_VGUIMenu;
-};
+	private:
+		int m_HintTextMsg;
+		int m_VGUIMenu;
+	};
 
-extern ViperHalfLife2 g_HL2;
+	extern ViperHalfLife2 g_HL2;
+}
 
 #endif//_INCLUDE_VIPER_HALFLIFE2_H_
 

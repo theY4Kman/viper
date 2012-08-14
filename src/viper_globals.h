@@ -61,148 +61,136 @@
 #define HUD_PRINTTALK		3
 #define HUD_PRINTCENTER		4
 
-/* Interface declaration */
-extern IUniformRandomStream *g_pRandom;
-extern SourceMod::IRootConsole *g_pMenu;
 extern ICvar *icvar;
-extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
-extern IServerPluginHelpers *g_pServerPluginHelpers;
-extern IServerGameClients *serverClients;
-extern IGameEventManager2 *gameevents;
-extern IEngineSound *enginesound;
-extern SourceMod::IGameConfig *g_pGameConf;
-extern IFileSystem *baseFs;
 
-extern SourceMod::INativeInterface *ninvoke;
+using namespace Viper::Python;
 
-#if SOURCE_ENGINE >= SE_ORANGEBOX
-extern ICvar *g_pCVar;
-#endif
+namespace Viper {
+	/* Interface declaration */
+	extern IUniformRandomStream *g_pRandom;
+	extern SourceMod::IRootConsole *g_pMenu;
+	extern SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch;
+	extern IServerPluginHelpers *g_pServerPluginHelpers;
+	extern IServerGameClients *serverClients;
+	extern IGameEventManager2 *gameevents;
+	extern IEngineSound *enginesound;
+	extern SourceMod::IGameConfig *g_pGameConf;
+	extern IFileSystem *baseFs;
 
-extern PyThreadState *g_pGlobalThreadState;
-extern PyObject *g_pViperException;
+	extern SourceMod::INativeInterface *ninvoke;
 
-#if SOURCE_ENGINE < SE_ORANGEBOX
-#   define GetEngineFactory engineFactory
-#endif
+	#if SOURCE_ENGINE >= SE_ORANGEBOX
+	extern ICvar *g_pCVar;
+	#endif
 
-#define IS_STR_FILLED(str) ((str) != NULL && (str)[0] != '\0')
+	extern PyThreadState *g_pGlobalThreadState;
+	extern PyObject *g_pViperException;
 
-#ifndef PyModule_AddIntMacro
-#   define PyModule_AddIntMacro(module, constant) PyModule_AddIntConstant(module, #constant, constant)
-#endif
+	#if SOURCE_ENGINE < SE_ORANGEBOX
+	#   define GetEngineFactory engineFactory
+	#endif
 
-/* Retrieve the plug-in of the current thread state. */
-#define GET_THREAD_PLUGIN() IViperPlugin *pPlugin; { \
-    PyThreadState *tstate = PyThreadState_Get(); \
-    assert(tstate != NULL); \
-    pPlugin = g_VPlugins.GetPluginOfInterpreterState(tstate->interp); \
-    if (pPlugin == NULL) \
-    { \
-        PyErr_SetString(g_pViperException, "Error retrieving current plug-in"); \
-        return 0; \
-    } \
-}
+	#define IS_STR_FILLED(str) ((str) != NULL && (str)[0] != '\0')
 
-#define SERVER_CALL(func) SH_CALL(g_pGameDLLPatch, &IServerGameDLL::func)
+	#ifndef PyModule_AddIntMacro
+	#   define PyModule_AddIntMacro(module, constant) PyModule_AddIntConstant(module, #constant, constant)
+	#endif
 
-typedef PyObject PyFunction;
-
-/* Utility functions from various authors */
-/* From sm_stringutils.cpp */
-size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...);
-
-/* From sm_stringutils.cpp */
-char *sm_strdup(char const *str);
-
-/* StrReplace by sslice. I bet he doesn't know :O */
-int StrReplace(char *str, char const *from, char const *to, int maxlen);
-
-/**
- * @brief Retrieves the name of the deepest folder in a path
- */
-char const *GetLastFolderOfPath(char const *path);
-
-/**
- * @brief Retrieves all the text past the last slash in a path
- */
-char const *GetLastOfPath(char const *path);
-
-/* From sm_stringutils.cpp */
-unsigned int strncopy(char *dest, char const *src, size_t count);
-
-/* Utility functions for PyObject data types */
-PyObject *CreatePyVector(float x=0.0f, float y=0.0f, float z=0.0f);
-PyObject *CreatePyColor(int r=0, int g=0, int b=0, int a=0);
-inline PyObject *CreatePyVector(const Vector &vec)
-{
-    return CreatePyVector(vec.x, vec.y, vec.z);
-}
-inline PyObject *CreatePyVector(const QAngle &ang)
-{
-    return CreatePyVector(ang.x, ang.y, ang.z);
-}
-
-inline Vector *VectorFromPyVector(datatypes__Vector *vec)
-{
-    return new Vector(vec->x, vec->y, vec->z);
-}
-
-inline PyObject *CreatePyColor(Color color)
-{
-    return CreatePyColor(color[0], color[1], color[2], color[3]);
-}
-
-inline Color *ColorFromPyColor(datatypes__Color *color)
-{
-    return new Color(color->r, color->g, color->b, color->a);
-}
-
-class ViperGlobalClass
-{
-    friend class BaseViper;
-public:
-    ViperGlobalClass();
-public:
-    /**
-	 * @brief Called when Viper is initially loading
-	 */
-	virtual void OnViperStartup(bool late)
-	{
+	/* Retrieve the plug-in of the current thread state. */
+	#define GET_THREAD_PLUGIN() IViperPlugin *pPlugin; { \
+		PyThreadState *tstate = PyThreadState_Get(); \
+		assert(tstate != NULL); \
+		pPlugin = g_VPlugins.GetPluginOfInterpreterState(tstate->interp); \
+		if (pPlugin == NULL) \
+		{ \
+			PyErr_SetString(g_pViperException, "Error retrieving current plug-in"); \
+			return 0; \
+		} \
 	}
+
+	#define SERVER_CALL(func) SH_CALL(g_pGameDLLPatch, &IServerGameDLL::func)
+
+	typedef PyObject PyFunction;
+
+	PyObject *CreatePyVector(float x=0.0f, float y=0.0f, float z=0.0f);
+	PyObject *CreatePyVector(const QAngle &ang);
+	PyObject *CreatePyVector(const Vector &vec);
+
+	PyObject *CreatePyColor(Color color);
+	PyObject *CreatePyColor(int r=0, int g=0, int b=0, int a=0);
+
+	Color *ColorFromPyColor(datatypes__Color *color);
+	
+
+	/* Utility functions from various authors */
+	/* From sm_stringutils.cpp */
+	size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...);
+
+	/* From sm_stringutils.cpp */
+	char *sm_strdup(char const *str);
+
+	/* StrReplace by sslice. I bet he doesn't know :O */
+	int StrReplace(char *str, char const *from, char const *to, int maxlen);
 
 	/**
-	 * @brief Called after all global classes have been started up
+	 * @brief Retrieves the name of the deepest folder in a path
 	 */
-	virtual void OnViperAllInitialized()
-	{
-	}
+	char const *GetLastFolderOfPath(char const *path);
 
 	/**
-	 * @brief Called after all global classes have initialized
+	 * @brief Retrieves all the text past the last slash in a path
 	 */
-	virtual void OnViperAllInitialized_Post()
-	{
-	}
+	char const *GetLastOfPath(char const *path);
 
-	/**
-	 * @brief Called when Viper is shutting down
-	 */
-	virtual void OnViperShutdown()
-	{
-	}
+	/* From sm_stringutils.cpp */
+	unsigned int strncopy(char *dest, char const *src, size_t count);
 
-	/**
-	 * @brief Called after Viper is completely shut down
-	 */
-	virtual void OnViperAllShutdown()
+	class ViperGlobalClass
 	{
-	}
+		friend class BaseViper;
+	public:
+		ViperGlobalClass();
+	public:
+		/**
+		 * @brief Called when Viper is initially loading
+		 */
+		virtual void OnViperStartup(bool late)
+		{
+		}
 
-private:
-    ViperGlobalClass *m_pGlobalClassNext;
-    static ViperGlobalClass *head;
-};
+		/**
+		 * @brief Called after all global classes have been started up
+		 */
+		virtual void OnViperAllInitialized()
+		{
+		}
+
+		/**
+		 * @brief Called after all global classes have initialized
+		 */
+		virtual void OnViperAllInitialized_Post()
+		{
+		}
+
+		/**
+		 * @brief Called when Viper is shutting down
+		 */
+		virtual void OnViperShutdown()
+		{
+		}
+
+		/**
+		 * @brief Called after Viper is completely shut down
+		 */
+		virtual void OnViperAllShutdown()
+		{
+		}
+
+	private:
+		ViperGlobalClass *m_pGlobalClassNext;
+		static ViperGlobalClass *head;
+	};
+}
 
 #endif /* _INCLUDE_VIPER_GLOBALS_H_ */
 

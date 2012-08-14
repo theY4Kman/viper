@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -21,13 +22,17 @@
 #ifndef _INCLUDE_PYTHON_CLIENTS_H_
 #define _INCLUDE_PYTHON_CLIENTS_H_
 
-extern PyTypeObject clients__ClientType;
+namespace Viper {
+	namespace Python {
+		extern PyTypeObject clients__ClientType;
 
-typedef struct {
-    PyObject_HEAD
+		typedef struct {
+			PyObject_HEAD
     
-    int index;
-} clients__Client;
+			int index;
+		} clients__Client;
+	}
+}
 
 #endif // _INCLUDE_PYTHON_CLIENTS_H_
 

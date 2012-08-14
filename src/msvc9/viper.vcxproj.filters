@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Systems">
+      <UniqueIdentifier>{007dbef6-19a5-4e3b-9767-e3c860bd935b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK">
+      <UniqueIdentifier>{b6030219-6292-4897-8ac8-f506ad04686c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{b27d3458-a189-46dc-bac8-6599d67090c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceMod">
+      <UniqueIdentifier>{7144b0a4-1cca-427e-809c-4407a7e5d532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Python">
+      <UniqueIdentifier>{817da114-727a-4ec8-87d8-8645fcba69ac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\systems\ConCmdManager.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\systems\ConVarManager.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\systems\EventManager.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\systems\ForwardSys.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\systems\HalfLife2.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\systems\PlayerManager.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sdk\smsdk_ext.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sourcemod\sm_trie.cpp">
+      <Filter>SourceMod</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_bitbuf.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_clients.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_console.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_datatypes.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_entity.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_events.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_forwards.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_halflife.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_keyvalues.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_menus.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_natives.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_sourcemod.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\python\py_usermessages.cpp">
+      <Filter>Python</Filter>
+    </ClCompile>
+    <ClCompile Include="..\console.cpp" />
+    <ClCompile Include="..\extension.cpp" />
+    <ClCompile Include="..\viper.cpp" />
+    <ClCompile Include="..\systems\ViperPluginSys.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\viper_globals.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\systems\ConCmdManager.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\systems\ConVarManager.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\systems\EventManager.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\systems\ForwardSys.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\systems\HalfLife2.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\systems\PlayerManager.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sdk\smsdk_config.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sdk\smsdk_ext.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\IViper.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\IViperEngineSpecific.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\IViperForwardSys.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\IViperPluginSys.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\IViperShareSys.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\convar_sm.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\convar_sm_l4d.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\convar_sm_ob.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\sm_trie.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\init.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_bitbuf.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_clients.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_console.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_datatypes.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_entity.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_events.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\python\py_keyvalues.h">
+      <Filter>Python</Filter>
+    </ClInclude>
+    <ClInclude Include="..\console.h" />
+    <ClInclude Include="..\extension.h" />
+    <ClInclude Include="..\python_delay_data.h" />
+    <ClInclude Include="..\viper.h" />
+    <ClInclude Include="..\viper_globals.h" />
+    <ClInclude Include="..\viper_keyvalues.h" />
+    <ClInclude Include="..\viper_metamod_wrappers.h" />
+    <ClInclude Include="..\systems\ViperPluginSys.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

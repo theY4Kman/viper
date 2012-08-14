@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 Anthony "PimpinJuice" Iacono
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -21,15 +22,14 @@
 #include "viper.h"
 #include "python/init.h"
 #include "viper_globals.h"
-#include "PluginSys.h"
+#include "systems/ViperPluginSys.h"
 
 SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
-
-SourceMod::IRootConsole *g_pMenu = NULL;
-SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch = NULL;
-
-bool
-BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
+namespace Viper {
+	SourceMod::IRootConsole *g_pMenu = NULL;
+	SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch = NULL;
+	
+	bool BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
 {
     g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
     SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
@@ -41,84 +41,83 @@ BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
     return true;
 }
 
-void
-BaseViper::StartViper()
-{
-    SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &BaseViper::GameFrame, false);
+	void BaseViper::StartViper()
+	{
+		SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &BaseViper::GameFrame, false);
     
-    /* Notify! */
-    ViperGlobalClass *pBase = ViperGlobalClass::head;
-    while (pBase)
-    {
-        pBase->OnViperStartup(false);
-        pBase = pBase->m_pGlobalClassNext;
-    }
+		/* Notify! */
+		ViperGlobalClass *pBase = ViperGlobalClass::head;
+		while (pBase)
+		{
+			pBase->OnViperStartup(false);
+			pBase = pBase->m_pGlobalClassNext;
+		}
 
-    /* Notify! */
-    pBase = ViperGlobalClass::head;
-    while (pBase)
-    {
-        pBase->OnViperAllInitialized();
-        pBase = pBase->m_pGlobalClassNext;
-    }
+		/* Notify! */
+		pBase = ViperGlobalClass::head;
+		while (pBase)
+		{
+			pBase->OnViperAllInitialized();
+			pBase = pBase->m_pGlobalClassNext;
+		}
 
-    /* Notify! */
-    pBase = ViperGlobalClass::head;
-    while (pBase)
-    {
-        pBase->OnViperAllInitialized_Post();
-        pBase = pBase->m_pGlobalClassNext;
-    }
+		/* Notify! */
+		pBase = ViperGlobalClass::head;
+		while (pBase)
+		{
+			pBase->OnViperAllInitialized_Post();
+			pBase = pBase->m_pGlobalClassNext;
+		}
     
-    /* Setup the game frame hook */
-    m_GameFrame = g_Forwards.CreateForward("game_frame", ET_Ignore,
-        m_EmptyTuple, NULL);
+		/* Setup the game frame hook */
+		m_GameFrame = g_Forwards.CreateForward("game_frame", ET_Ignore,
+			m_EmptyTuple, NULL);
     
-    /* Load the plugins */
-    char plugins_path[PLATFORM_MAX_PATH];
-    g_pSM->BuildPath(SourceMod::Path_SM, plugins_path, sizeof(plugins_path),
-        "plugins");
-    g_VPlugins.LoadPluginsFromDir(plugins_path);
-}
+		/* Load the plugins */
+		char plugins_path[PLATFORM_MAX_PATH];
+		g_pSM->BuildPath(SourceMod::Path_SM, plugins_path, sizeof(plugins_path),
+			"plugins");
+		g_VPlugins.LoadPluginsFromDir(plugins_path);
+	}
 
-void
-BaseViper::OnViperUnload()
-{
-    ViperGlobalClass *pBase = ViperGlobalClass::head;
-    while (pBase)
-    {
-        pBase->OnViperShutdown();
-        pBase = pBase->m_pGlobalClassNext;
-    }
+	void
+	BaseViper::OnViperUnload()
+	{
+		ViperGlobalClass *pBase = ViperGlobalClass::head;
+		while (pBase)
+		{
+			pBase->OnViperShutdown();
+			pBase = pBase->m_pGlobalClassNext;
+		}
     
-    pBase = ViperGlobalClass::head;
-    while (pBase)
-    {
-        pBase->OnViperAllShutdown();
-        pBase = pBase->m_pGlobalClassNext;
-    }
+		pBase = ViperGlobalClass::head;
+		while (pBase)
+		{
+			pBase->OnViperAllShutdown();
+			pBase = pBase->m_pGlobalClassNext;
+		}
     
-    Py_DECREF(m_EmptyTuple);
-}
+		Py_DECREF(m_EmptyTuple);
+	}
 
-/* Oh, I just love copying code directly from SourceMod
- * It warms the cockles of my heart. My cockles are warmed.
- */
-void
-BaseViper::PushCommandStack(const CCommand *cmd)
-{
-    CachedCommandInfo info;
+	/* Oh, I just love copying code directly from SourceMod
+	 * It warms the cockles of my heart. My cockles are warmed.
+	 */
+	void
+	BaseViper::PushCommandStack(const CCommand *cmd)
+	{
+		CachedCommandInfo info;
 
-    info.args = cmd;
-#if SOURCE_ENGINE < SE_ORANGEBOX
-    strncopy(info.cmd, cmd->Arg(0), sizeof(info.cmd));
-#endif
+		info.args = cmd;
+	#if SOURCE_ENGINE < SE_ORANGEBOX
+		strncopy(info.cmd, cmd->Arg(0), sizeof(info.cmd));
+	#endif
 
-    m_CommandStack.push(info);
-}
+		m_CommandStack.push(info);
+	}
 
-char const *
-BaseViper::CurrentCommandName()
+	char const *
+								BaseViper::CurrentCommandName()
 {
 #if SOURCE_ENGINE >= SE_ORANGEBOX
     return m_CommandStack.front().args->Arg(0);
@@ -127,8 +126,8 @@ BaseViper::CurrentCommandName()
 #endif
 }
 
-const CCommand *
-BaseViper::PeekCommandStack()
+	const CCommand *
+						BaseViper::PeekCommandStack()
 {
     if (m_CommandStack.empty())
         return NULL;
@@ -136,127 +135,127 @@ BaseViper::PeekCommandStack()
     return m_CommandStack.front().args;
 }
 
-void
-BaseViper::PopCommandStack()
+	void
+				BaseViper::PopCommandStack()
 {
     m_CommandStack.pop();
 }
 
-void
-BaseViper::GameFrame(bool simulating)
+	void
+					BaseViper::GameFrame(bool simulating)
 {
     if (m_GameFrame->GetFunctionCount())
         m_GameFrame->Execute(NULL, m_EmptyTuple);
 }
 
-BaseViper g_Viper;
+	BaseViper g_Viper;
 
-ViperGlobalClass *ViperGlobalClass::head = NULL;
-ViperGlobalClass::ViperGlobalClass()
-{
-    m_pGlobalClassNext = ViperGlobalClass::head;
-    ViperGlobalClass::head = this;
-}
+	ViperGlobalClass *ViperGlobalClass::head = NULL;
+	ViperGlobalClass::ViperGlobalClass()
+	{
+		m_pGlobalClassNext = ViperGlobalClass::head;
+		ViperGlobalClass::head = this;
+	}
 
-/* Utility functions */
-size_t
-UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    size_t len = vsnprintf(buffer, maxlength, fmt, ap);
-    va_end(ap);
+	/* Utility functions */
+	size_t
+	UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...)
+	{
+		va_list ap;
+		va_start(ap, fmt);
+		size_t len = vsnprintf(buffer, maxlength, fmt, ap);
+		va_end(ap);
 
-    if (len >= maxlength)
-    {
-        buffer[maxlength - 1] = '\0';
-        return (maxlength - 1);
-    }
-    else
-    {
-        return len;
-    }
-}
+		if (len >= maxlength)
+		{
+			buffer[maxlength - 1] = '\0';
+			return (maxlength - 1);
+		}
+		else
+		{
+			return len;
+		}
+	}
 
-char *
-sm_strdup(char const *str)
-{
-    char *ptr = new char[strlen(str)+1];
-    strcpy(ptr, str);
-    return ptr;
-}
+	char *
+	sm_strdup(char const *str)
+	{
+		char *ptr = new char[strlen(str)+1];
+		strcpy(ptr, str);
+		return ptr;
+	}
 
-int
-StrReplace(char *str, char const *from, char const *to, int maxlen) 
-{
-    char *pstr = str;
-    int fromlen = strlen(from);
-    int tolen = strlen(to);
-    int RC = 0;
+	int
+	StrReplace(char *str, char const *from, char const *to, int maxlen) 
+	{
+		char *pstr = str;
+		int fromlen = strlen(from);
+		int tolen = strlen(to);
+		int RC = 0;
 
-    while (*pstr != '\0' && pstr - str < maxlen) {
-        if (strncmp(pstr, from, fromlen) != 0) {
-            *pstr++;
-            continue;
-        }
-        memmove(pstr + tolen, pstr + fromlen, maxlen - ((pstr + tolen) - str) - 1);
-        memcpy(pstr, to, tolen);
-        pstr += tolen;
-        RC++;
-    }
-    return RC;
-}
+		while (*pstr != '\0' && pstr - str < maxlen) {
+			if (strncmp(pstr, from, fromlen) != 0) {
+				*pstr++;
+				continue;
+			}
+			memmove(pstr + tolen, pstr + fromlen, maxlen - ((pstr + tolen) - str) - 1);
+			memcpy(pstr, to, tolen);
+			pstr += tolen;
+			RC++;
+		}
+		return RC;
+	}
 
-char const *
-GetLastFolderOfPath(char const *path)
-{
-    char const *lastslash = strrchr(path, '/')-1;
+	char const *
+	GetLastFolderOfPath(char const *path)
+	{
+		char const *lastslash = strrchr(path, '/')-1;
     
-    /* No slashes found, so just send 'er on back */
-    if (lastslash == NULL)
-        return path;
+		/* No slashes found, so just send 'er on back */
+		if (lastslash == NULL)
+			return path;
     
-    char *seclastslash = const_cast<char*>(lastslash);
-    while (seclastslash > path)
-    {
-        if (*(--seclastslash) == '/')
-            break;
-    }
+		char *seclastslash = const_cast<char*>(lastslash);
+		while (seclastslash > path)
+		{
+			if (*(--seclastslash) == '/')
+				break;
+		}
     
-    size_t length = lastslash - seclastslash + 1;
-    char *nicename = (char*)malloc(length);
+		size_t length = lastslash - seclastslash + 1;
+		char *nicename = (char*)malloc(length);
     
-    strncpy(nicename, seclastslash+1, length);
-    nicename[lastslash-seclastslash] = '\0';
+		strncpy(nicename, seclastslash+1, length);
+		nicename[lastslash-seclastslash] = '\0';
 
-    return static_cast<char const *>(nicename);
+		return static_cast<char const *>(nicename);
+	}
+
+	char const *
+	GetLastOfPath(char const *path)
+	{
+		char const *lastslash = strrchr(path, '/');
+		if (lastslash == NULL)
+			return path;
+    
+		return lastslash + 1;
+	}
+
+	unsigned int
+	strncopy(char *dest, char const *src, size_t count)
+	{
+		if (!count)
+		{
+			return 0;
+		}
+
+		char *start = dest;
+		while ((*src) && (--count))
+		{
+			*dest++ = *src++;
+		}
+		*dest = '\0';
+
+		return (dest - start);
+	}
 }
-
-char const *
-GetLastOfPath(char const *path)
-{
-    char const *lastslash = strrchr(path, '/');
-    if (lastslash == NULL)
-        return path;
-    
-    return lastslash + 1;
-}
-
-unsigned int
-strncopy(char *dest, char const *src, size_t count)
-{
-    if (!count)
-    {
-        return 0;
-    }
-
-    char *start = dest;
-    while ((*src) && (--count))
-    {
-        *dest++ = *src++;
-    }
-    *dest = '\0';
-
-    return (dest - start);
-}
-

@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -26,37 +27,38 @@
 #include <IRootConsoleMenu.h>
 #include <compat_wrappers.h>
 
-class ViperConsole :
-    public SourceMod::IRootConsoleCommand,
-    public ViperGlobalClass,
-    public IConCommandBaseAccessor
-{
-public: // IRootConsoleCommand
-	// Called when an admin runs "sm py"
-	virtual void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
-public: // ViperGlobalClass
-	virtual void OnViperStartup(bool late);
-	virtual void OnViperAllShutdown();
-public: // IConCommandBaseAccessor
-    bool RegisterConCommandBase(ConCommandBase *pCommand);
-public: // ICommandCallbackvoid
-    void CommandCallback(const CCommand &command);
+namespace Viper {
+	class ViperConsole :
+		public SourceMod::IRootConsoleCommand,
+		public ViperGlobalClass,
+		public IConCommandBaseAccessor
+	{
+	public: // IRootConsoleCommand
+		// Called when an admin runs "sm py"
+		virtual void OnRootConsoleCommand(char const *cmdname, const CCommand &command);
+	public: // ViperGlobalClass
+		virtual void OnViperStartup(bool late);
+		virtual void OnViperAllShutdown();
+	public: // IConCommandBaseAccessor
+		bool RegisterConCommandBase(ConCommandBase *pCommand);
+	public: // ICommandCallbackvoid
+		void CommandCallback(const CCommand &command);
 
-public:
-    ViperConsole();
-    ~ViperConsole();
+	public:
+		ViperConsole();
+		~ViperConsole();
     
-    IViperPlugin *GetInterpPlugin()
-    {
-        return m_Interp;
-    }
+		IViperPlugin *GetInterpPlugin()
+		{
+			return m_Interp;
+		}
 
-private:
-    ConCommandBase *m_InterpCmd;
-    IViperPlugin *m_Interp;
-};
+	private:
+		ConCommandBase *m_InterpCmd;
+		IViperPlugin *m_Interp;
+	};
 
-extern ViperConsole g_VConsole;
+	extern ViperConsole g_VConsole;
+}
 
 #endif /* _INCLUDE_VIPER_CONSOLE_H_ */
-

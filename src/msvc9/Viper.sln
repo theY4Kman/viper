@@ -1,37 +1,37 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Viper", "viper.vcproj", "{B3E797CF-4E77-4C9D-B8A8-7589B6902206}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "viper", "viper.vcxproj", "{B3E797CF-4E77-4C9D-B8A8-7589B6902206}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug - Episode 1|Win32 = Debug - Episode 1|Win32
-		Debug - Left 4 Dead|Win32 = Debug - Left 4 Dead|Win32
 		Debug - Left 4 Dead 2|Win32 = Debug - Left 4 Dead 2|Win32
+		Debug - Left 4 Dead|Win32 = Debug - Left 4 Dead|Win32
 		Debug - Orange Box Valve|Win32 = Debug - Orange Box Valve|Win32
 		Debug - Orange Box|Win32 = Debug - Orange Box|Win32
 		Release - Episode 1|Win32 = Release - Episode 1|Win32
-		Release - Left 4 Dead|Win32 = Release - Left 4 Dead|Win32
 		Release - Left 4 Dead 2|Win32 = Release - Left 4 Dead 2|Win32
+		Release - Left 4 Dead|Win32 = Release - Left 4 Dead|Win32
 		Release - Orange Box Valve|Win32 = Release - Orange Box Valve|Win32
 		Release - Orange Box|Win32 = Release - Orange Box|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Episode 1|Win32.ActiveCfg = Debug - Episode 1|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Episode 1|Win32.Build.0 = Debug - Episode 1|Win32
-		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Left 4 Dead|Win32.ActiveCfg = Debug - Left 4 Dead|Win32
-		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Left 4 Dead|Win32.Build.0 = Debug - Left 4 Dead|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Left 4 Dead 2|Win32.ActiveCfg = Debug - Left 4 Dead 2|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Left 4 Dead 2|Win32.Build.0 = Debug - Left 4 Dead 2|Win32
+		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Left 4 Dead|Win32.ActiveCfg = Debug - Left 4 Dead|Win32
+		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Left 4 Dead|Win32.Build.0 = Debug - Left 4 Dead|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Orange Box Valve|Win32.ActiveCfg = Debug - Orange Box Valve|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Orange Box Valve|Win32.Build.0 = Debug - Orange Box Valve|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Orange Box|Win32.ActiveCfg = Debug - Orange Box|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Debug - Orange Box|Win32.Build.0 = Debug - Orange Box|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Episode 1|Win32.ActiveCfg = Release - Episode 1|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Episode 1|Win32.Build.0 = Release - Episode 1|Win32
-		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead|Win32.ActiveCfg = Release - Left 4 Dead|Win32
-		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead|Win32.Build.0 = Release - Left 4 Dead|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead 2|Win32.ActiveCfg = Release - Left 4 Dead 2|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead 2|Win32.Build.0 = Release - Left 4 Dead 2|Win32
+		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead|Win32.ActiveCfg = Release - Left 4 Dead|Win32
+		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Left 4 Dead|Win32.Build.0 = Release - Left 4 Dead|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Orange Box Valve|Win32.ActiveCfg = Release - Orange Box Valve|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Orange Box Valve|Win32.Build.0 = Release - Orange Box Valve|Win32
 		{B3E797CF-4E77-4C9D-B8A8-7589B6902206}.Release - Orange Box|Win32.ActiveCfg = Release - Orange Box|Win32

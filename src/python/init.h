@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -26,26 +27,32 @@
 #ifndef _INCLUDE_VIPER_PYTHON_INIT_H_
 #define _INCLUDE_VIPER_PYTHON_INIT_H_
 
-/**
- * Initializes the standard Viper library module, `sourcemod`,
- * as well as initializes and adds submodules, such as `console` and `clients`
- */
-PyObject *initsourcemod(void);
+namespace Viper
+{
+	namespace Python
+	{
+		/**
+		 * Initializes the standard Viper library module, `sourcemod`,
+		 * as well as initializes and adds submodules, such as `console` and `clients`
+		 */
+		PyObject *initsourcemod(void);
 
-/** Initializes the module and returns it. */
-PyObject *initconsole(void);
-PyObject *initfiles(void);
-PyObject *initforwards(void);
-PyObject *initevents(void);
-PyObject *initclients(void);
-PyObject *initentity(void);
-PyObject *inithalflife(void);
-PyObject *initkeyvalues(void);
-PyObject *initdatatypes(void);
-PyObject *initusermessages(void);
-PyObject *initbitbuf(void);
-PyObject *initnatives(void);
-PyObject *initmenus(void);
+		/** Initializes the module and returns it. */
+		PyObject *initconsole(void);
+		PyObject *initfiles(void);
+		PyObject *initforwards(void);
+		PyObject *initevents(void);
+		PyObject *initclients(void);
+		PyObject *initentity(void);
+		PyObject *inithalflife(void);
+		PyObject *initkeyvalues(void);
+		PyObject *initdatatypes(void);
+		PyObject *initusermessages(void);
+		PyObject *initbitbuf(void);
+		PyObject *initnatives(void);
+		PyObject *initmenus(void);
+	}
+}
 
 #endif /* _INCLUDE_VIPER_PYTHON_INIT_H_ */
 

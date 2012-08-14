@@ -1,1 +1,8 @@
 linenoise_example
+
+src/msvc9/_ReSharper.viper/
+src/msvc9/_UpgradeReport_Files/
+src/msvc9/Debug*
+src/msvc9/Release*
+*.obj
+src/msvc9/build/

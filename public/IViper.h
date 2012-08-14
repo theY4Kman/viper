@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -25,13 +26,15 @@
 
 class CCommand;
 
-class IBaseViper
-{
-public:
-    virtual void PushCommandStack(const CCommand *cmd) =0;
-    virtual const CCommand *PeekCommandStack() =0;
-    virtual void PopCommandStack() =0;
-    virtual char const *CurrentCommandName() =0;
-};
+namespace Viper {
+	class IBaseViper {
+	public:
+		virtual void PushCommandStack(const CCommand *cmd) =0;
+		virtual const CCommand *PeekCommandStack() =0;
+		virtual void PopCommandStack() =0;
+		virtual char const *CurrentCommandName() =0;
+	};
+}
+
 
 #endif /* _INCLUDE_VIPER_IVIPER_H_ */

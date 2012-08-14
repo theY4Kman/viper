@@ -1,7 +1,8 @@
 /**
  * =============================================================================
  * Viper
- * Copyright (C) 2007-2011 Zach "theY4Kman" Kanzler
+ * Copyright (C) 2012 PimpinJuice
+ * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
  * Copyright (C) 2004-2007 AlliedModders LLC.
  * =============================================================================
  *
@@ -23,22 +24,26 @@
 
 #include <Python.h>
 
-extern PyTypeObject datatypes__VectorType;
-extern PyTypeObject datatypes__ColorType;
+namespace Viper {
+	namespace Python {
+		extern PyTypeObject datatypes__VectorType;
+		extern PyTypeObject datatypes__ColorType;
 
-struct datatypes__Vector
-{
-    PyObject_HEAD
+		struct datatypes__Vector
+		{
+			PyObject_HEAD
     
-    float x, y, z;
-};
+			float x, y, z;
+		};
 
-struct datatypes__Color
-{
-    PyObject_HEAD
+		struct datatypes__Color
+		{
+			PyObject_HEAD
     
-    int r, g, b, a;
-};
+			int r, g, b, a;
+		};
+	}
+}
 
 #endif//_INCLUDE_VIPER_PY_DATATYPES_H_
 
