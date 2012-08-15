@@ -373,7 +373,7 @@ namespace Viper {
 			0,                                                      /* tp_iter */
 			0,                                                      /* tp_iternext */
 			0,                                                      /* tp_methods */
-			0,                                                      /* tp_members */
+			natives__Ref__members,                                  /* tp_members */
 			natives__Ref__getsets,                                  /* tp_getset */
 			0,                                                      /* tp_base */
 			0,                                                      /* tp_dict */
@@ -614,7 +614,8 @@ namespace Viper {
 		initnatives(void)
 		{
 			if (PyType_Ready(&natives__RefType) < 0 ||
-				PyType_Ready(&natives__FloatRefType) < 0)
+				PyType_Ready(&natives__FloatRefType) < 0 ||
+				PyType_Ready(&natives__StringRefType) < 0)
 			{
 				PyErr_Print();
 				return NULL;
@@ -628,6 +629,9 @@ namespace Viper {
     
 			Py_INCREF((PyObject *)&natives__FloatRefType);
 			PyModule_AddObject(natives, "FloatRef", (PyObject *)&natives__FloatRefType);
+
+            Py_INCREF((PyObject *)&natives__StringRefType);
+            PyModule_AddObject(natives, "StringRef", (PyObject *)&natives__StringRefType);
     
 			return natives;
 		}
