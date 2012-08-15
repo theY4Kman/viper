@@ -105,6 +105,12 @@ namespace Viper {
 			Py_RETURN_NONE;
 		}
 
+        static PyObject *
+        sourcemod__server_err__flush(sourcemod__server_err *self)
+        {
+            Py_RETURN_NONE;
+        }
+
 		static void
 		sourcemod__server_err__del__(sourcemod__server_err *self)
 		{
@@ -126,6 +132,9 @@ namespace Viper {
 				"Prints an error message to the server console.\n\n"
 				"@type  msg: string\n"
 				"@param msg: The message to print."},
+            {"flush", (PyCFunction)sourcemod__server_err__flush, METH_NOARGS,
+                "flush()\n\n"
+                "Does nothing. For compatibility only."},
 			{NULL, NULL, 0, NULL},
 		};
 
@@ -190,6 +199,12 @@ namespace Viper {
 			Py_RETURN_NONE;
 		}
 
+        static PyObject *
+        sourcemod__server_out__flush(sourcemod__server_out *self)
+        {
+            Py_RETURN_NONE;
+        }
+
 		static void
 		sourcemod__server_out__del__(sourcemod__server_out *self)
 		{
@@ -211,6 +226,9 @@ namespace Viper {
 				"Prints a message to the server console.\n\n"
 				"@type  msg: string\n"
 				"@param msg: The message to print."},
+            {"flush", (PyCFunction)sourcemod__server_out__flush, METH_NOARGS,
+                "flush()\n\n"
+                "Does nothing. For compatibility only."},
 			{NULL, NULL, 0, NULL},
 		};
 
