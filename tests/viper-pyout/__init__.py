@@ -1,7 +1,8 @@
-import os, os.path
+import os
 
 import inspect
-import types
+import string
+import re
 
 import sourcemod
 from sourcemod import Plugin_Handled
@@ -12,6 +13,9 @@ myinfo = {
   'description': "Outputs barebones headers.",
   'version': "1.0"
 }
+
+
+RGX_DOC_PROTO = re.compile(r'([^[]*)\s*(\[\s*,?\s*([^\]]+)\])?')
 
 def outmod(cmd):
   out = gen_mod(__import__(cmd.args[0]))
@@ -69,8 +73,26 @@ def proto_from_doc(doc):
   
   if begin == -1 or end == -1:
     return ''
-  
-  doc = doc[begin+1:end].replace(']', '').replace('[', '')
+
+  proto = doc[begin+1:end]
+  match = RGX_DOC_PROTO.match(proto)
+
+  args = match.group(1) or ''
+  kwargs = match.group(3) or ''
+
+  if kwargs:
+      kwargs = kwargs.replace('[', '')
+      kwargs = map(string.strip, kwargs.split(','))
+      kwargs = ', '.join(map(lambda k: ('%s=None' % k) if '=' not in k else k,
+                             kwargs))
+
+  parts = []
+  if args:
+      parts.append(args)
+  if kwargs:
+      parts.append(kwargs)
+
+  doc = ', '.join(parts)
   doc = doc.replace('...', '*args')
   doc = doc.strip()
   
@@ -87,8 +109,12 @@ def indent_doc(doc):
 def isclassattr(o):
   return inspect.isgetsetdescriptor(o) or inspect.ismemberdescriptor(o)
 
+def fullname(o):
+    return o.__module__ + '.' + o.__name__
+
 def gen_mod(mod, indent=0, cls=False, deep=False):
   children = []
+  imported = []
   out = ''
   used = []
   
@@ -107,6 +133,7 @@ def gen_mod(mod, indent=0, cls=False, deep=False):
       used.append(name)
       
       if inspect.ismodule(val) and deep is True:
+        imported.append(val.__name__)
         children.append(gen_mod(val))
         pass
       
@@ -147,10 +174,26 @@ def gen_mod(mod, indent=0, cls=False, deep=False):
     
     if pred is None:
       out = out + '\n' + _out
-  
+
+  mod_name = mod.__name__
+  if inspect.isclass(mod):
+    bases = ','.join(map(fullname, mod.__bases__))
+    if bases:
+      mod_name += '(%s)' % bases
+
+  if imported:
+    out = 'from . import %s\n\n%s' % (', '.join(imported), out)
+
   out = '\n'.join([('  '*indent)+line for line in out.splitlines()]) + '\n'
-  return (mod.__name__, (out, children))
+  return (mod_name, (out, children))
 
 if __name__ == "__main__":
-  sourcemod.console.reg_concmd("sm_dumpmod", outmod)
-  sourcemod.console.reg_concmd("sm_dumpmods", outmods)
+  sourcemod.console.reg_srvcmd("sm_dumpmod", outmod)
+  sourcemod.console.reg_srvcmd("sm_dumpmods", outmods)
+
+  def enable_pycharm_debug(cmd):
+      from pydev import pydevd
+      pydevd.settrace('localhost', port=1292)
+
+  sourcemod.console.reg_srvcmd("_py_pyout_debug", enable_pycharm_debug)
+
