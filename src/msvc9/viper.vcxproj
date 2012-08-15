@@ -134,7 +134,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">E:\srcds\css\cstrike\addons\sourcemod\extensions</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">$(SolutionDir)$(Configuration)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release - Orange Box Valve|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
@@ -205,7 +205,7 @@
       <AdditionalOptions>/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDK)\public;$(HL2SDK)\public\game\server\;$(HL2SDK)\public\engine;$(HL2SDK)\public\tier0;$(HL2SDK)\public\tier1;$(HL2SDK)\public\vstdlib;$(HL2SDK)\tier1;$(MMSOURCE17)\core;$(MMSOURCE17)\core\sourcemm;$(MMSOURCE17)\core\sourcehook;$(PYTHON);$(PYTHON)\Include;$(PYTHON)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE)\public\game\server\;$(HL2SDKOBVALVE)\public\engine;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\vstdlib;$(HL2SDKOBVALVE)\tier1;$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON25);$(PYTHON25)\Include;$(PYTHON25)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -225,7 +225,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>"$(VcInstallDir)\lib\delayimp.lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(HL2SDK)\lib\public\tier0.lib;$(HL2SDK)\lib\public\tier1.lib;$(HL2SDK)\lib\public\vstdlib.lib;$(HL2SDK)\lib\public\mathlib.lib;E:\Programming\Python-2.5.4\PCbuild8\Win32Debug\python25_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(HL2SDKOBVALVE)\lib\public\tier0.lib;$(HL2SDKOBVALVE)\lib\public\tier1.lib;$(HL2SDKOBVALVE)\lib\public\vstdlib.lib;$(HL2SDKOBVALVE)\lib\public\mathlib.lib;$(PYTHON25)\PCBuild8\Win32Debug\python25_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(Outdir)viper.ext.2.ep2v.dll</OutputFile>
       <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio 9.0\VC\lib;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

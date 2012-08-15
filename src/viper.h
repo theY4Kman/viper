@@ -29,6 +29,12 @@
 #include <IViperForwardSys.h>
 #include <IForwardSys.h>
 
+#ifdef _DEBUG
+    #define PYTHON_DLL "python25_d.dll"
+#else
+    #define PYTHON_DLL "python25.dll"
+#endif
+
 namespace Viper {
 	struct CachedCommandInfo {
 		const CCommand *args;

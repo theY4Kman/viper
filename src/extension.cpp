@@ -133,11 +133,8 @@ namespace Viper {
 		g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
 			"extensions/viper/lib/plat-win/");
 		SetDllDirectory(libpath);
-
-		//////////////////////////////////
-		META_CONPRINTF("bpath: %s", libpath);
-    
-		HMODULE python25_DLL = LoadLibrary("python25_d.dll"); // lol _d
+        
+        HMODULE python25_DLL = LoadLibrary(PYTHON_DLL);
 		if (python25_DLL == NULL)
 		{
 			LPVOID errorMsg;
@@ -152,7 +149,7 @@ namespace Viper {
 				0, NULL
 			);
         
-			size_t written = UTIL_Format(error, maxlength, "Unable to load python25.dll (0x%x): %s", GetLastError(), errorMsg);
+			size_t written = UTIL_Format(error, maxlength, "Unable to load " PYTHON_DLL " (0x%x): %s", GetLastError(), errorMsg);
 			error[written-2] = '\0';
 			return false;
 		}
