@@ -255,7 +255,7 @@ namespace Viper {
 			if (self->type == RefType_String)
 			{
 				int mod = size % 4;
-				cell_size = (cell_size / 4) + (mod == 0);
+				cell_size = (cell_size / 4) + (mod != 0);
 			}
     
 			if (runtime->GetDefaultContext()->HeapAlloc(size, &self->local_addr,
