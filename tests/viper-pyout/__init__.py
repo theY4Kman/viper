@@ -152,6 +152,8 @@ def gen_mod(mod, indent=0, cls=False, deep=False):
         proto = proto_from_doc(val.__doc__)
         if proto != "":
           proto = 'self, ' + proto
+        else:
+          proto = 'self'
         
         out += "def %s(%s):\n  '''%s'''\n  pass\n\n" % (name, proto,
             indent_doc(val.__doc__))
