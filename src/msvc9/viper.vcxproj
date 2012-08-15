@@ -194,12 +194,14 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release - Orange Box|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release - Orange Box|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release - Orange Box|Win32'" />
+    <CustomBuildAfterTargets Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">
     <CustomBuildStep>
-      <Command>copy "$(OutDir)viper.ext.2.ep2v.dll" "$(ProjectDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll"
-</Command>
+      <Command>copy /Y "$(OutDir)\viper.ext.2.ep2v.dll" "$(ProjectDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll"</Command>
       <Outputs>$(ProjectDir)\build\addons\sourcemod\extensions\viper.ext.2.ep2v.dll;%(Outputs)</Outputs>
+      <Message>Copying to build/ directory</Message>
     </CustomBuildStep>
     <ClCompile>
       <AdditionalOptions>/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4 %(AdditionalOptions)</AdditionalOptions>
