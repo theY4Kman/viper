@@ -110,7 +110,10 @@ def isclassattr(o):
   return inspect.isgetsetdescriptor(o) or inspect.ismemberdescriptor(o)
 
 def fullname(o):
-    return o.__module__ + '.' + o.__name__
+    if o.__module__ != '__builtin__':
+        return o.__module__ + '.' + o.__name__
+    else:
+        return o.__name__
 
 def gen_mod(mod, indent=0, cls=False, deep=False):
   children = []
@@ -144,8 +147,9 @@ def gen_mod(mod, indent=0, cls=False, deep=False):
       
       # A class
       elif inspect.isclass(val) and name != '__class__':
-        out += "class %s:\n  '''%s'''\n%s\n" % (name, val.__doc__,
-            gen_mod(val, indent+1, True)[1][0])
+        class_name,(class_out, _) = gen_mod(val, indent+1, True)
+        out += "class %s:\n  '''%s'''\n%s\n" % (class_name, val.__doc__,
+            class_out)
       
       # A method in a class
       elif inspect.isroutine(val):
