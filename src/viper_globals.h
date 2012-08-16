@@ -84,6 +84,7 @@ extern SourceMod::INativeInterface *g_pNInvoke;
 
 extern PyThreadState *g_pGlobalThreadState;
 extern PyObject *g_pViperException;
+extern PyObject *g_pViperExtensionException;
 
 namespace Viper {
 	#if SOURCE_ENGINE < SE_ORANGEBOX

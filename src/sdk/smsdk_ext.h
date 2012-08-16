@@ -79,6 +79,8 @@
 #include <IUserMessages.h>
 #endif
 
+#include <IExtensionSys.h>
+
 #if defined SMEXT_CONF_METAMOD
 #include <ISmmPlugin.h>
 #include <eiface.h>
@@ -273,6 +275,8 @@ extern SourceMod::IAdminSystem *adminsys;
 #if defined SMEXT_ENABLE_USERMSGS
 extern SourceMod::IUserMessages *usermsgs;
 #endif
+
+extern SourceMod::IExtensionManager *extsys;
 
 #if defined SMEXT_CONF_METAMOD
 PLUGIN_GLOBALVARS();

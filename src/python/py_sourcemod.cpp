@@ -32,6 +32,7 @@
 #include "viper.h"
 
 PyObject *g_pViperException = NULL;
+PyObject *g_pViperExtensionException = NULL;
 
 namespace Viper {
 	namespace Python {
@@ -61,6 +62,29 @@ namespace Viper {
 				return PyString_FromFormat("%s%s", smpath, path);
 		}
 
+        static PyObject *
+        sourcemod__require_ext(PyObject *self, PyObject *args)
+        {
+            char *ext_name;
+            if (!PyArg_ParseTuple(args, "s", &ext_name))
+                return NULL;
+
+            size_t size = strlen(ext_name) + 5;
+            char *ext_name_with_ext = new char[size];
+            UTIL_Format(ext_name_with_ext, size, "%s.ext", ext_name);
+
+            char error[256];
+            if (!extsys->LoadExtension(ext_name_with_ext, (char *)&error,
+                sizeof(error)))
+            {
+                PyErr_Format(g_pViperExtensionException, "Unable to load %s: %s",
+                    ext_name, (char *)&error);
+                return NULL;
+            }
+
+            Py_RETURN_NONE;
+        }
+
 		static PyMethodDef sourcemod__methods[] = {
 			{"get_game_path", sourcemod__get_game_path, METH_NOARGS,
 				"get_game_path() -> str\n\n"
@@ -74,6 +98,13 @@ namespace Viper {
 				"@param path: A path to append to the SourceMod path\n"
 				"@rtype: string\n"
 				"@return: Returns the path to SourceMod"},
+            {"require_ext", (PyCFunction)sourcemod__require_ext, METH_VARARGS,
+                "require_ext(extension)\n\n"
+                "Loads a SourceMod extension.\n\n"
+                "@type  extension: str\n"
+                "@param extension: The name of the extension, without .ext.[so|dll|dylib]. For\n"
+                "    example, to load the Viper extension, use 'viper' instead of 'viper.ext.so'\n"
+                "@throw ViperExtensionError: The extension was not loaded."},
 			{NULL, NULL, 0, NULL},
 		};
 
@@ -281,9 +312,17 @@ namespace Viper {
 			if (g_pViperException == NULL)
 				g_pViperException = PyErr_NewException("sourcemod.ViperError",
 					NULL, NULL);
+
+            if (g_pViperExtensionException == NULL)
+                g_pViperExtensionException = PyErr_NewException(
+                    "sourcemod.ViperExtensionError", g_pViperException, NULL);
     
 			Py_INCREF(g_pViperException);
 			PyModule_AddObject(sourcemod, "ViperError", g_pViperException);
+    
+			Py_INCREF(g_pViperExtensionException);
+			PyModule_AddObject(sourcemod, "ViperExtensionError",
+                g_pViperExtensionException);
 
 		#define PyModule_AddStringMacroFromChar(name, string) { \
 			PyObject *_name = PyString_FromString((string)); \

@@ -85,6 +85,8 @@ SourceMod::ITextParsers *textparsers = NULL;
 SourceMod::IUserMessages *usermsgs = NULL;
 #endif
 
+SourceMod::IExtensionManager *extsys = NULL;
+
 /** Exports the main interface */
 PLATFORM_EXTERN_C SourceMod::IExtensionInterface *GetSMExtAPI()
 {
@@ -170,6 +172,8 @@ bool SDKExtension::OnExtensionLoad(SourceMod::IExtension *me, SourceMod::IShareS
 #if defined SMEXT_ENABLE_USERMSGS
 	SM_GET_IFACE(USERMSGS, usermsgs);
 #endif
+
+    SM_GET_IFACE(EXTENSIONMANAGER, extsys);
 
 	if (SDK_OnLoad(error, maxlength, late))
 	{
