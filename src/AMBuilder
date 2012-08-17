@@ -25,7 +25,7 @@ binary.AddSourceFiles('src', '''
 sdk/smsdk_ext.cpp extension.cpp viper.cpp console.cpp sourcemod/sm_trie.cpp
 
 systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventManager.cpp
-systems/PlayerManager.cpp systems/PluginSys.cpp systems/ForwardSys.cpp
+systems/PlayerManager.cpp systems/ViperPluginSys.cpp systems/ForwardSys.cpp
 systems/HalfLife2.cpp
 
 python/py_clients.cpp python/py_events.cpp python/py_console.cpp
