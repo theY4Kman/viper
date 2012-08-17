@@ -22,7 +22,7 @@ binary = Cpp.LibraryBuilder(name, AMBuild, extension, compiler)
 Viper.PreSetupHL2Job(extension, binary, 'ep2v')
 
 binary.AddSourceFiles('src', '''
-sdk/smsdk_ext.cpp extension.cpp viper.cpp console.cpp sourcemod/sm_trie.cpp
+sdk/smsdk_ext.cpp extension.cpp viper.cpp viper_globals.cpp console.cpp sourcemod/sm_trie.cpp
 
 systems/ConCmdManager.cpp systems/ConVarManager.cpp systems/EventManager.cpp
 systems/PlayerManager.cpp systems/ViperPluginSys.cpp systems/ForwardSys.cpp
