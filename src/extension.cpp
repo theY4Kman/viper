@@ -103,6 +103,13 @@ namespace Viper {
 	void
 	InitializePython(void)
 	{
+		char libpath[PLATFORM_MAX_PATH];
+
+		g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
+			"extensions/viper/lib/");
+
+		Py_SetPythonHome(libpath);
+
 		if (!Py_IsInitialized())
 		{
 			/* Initialize the python interpreter, passing 0 to skip registration of
@@ -176,7 +183,12 @@ namespace Viper {
 		/* We must load in the binary to allow access to it.
 			* Thanks to your-name-here for that bit of info!
 			*/
-		if (dlopen("libpython2.5.so.1.0", RTLD_NOW) == NULL)
+		char libpath[PLATFORM_MAX_PATH];
+
+		g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
+			"extensions/viper/lib/plat-linux2/libpython2.5.so.1.0");
+
+		if (dlopen(libpath, RTLD_NOW) == NULL)
 		{
 			strncpy(error, "Unable to load libpython2.5.so.1.0", maxlength);
 			return false;
