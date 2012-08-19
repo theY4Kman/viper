@@ -667,18 +667,22 @@ namespace Viper {
 			PyModule_AddIntMacro(menus, MenuAction_Cancel);
 			PyModule_AddIntMacro(menus, MenuAction_End);
 	
-			PyModule_AddIntMacro(menus, SourceMod::MenuCancel_Disconnected);
-			PyModule_AddIntMacro(menus, SourceMod::MenuCancel_Interrupted);
-			PyModule_AddIntMacro(menus, SourceMod::MenuCancel_NoDisplay);
-			PyModule_AddIntMacro(menus, SourceMod::MenuCancel_Timeout);
-			PyModule_AddIntMacro(menus, SourceMod::MenuCancel_ExitBack);
+            {
+                using namespace SourceMod;
+
+			    PyModule_AddIntMacro(menus, MenuCancel_Disconnected);
+			    PyModule_AddIntMacro(menus, MenuCancel_Interrupted);
+			    PyModule_AddIntMacro(menus, MenuCancel_NoDisplay);
+			    PyModule_AddIntMacro(menus, MenuCancel_Timeout);
+			    PyModule_AddIntMacro(menus, MenuCancel_ExitBack);
     
-			PyModule_AddIntMacro(menus, SourceMod::MenuEnd_Selected);
-			PyModule_AddIntMacro(menus, SourceMod::MenuEnd_VotingDone);
-			PyModule_AddIntMacro(menus, SourceMod::MenuEnd_VotingCancelled);
-			PyModule_AddIntMacro(menus, SourceMod::MenuEnd_Cancelled);
-			PyModule_AddIntMacro(menus, SourceMod::MenuEnd_Exit);
-			PyModule_AddIntMacro(menus, SourceMod::MenuEnd_ExitBack);
+			    PyModule_AddIntMacro(menus, MenuEnd_Selected);
+			    PyModule_AddIntMacro(menus, MenuEnd_VotingDone);
+			    PyModule_AddIntMacro(menus, MenuEnd_VotingCancelled);
+			    PyModule_AddIntMacro(menus, MenuEnd_Cancelled);
+			    PyModule_AddIntMacro(menus, MenuEnd_Exit);
+			    PyModule_AddIntMacro(menus, MenuEnd_ExitBack);
+            }
     
 			return menus;
 		}
