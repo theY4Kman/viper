@@ -27,7 +27,8 @@
 #include "console.h"
 #include <string.h>
 
-namespace Viper {
+namespace Viper
+{
 	CPluginFunction::~CPluginFunction()
 	{
 		Py_DECREF(m_pFunc);

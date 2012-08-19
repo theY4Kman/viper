@@ -28,8 +28,11 @@ SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
 
 SourceMod::IRootConsole *g_pMenu = NULL;
 SourceHook::CallClass<IServerGameDLL> *g_pGameDLLPatch = NULL;
-namespace Viper {
-	bool BaseViper::OnViperLoad(char *error, size_t maxlength, bool late) {
+
+namespace Viper
+{
+	bool BaseViper::OnViperLoad(char *error, size_t maxlength, bool late)
+    {
 		g_pGameDLLPatch = SH_GET_CALLCLASS(gamedll);
 		SM_GET_IFACE(ROOTCONSOLE, g_pMenu);
 
@@ -116,36 +119,36 @@ namespace Viper {
 	}
 
 	char const *
-								BaseViper::CurrentCommandName()
-{
-#if SOURCE_ENGINE >= SE_ORANGEBOX
-    return m_CommandStack.front().args->Arg(0);
-#else
-    return m_CommandStack.front().cmd;
-#endif
-}
+    BaseViper::CurrentCommandName()
+    {
+    #if SOURCE_ENGINE >= SE_ORANGEBOX
+        return m_CommandStack.front().args->Arg(0);
+    #else
+        return m_CommandStack.front().cmd;
+    #endif
+    }
 
-	const CCommand *
-						BaseViper::PeekCommandStack()
-{
-    if (m_CommandStack.empty())
-        return NULL;
+    const CCommand *
+    BaseViper::PeekCommandStack()
+    {
+        if (m_CommandStack.empty())
+            return NULL;
 
-    return m_CommandStack.front().args;
-}
-
-	void
-				BaseViper::PopCommandStack()
-{
-    m_CommandStack.pop();
-}
+        return m_CommandStack.front().args;
+    }
 
 	void
-					BaseViper::GameFrame(bool simulating)
-{
-    if (m_GameFrame->GetFunctionCount())
-        m_GameFrame->Execute(NULL, m_EmptyTuple);
-}
+    BaseViper::PopCommandStack()
+    {
+        m_CommandStack.pop();
+    }
+
+    void
+    BaseViper::GameFrame(bool simulating)
+    {
+        if (m_GameFrame->GetFunctionCount())
+            m_GameFrame->Execute(NULL, m_EmptyTuple);
+    }
 
 	BaseViper g_Viper;
 

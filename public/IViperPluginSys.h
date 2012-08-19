@@ -26,7 +26,8 @@
 #include "IViperShareSys.h"
 #include "IViperForwardSys.h"
 
-namespace Viper {
+namespace Viper
+{
 	/** 
 	 * @brief Encapsulates plugin public information exposed through "myinfo."
 	 */
