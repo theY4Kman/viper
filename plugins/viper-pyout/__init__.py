@@ -83,8 +83,13 @@ def proto_from_doc(doc):
   if kwargs:
       kwargs = kwargs.replace('[', '')
       kwargs = map(string.strip, kwargs.split(','))
-      kwargs = ', '.join(map(lambda k: ('%s=None' % k) if '=' not in k else k,
-                             kwargs))
+
+      def _add_none(s):
+          if '=' in s or s == '...':
+              return s
+          return '%s=None' % s
+
+      kwargs = ', '.join(map(_add_none, kwargs))
 
   parts = []
   if args:
