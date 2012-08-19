@@ -22,8 +22,8 @@
 #if defined(WIN32) && defined(Py_TRACE_REFS)
 	#undef _Py_INC_REFTOTAL
 	#undef _Py_DEC_REFTOTAL
-	#define _Py_INC_REFTOTAL	*(__Py_RefTotal)++
-	#define _Py_DEC_REFTOTAL	*(__Py_RefTotal)--
+	#define _Py_INC_REFTOTAL	(__Py_RefTotal && *(__Py_RefTotal)++)
+	#define _Py_DEC_REFTOTAL	(__Py_RefTotal && *(__Py_RefTotal)--)
 	extern Py_ssize_t *__Py_RefTotal;
 #endif
 
