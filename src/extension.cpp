@@ -106,7 +106,7 @@ namespace Viper {
 		char libpath[PLATFORM_MAX_PATH];
 
 		g_pSM->BuildPath(SourceMod::Path_SM, libpath, sizeof(libpath),
-			"extensions/viper/");
+			"extensions/viper/lib/");
 
 		Py_SetPythonHome(libpath);
 
