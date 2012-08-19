@@ -230,7 +230,7 @@ namespace Viper {
 				"   to handle all the arguments of the forward, though that is NOT checked\n"
 				"   automatically."},
 			{"fire", (PyCFunction)forwards__Forward__fire, METH_VARARGS,
-				"fire([arg1[, ... ]]) -> int\n\n"
+				"fire([ ... ]]) -> int\n\n"
 				"Fires the forward, passing all arguments passed to fire() to the callbacks\n"
 				"@rtype: int\n"
 				"@return: Depends on the ExecType of the forward."},
