@@ -11,20 +11,23 @@ namespace Viper {
 		namespace BitBuf {
 			class BitBufType {
 				public:
+					~BitBufType();
+
 					void WriteAngle(float num, int numBits = 8);
 					void WriteAngles(boost::python::list anglesList);
 					void WriteBool(bool boolValue);
 					void WriteByte(char byte);
 					void WriteCoord(float coord);
-					boost::python::object WriteChar(char charValue);
-					boost::python::object WriteEntity(int entityIndex);
-					boost::python::object WriteFloat(float floatValue);
-					boost::python::object WriteNum(int intValue);
-					boost::python::object WriteShort(short shortValue);
-					boost::python::object WriteString(std::string stringValue);
-					boost::python::object WriteVecCoord(boost::python::list vecCoord);
-					boost::python::object WriteVecNormal(boost::python::list vecNormal);
-					boost::python::object WriteWord(short word);
+					void WriteChar(char charValue);
+					void WriteEntity(int entityIndex);
+					void WriteFloat(float floatValue);
+					void WriteNum(int intValue);
+					void WriteShort(short shortValue);
+					void WriteString(std::string stringValue);
+					void WriteVecCoord(boost::python::list vecCoord);
+					void WriteVecNormal(boost::python::list vecNormal);
+					void WriteWord(short word);
+					boost::python::object StrMagic();
 
 				private:
 					std::vector<BitBufCell *> Cells;

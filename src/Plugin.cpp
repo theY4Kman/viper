@@ -5,6 +5,7 @@
 #include "Modules/Sourcemod/SourcemodModule.h"
 #include "Modules/BitBuf/BitBufModule.h"
 #include "Modules/Halflife/HalflifeModule.h"
+#include "Modules/Datatypes/DatatypesModule.h"
 
 namespace py = boost::python;
 
@@ -32,6 +33,7 @@ namespace Viper {
 		Viper::Modules::Sourcemod::initsourcemod();
 		Viper::Modules::BitBuf::initbitbuf();
 		Viper::Modules::Halflife::inithalflife();
+		Viper::Modules::Datatypes::initdatatypes();
 
 		PyThreadState_Swap(currentThreadState);
 	}

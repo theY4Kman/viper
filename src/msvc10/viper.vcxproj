@@ -700,9 +700,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Modules\BitBuf\BitBufModule.cpp" />
-    <ClCompile Include="..\Modules\BitBuf\BitBufRead.cpp" />
+    <ClCompile Include="..\Modules\BitBuf\BitBufReadType.cpp" />
     <ClCompile Include="..\Modules\BitBuf\BitBufType.cpp" />
     <ClCompile Include="..\Modules\BitBuf\BitBufVectorException.cpp" />
+    <ClCompile Include="..\Modules\Datatypes\DatatypesModule.cpp" />
+    <ClCompile Include="..\Modules\Datatypes\VectorType.cpp" />
     <ClCompile Include="..\Modules\Halflife\HalflifeModule.cpp" />
     <ClCompile Include="..\Modules\Sourcemod\LoadExtensionException.cpp" />
     <ClCompile Include="..\Modules\Sourcemod\SourcemodModule.cpp" />
@@ -718,10 +720,12 @@
     <ClInclude Include="..\Macros.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufCell.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufModule.h" />
-    <ClInclude Include="..\Modules\BitBuf\BitBufRead.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufReadType.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufType.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufTypes.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufVectorException.h" />
+    <ClInclude Include="..\Modules\Datatypes\DatatypesModule.h" />
+    <ClInclude Include="..\Modules\Datatypes\VectorType.h" />
     <ClInclude Include="..\Modules\Halflife\HalflifeModule.h" />
     <ClInclude Include="..\Modules\Sourcemod\LoadExtensionException.h" />
     <ClInclude Include="..\Modules\Sourcemod\SourcemodModule.h" />

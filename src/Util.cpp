@@ -14,3 +14,9 @@ size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...) {
 	
 	return len;
 }
+
+char *UTIL_Strdup(char const *str) {
+	char *ptr = new char[strlen(str)+1];
+	strcpy(ptr, str);
+	return ptr;
+}

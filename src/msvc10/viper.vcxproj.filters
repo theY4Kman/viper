@@ -28,6 +28,9 @@
     <Filter Include="Viper\Modules\Halflife">
       <UniqueIdentifier>{54923ff9-c1ac-4649-94df-8b038fd46baa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Viper\Modules\Datatypes">
+      <UniqueIdentifier>{801de44d-04fa-4406-b5c7-ad3a7ec45f27}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -42,9 +45,6 @@
     </ClCompile>
     <ClCompile Include="..\Modules\Sys\StdIoRedirect.cpp">
       <Filter>Viper\Modules\Sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\BitBuf\BitBufRead.cpp">
-      <Filter>Viper\Modules\BitBuf</Filter>
     </ClCompile>
     <ClCompile Include="..\PluginManager.cpp">
       <Filter>Viper</Filter>
@@ -66,6 +66,15 @@
     </ClCompile>
     <ClCompile Include="..\Modules\Halflife\HalflifeModule.cpp">
       <Filter>Viper\Modules\Halflife</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\BitBuf\BitBufReadType.cpp">
+      <Filter>Viper\Modules\BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Datatypes\DatatypesModule.cpp">
+      <Filter>Viper\Modules\Datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Datatypes\VectorType.cpp">
+      <Filter>Viper\Modules\Datatypes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,9 +109,6 @@
     <ClInclude Include="..\Modules\BitBuf\BitBufCell.h">
       <Filter>Viper\Modules\BitBuf</Filter>
     </ClInclude>
-    <ClInclude Include="..\Modules\BitBuf\BitBufRead.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
     <ClInclude Include="..\PluginManager.h">
       <Filter>Viper</Filter>
     </ClInclude>
@@ -129,6 +135,15 @@
     </ClInclude>
     <ClInclude Include="..\Modules\Halflife\HalflifeModule.h">
       <Filter>Viper\Modules\Halflife</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\BitBuf\BitBufReadType.h">
+      <Filter>Viper\Modules\BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Datatypes\DatatypesModule.h">
+      <Filter>Viper\Modules\Datatypes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Datatypes\VectorType.h">
+      <Filter>Viper\Modules\Datatypes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
