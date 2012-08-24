@@ -6,3 +6,5 @@ src/msvc9/Debug*
 src/msvc9/Release*
 *.obj
 src/msvc9/build/
+src/msvc10/Debug - Orange Box Valve/
+src/msvc10/build/

@@ -196,6 +196,7 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release - Orange Box|Win32'" />
     <CustomBuildAfterTargets Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">
     </CustomBuildAfterTargets>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">$(BOOST)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Orange Box Valve|Win32'">
     <CustomBuildStep>
@@ -208,14 +209,14 @@
       <AdditionalOptions>/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE)\public\game\server\;$(HL2SDKOBVALVE)\public\engine;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\vstdlib;$(HL2SDKOBVALVE)\tier1;$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON25);$(PYTHON25)\Include;$(PYTHON25)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE)\public\game\server\;$(HL2SDKOBVALVE)\public\engine;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\vstdlib;$(HL2SDKOBVALVE)\tier1;$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;BOOST_PYTHON_STATIC_LIB;DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <PreprocessKeepComments>false</PreprocessKeepComments>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PrecompiledHeader>
@@ -227,12 +228,11 @@
       <PreprocessorDefinitions>BINARY_NAME="$(TargetFileName)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>"$(VcInstallDir)\lib\delayimp.lib" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(HL2SDKOBVALVE)\lib\public\tier0.lib;$(HL2SDKOBVALVE)\lib\public\tier1.lib;$(HL2SDKOBVALVE)\lib\public\vstdlib.lib;$(HL2SDKOBVALVE)\lib\public\mathlib.lib;$(PYTHON25)\PCBuild8\Win32Debug\python25_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(HL2SDKOBVALVE)\lib\public\tier0.lib;$(HL2SDKOBVALVE)\lib\public\tier1.lib;$(HL2SDKOBVALVE)\lib\public\vstdlib.lib;$(HL2SDKOBVALVE)\lib\public\mathlib.lib;$(PYTHON27)\PCBuild\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(Outdir)viper.ext.2.ep2v.dll</OutputFile>
-      <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio 9.0\VC\lib;D:\Programming\viper\src\msvc9\build\addons\sourcemod\extensions\viper\lib\plat-win\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio 9.0\VC\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <DelayLoadDLLs>python25_d.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -699,67 +699,42 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\systems\ConCmdManager.cpp" />
-    <ClCompile Include="..\systems\ConVarManager.cpp" />
-    <ClCompile Include="..\systems\EventManager.cpp" />
-    <ClCompile Include="..\systems\ForwardSys.cpp" />
-    <ClCompile Include="..\systems\HalfLife2.cpp" />
-    <ClCompile Include="..\systems\PlayerManager.cpp" />
-    <ClCompile Include="..\systems\ViperPluginSys.cpp" />
+    <ClCompile Include="..\Modules\BitBuf\BitBufModule.cpp" />
+    <ClCompile Include="..\Modules\BitBuf\BitBufRead.cpp" />
+    <ClCompile Include="..\Modules\BitBuf\BitBufType.cpp" />
+    <ClCompile Include="..\Modules\BitBuf\BitBufVectorException.cpp" />
+    <ClCompile Include="..\Modules\Sourcemod\LoadExtensionException.cpp" />
+    <ClCompile Include="..\Modules\Sourcemod\SourcemodModule.cpp" />
+    <ClCompile Include="..\Modules\Sys\StdIoRedirect.cpp" />
     <ClCompile Include="..\sdk\smsdk_ext.cpp" />
-    <ClCompile Include="..\sourcemod\sm_trie.cpp" />
-    <ClCompile Include="..\python\py_bitbuf.cpp" />
-    <ClCompile Include="..\python\py_clients.cpp" />
-    <ClCompile Include="..\python\py_console.cpp" />
-    <ClCompile Include="..\python\py_datatypes.cpp" />
-    <ClCompile Include="..\python\py_entity.cpp" />
-    <ClCompile Include="..\python\py_events.cpp" />
-    <ClCompile Include="..\python\py_forwards.cpp" />
-    <ClCompile Include="..\python\py_halflife.cpp" />
-    <ClCompile Include="..\python\py_keyvalues.cpp" />
-    <ClCompile Include="..\python\py_menus.cpp" />
-    <ClCompile Include="..\python\py_natives.cpp" />
-    <ClCompile Include="..\python\py_sourcemod.cpp" />
-    <ClCompile Include="..\python\py_usermessages.cpp" />
-    <ClCompile Include="..\console.cpp" />
-    <ClCompile Include="..\extension.cpp" />
-    <ClCompile Include="..\viper.cpp" />
-    <ClCompile Include="..\viper_globals.cpp" />
+    <ClCompile Include="..\Util.cpp" />
+    <ClCompile Include="..\Extension.cpp" />
+    <ClCompile Include="..\Plugin.cpp" />
+    <ClCompile Include="..\PluginManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\BoostPythonSM.h" />
+    <ClInclude Include="..\Macros.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufCell.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufModule.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufRead.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufType.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufTypes.h" />
+    <ClInclude Include="..\Modules\BitBuf\BitBufVectorException.h" />
+    <ClInclude Include="..\Modules\Sourcemod\LoadExtensionException.h" />
+    <ClInclude Include="..\Modules\Sourcemod\SourcemodModule.h" />
+    <ClInclude Include="..\Modules\Sys\StdIoRedirect.h" />
+    <ClInclude Include="..\STL.h" />
+    <ClInclude Include="..\HL2SDK.h" />
     <ClInclude Include="..\sourcemod\convar_sm.h" />
     <ClInclude Include="..\sourcemod\convar_sm_l4d.h" />
     <ClInclude Include="..\sourcemod\convar_sm_ob.h" />
-    <ClInclude Include="..\systems\ConCmdManager.h" />
-    <ClInclude Include="..\systems\ConVarManager.h" />
-    <ClInclude Include="..\systems\EventManager.h" />
-    <ClInclude Include="..\systems\ForwardSys.h" />
-    <ClInclude Include="..\systems\HalfLife2.h" />
-    <ClInclude Include="..\systems\PlayerManager.h" />
-    <ClInclude Include="..\systems\ViperPluginSys.h" />
     <ClInclude Include="..\sdk\smsdk_config.h" />
     <ClInclude Include="..\sdk\smsdk_ext.h" />
-    <ClInclude Include="..\..\public\IViper.h" />
-    <ClInclude Include="..\..\public\IViperEngineSpecific.h" />
-    <ClInclude Include="..\..\public\IViperForwardSys.h" />
-    <ClInclude Include="..\..\public\IViperPluginSys.h" />
-    <ClInclude Include="..\..\public\IViperShareSys.h" />
-    <ClInclude Include="..\sourcemod\sm_trie.h" />
-    <ClInclude Include="..\python\init.h" />
-    <ClInclude Include="..\python\py_bitbuf.h" />
-    <ClInclude Include="..\python\py_clients.h" />
-    <ClInclude Include="..\python\py_console.h" />
-    <ClInclude Include="..\python\py_datatypes.h" />
-    <ClInclude Include="..\python\py_entity.h" />
-    <ClInclude Include="..\python\py_events.h" />
-    <ClInclude Include="..\python\py_keyvalues.h" />
-    <ClInclude Include="..\console.h" />
-    <ClInclude Include="..\extension.h" />
-    <ClInclude Include="..\python_delay_data.h" />
-    <ClInclude Include="..\viper.h" />
-    <ClInclude Include="..\viper_globals.h" />
-    <ClInclude Include="..\viper_keyvalues.h" />
-    <ClInclude Include="..\viper_metamod_wrappers.h" />
+    <ClInclude Include="..\Util.h" />
+    <ClInclude Include="..\Extension.h" />
+    <ClInclude Include="..\Plugin.h" />
+    <ClInclude Include="..\PluginManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

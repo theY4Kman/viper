@@ -19,67 +19,54 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _INCLUDE_VIPER_EXTENSION_H_
-#define _INCLUDE_VIPER_EXTENSION_H_
+#ifndef _INCLUDE_Extension_H_
+#define _INCLUDE_Extension_H_
 
-/**
- * @file extension.h
- * @brief Viper header
- * Contains declarations for the SM/MMS extension part of Viper
- */
-
-#include <Python.h>
-#include "viper_globals.h"
+#include "HL2SDK.h"
+#include "STL.h"
+#include <boost/python.hpp>
+#include <boost/python/raw_function.hpp>
 #include "sdk/smsdk_ext.h"
-#include <compat_wrappers.h>
-#include "systems/ViperPluginSys.h"
-#include "console.h"
+#include "PluginManager.h"
 
 namespace Viper {
-	/**
-	 * @brief Implementation of Viper using the helper SDKExtension class
-	 */
-	class ViperExtension : public SDKExtension
-	{
-	public: // SDKExtension
-		/**
-		 * @brief This is called after the initial loading sequence has been processed.
-		 *
-		 * @param error		Error message buffer.
-		 * @param maxlength	Size of error message buffer.
-		 * @param late		Whether or not the module was loaded after map load.
-		 * @return			True to succeed loading, false to fail.
-		 */
-		virtual bool SDK_OnLoad(char *error, size_t maxlength, bool late);
-	
-		/**
-		 * @brief This is called right before the extension is unloaded.
-		 */
-		virtual void SDK_OnUnload();
+	class Extension : public SDKExtension {
+	public:
+		Extension();
+		~Extension();
 
-		/**
-		 * @brief This is called once all known extensions have been loaded.
-		 * Note: It is is a good idea to add natives here, if any are provided.
-		 */
+		void InitializePython();
+		void InstallViperTypes();
+		void InitializePluginManager();
+
+	public:
+		virtual bool SDK_OnLoad(char *error, size_t maxlength, bool late);
+		virtual void SDK_OnUnload();
 		virtual void SDK_OnAllLoaded();
 
 	public:
-		/**
-		 * @brief Called when Metamod is attached, before the extension version is called.
-		 *
-		 * @param error			Error buffer.
-		 * @param maxlength		Maximum size of error buffer.
-		 * @param late			Whether or not Metamod considers this a late load.
-		 * @return				True to succeed, false to fail.
-		 */
 		virtual bool SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlength, bool late);
+
+	private:
+		// This is available after InitializePython()
+		std::string PythonHome;
+
+		// This is available after InitializePluginManager()
+		std::string PluginsDirectory;
+
+		// Also available after InitializePluginManager()
+		PluginManager *PluginManagerInstance;
+
+		ICvar *CvarInterface;
+		IUniformRandomStream *UniformRandomStreamInterface;
+		IServerPluginHelpers *ServerPluginsHelperInterface;
+		IGameEventManager2 *GameEventManagerInterface;
+		IEngineSound *EngineSoundInstance;
+		IBaseFileSystem *BaseFileSystemInstance;
+		IServerGameClients *ServerGameClientsInstance;
 	};
 
-	/** Initializes Python */
-	void InitalizePython(void);
+	extern Extension g_Extension;
 }
 
-extern Viper::ViperExtension g_ViperExt;
-
-#endif /* _INCLUDE_VIPER_EXTENSION_H_ */
-
+#endif /* _INCLUDE_Extension_H_ */

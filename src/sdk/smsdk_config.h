@@ -30,8 +30,9 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"Viper"
 #define SMEXT_CONF_DESCRIPTION	"Python for SourceMod"
-#define SMEXT_CONF_VERSION		"0.8.5a"
-#define SMEXT_CONF_AUTHOR		"Zach \"theY4Kman\" Kanzler"
+#define SMEXT_CONF_VERSION		"2.0"
+#define SMEXT_CONF_AUTHOR		"Zach \"theY4Kman\" Kanzler and " \
+	"Anthony \"PimpinJuice\" Iacono"
 #define SMEXT_CONF_URL			"http://y4kstudios.com"
 #define SMEXT_CONF_LOGTAG		"Viper"
 #define SMEXT_CONF_LICENSE		"GPLv3"
