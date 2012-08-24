@@ -4,6 +4,7 @@
 #include "Extension.h"
 #include "Modules/Sourcemod/SourcemodModule.h"
 #include "Modules/BitBuf/BitBufModule.h"
+#include "Modules/Halflife/HalflifeModule.h"
 
 namespace py = boost::python;
 
@@ -30,6 +31,7 @@ namespace Viper {
 		// This is kind of ugly but we have to do this for each thread state.
 		Viper::Modules::Sourcemod::initsourcemod();
 		Viper::Modules::BitBuf::initbitbuf();
+		Viper::Modules::Halflife::inithalflife();
 
 		PyThreadState_Swap(currentThreadState);
 	}

@@ -703,6 +703,7 @@
     <ClCompile Include="..\Modules\BitBuf\BitBufRead.cpp" />
     <ClCompile Include="..\Modules\BitBuf\BitBufType.cpp" />
     <ClCompile Include="..\Modules\BitBuf\BitBufVectorException.cpp" />
+    <ClCompile Include="..\Modules\Halflife\HalflifeModule.cpp" />
     <ClCompile Include="..\Modules\Sourcemod\LoadExtensionException.cpp" />
     <ClCompile Include="..\Modules\Sourcemod\SourcemodModule.cpp" />
     <ClCompile Include="..\Modules\Sys\StdIoRedirect.cpp" />
@@ -721,6 +722,7 @@
     <ClInclude Include="..\Modules\BitBuf\BitBufType.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufTypes.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufVectorException.h" />
+    <ClInclude Include="..\Modules\Halflife\HalflifeModule.h" />
     <ClInclude Include="..\Modules\Sourcemod\LoadExtensionException.h" />
     <ClInclude Include="..\Modules\Sourcemod\SourcemodModule.h" />
     <ClInclude Include="..\Modules\Sys\StdIoRedirect.h" />

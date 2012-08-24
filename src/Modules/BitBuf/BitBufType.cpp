@@ -47,7 +47,7 @@ namespace Viper {
    
 				Cells.push_back(cell);
 
-				return py::object(py::handle<>(py::borrowed(Py_None))); 
+				return py::object(py::handle<>(py::borrowed(Py_None)));
 			}
 		}
 	}

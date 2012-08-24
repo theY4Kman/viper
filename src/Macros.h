@@ -44,4 +44,5 @@
 #define DEFINE_CUSTOM_EXCEPTION_DECL(cpptype, module) \
 	extern PyObject *module##_##cpptype;
 
+#define BOOST_PY_NONE py::object(py::handle<>(py::borrowed(Py_None)))
 #endif
