@@ -20,7 +20,7 @@ namespace Viper {
 					return py::str(gamedll->GetGameDescription());
 				}
 
-				return py::str(SH_CALL(gamedllPatch, &IServerGameDLL::GetGameDescription)());
+				return py::str(SERVER_CALL(GetGameDescription)());
 			}
 
 			BOOST_PYTHON_MODULE(halflife) {

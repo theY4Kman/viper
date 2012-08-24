@@ -1,6 +1,8 @@
 #ifndef __INCLUDE_MACROS_H__
 #define __INCLUDE_MACROS_H__
 
+#include "Extension.h"
+
 #define WRAP_OBJECT_METHOD(cpptype, module, method) \
 	boost::python::object module##__##cpptype##_##method( \
 		boost::python::tuple argumentsTuple, \
@@ -45,4 +47,7 @@
 	extern PyObject *module##_##cpptype;
 
 #define BOOST_PY_NONE py::object(py::handle<>(py::borrowed(Py_None)))
+
+#define SERVER_CALL(func) SH_CALL(g_Extension.GetGameDLLPatch(), &IServerGameDLL::func)
+
 #endif

@@ -39,6 +39,8 @@ namespace Viper {
 		void InstallViperTypes();
 		void InitializePluginManager();
 
+		SourceHook::CallClass<IServerGameDLL> *GetGameDLLPatch();
+
 	public:
 		virtual bool SDK_OnLoad(char *error, size_t maxlength, bool late);
 		virtual void SDK_OnUnload();
@@ -64,9 +66,11 @@ namespace Viper {
 		IEngineSound *EngineSoundInstance;
 		IBaseFileSystem *BaseFileSystemInstance;
 		IServerGameClients *ServerGameClientsInstance;
-	};
 
-	extern Extension g_Extension;
+		SourceHook::CallClass<IServerGameDLL> *GameDLLPatch;
+	};
 }
+
+extern Viper::Extension g_Extension;
 
 #endif /* _INCLUDE_Extension_H_ */

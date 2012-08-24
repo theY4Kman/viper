@@ -103,6 +103,8 @@ namespace Viper {
 	}
 
 	bool Extension::SDK_OnLoad(char *error, size_t maxlength, bool late) {
+		GameDLLPatch = SH_GET_CALLCLASS(gamedll);
+
 		try {
 			InitializePython();
 			InstallViperTypes();
@@ -144,5 +146,9 @@ namespace Viper {
 			IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 
 		return true;
+	}
+
+	SourceHook::CallClass<IServerGameDLL> *Extension::GetGameDLLPatch() {
+		return GameDLLPatch;
 	}
 }
