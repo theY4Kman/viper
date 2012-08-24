@@ -15,6 +15,9 @@ namespace Viper {
 				if(keywordsDict.contains("original")) {
 					original = py::extract<bool>(keywordsDict["original"]);
 				}
+				else if(py::len(argumentsTuple) > 1) {
+					original = py::extract<bool>(argumentsTuple[1]);
+				}
 
 				if(original) {
 					return py::str(gamedll->GetGameDescription());

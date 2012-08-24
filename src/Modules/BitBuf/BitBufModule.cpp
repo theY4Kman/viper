@@ -13,8 +13,10 @@ namespace Viper {
 
 			BOOST_PYTHON_MODULE(bitbuf) {
 				py::class_<BitBufType>("BitBuf", py::init<>())
-					.def("write_angle", py::raw_function(&bitbuf__BitBufType_WriteAngle, 1))
-					.def("write_angles", py::raw_function(&bitbuf__BitBufType_WriteAngles, 1));
+					.def("write_angle", &BitBufType::WriteAngle, (py::arg("num"), py::arg("numBits")=8));
+					/*.def("write_angles", py::raw_function(&bitbuf__BitBufType_WriteAngles, 2))
+					.def("write_bool", py::raw_function(&bitbuf__BitBufType_WriteBool, 2))
+					.def("write_byte", &BitBufType::WriteByte, py::arg("byte"));*/
 
 				DEFINE_CUSTOM_EXCEPTION(BitBufVectorException, bitbuf,
 					PyExc_Exception, "bitbuf.BitBufVectorException",

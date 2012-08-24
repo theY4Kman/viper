@@ -3,19 +3,6 @@
 
 #include "Extension.h"
 
-#define WRAP_OBJECT_METHOD(cpptype, module, method) \
-	boost::python::object module##__##cpptype##_##method( \
-		boost::python::tuple argumentsTuple, \
-		boost::python::dict keywordsDict) { \
-	boost::python::object self = argumentsTuple[0]; \
-	cpptype *instance = boost::python::extract<cpptype*>(self); \
-	return instance->method(argumentsTuple, keywordsDict); \
-}
-
-#define WRAP_OBJECT_METHOD_STUB(cpptype, module, method) \
-	extern boost::python::object module##__##cpptype##_##method( \
-		boost::python::tuple argumentsTuple, boost::python::dict keywordsDict);
-
 // To define a custom exception type, you need to call the following!
 // Call either DEFINE_CUSTOM_EXCEPTION_INIT or DEFINE_CUSTOM_EXCEPTION_INIT_EX
 // right above the BOOST_PYTHON_MODULE(){} it in the CPP source
