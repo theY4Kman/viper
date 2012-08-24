@@ -14,7 +14,7 @@ namespace Viper {
 				std::string what() const;
 
 			private:
-				boost::python::tuple BadVecList;
+				boost::python::list BadVecList;
 			};
 		}
 	}

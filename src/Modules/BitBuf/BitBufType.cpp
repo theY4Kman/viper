@@ -41,9 +41,9 @@ namespace Viper {
 				BitBufCell *cell = new BitBufCell();
 				cell->type = BitBufType_Angles;
 
-				cell->data.asVector[0] = py::extract<float>(vecTuple[0]);
-				cell->data.asVector[1] = py::extract<float>(vecTuple[1]);
-				cell->data.asVector[2] = py::extract<float>(vecTuple[2]);
+				cell->data.asVector[0] = py::extract<float>(vecList[0]);
+				cell->data.asVector[1] = py::extract<float>(vecList[1]);
+				cell->data.asVector[2] = py::extract<float>(vecList[2]);
    
 				Cells.push_back(cell);
 
