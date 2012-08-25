@@ -9,10 +9,22 @@ namespace py = boost::python;
 namespace Viper {
 	namespace Modules {
 		namespace Datatypes {
+			VectorType::VectorType(float x, float y, float z) {
+				X = x;
+				Y = y;
+				Z = z;
+			}
+
+			VectorType::VectorType(const VectorType &v) {
+				X = v.X;
+				Y = v.Y;
+				Z = v.Z;
+			}
+
 			bool VectorType::CompareEqual(VectorType v) {
-				return x == v.x &&
-					y == v.y &&
-					z == v.z;
+				return X == v.X &&
+					Y == v.Y &&
+					Z == v.Z;
 			}
 
 			bool VectorType::CompareNotEqual(VectorType v) {
@@ -25,32 +37,32 @@ namespace Viper {
 			}
 
 			bool VectorType::CompareGreaterThan(VectorType v) {
-				return x > v.x &&
-					y > v.y &&
-					z > v.z;
+				return X > v.X &&
+					Y > v.Y &&
+					Z > v.Z;
 			}
 
 			bool VectorType::CompareLessThan(VectorType v) {
-				return x < v.x &&
-					y < v.y &&
-					z < v.z;
+				return X < v.X &&
+					Y < v.Y &&
+					Z < v.Z;
 			}
 
 			bool VectorType::CompareGreaterThanOrEqual(VectorType v) {
-				return x >= v.x &&
-					y >= v.y &&
-					z >= v.z;
+				return X >= v.X &&
+					Y >= v.Y &&
+					Z >= v.Z;
 			}
 
 			bool VectorType::CompareLessThanOrEqual(VectorType v) {
-				return x <= v.x &&
-					y <= v.y &&
-					z <= v.z;
+				return X <= v.X &&
+					Y <= v.Y &&
+					Z <= v.Z;
 			}
 
 			std::string VectorType::ReprMagic() {
 				char repr[256];
-				UTIL_Format(repr, sizeof(repr), "Vector(%f, %f, %f)", x, y, z);
+				UTIL_Format(repr, sizeof(repr), "Vector(%f, %f, %f)", X, Y, Z);
     
 				return std::string(repr);
 			}

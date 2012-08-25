@@ -8,6 +8,9 @@ namespace Viper {
 		namespace Datatypes {
 			class VectorType {
 			public:
+				VectorType(const VectorType &v);
+				VectorType(float x = 0.0f, float y = 0.0f, float z = 0.0f);
+
 				int Compare(VectorType v);
 				bool CompareEqual(VectorType v);
 				bool CompareNotEqual(VectorType v);
@@ -17,9 +20,9 @@ namespace Viper {
 				bool CompareLessThanOrEqual(VectorType v);
 				std::string ReprMagic();
 
-				float x;
-				float y;
-				float z;
+				float X;
+				float Y;
+				float Z;
 			};
 		}
 	}

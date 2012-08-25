@@ -46,6 +46,8 @@ namespace Viper {
 		EngineSoundInstance = NULL;
 		BaseFileSystemInstance = NULL;
 		ServerGameClientsInstance = NULL;
+		GameDLLPatch = NULL;
+		GlobalsInstance = NULL;
 	}
 
 	Extension::~Extension() {
@@ -73,24 +75,6 @@ namespace Viper {
 			std::string(PythonHome)).c_str()));
 	}
 
-	void Extension::InstallViperTypes() {
-		py::object mainModule = py::import("__main__");
-		py::object mainNamespace = mainModule.attr("__dict__");
-
-		// Hooking Stdout/err
-		mainNamespace["StdIoRedirect"] = py::class_
-			<sys::StdIoRedirect>("StdIoRedirect", py::init<>())
-			.def("write", &sys::StdIoRedirect::Write)
-			.def("Flush", &sys::StdIoRedirect::Flush);
-
-		sys::StdIoRedirect stdIoRedirector;
-
-		py::object sysModule = py::import("sys");
-
-		sysModule.attr("stderr") = stdIoRedirector;
-		sysModule.attr("stdout") = stdIoRedirector;
-	}
-
 	void Extension::InitializePluginManager() {
 		char pluginsDirectory[PLATFORM_MAX_PATH];
 
@@ -107,7 +91,6 @@ namespace Viper {
 
 		try {
 			InitializePython();
-			InstallViperTypes();
 			InitializePluginManager();
 		
 			PluginManagerInstance->LoadPluginsInDirectory(PluginsDirectory);
@@ -145,10 +128,16 @@ namespace Viper {
 		GET_V_IFACE_ANY(GetServerFactory, ServerGameClientsInstance,
 			IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 
+		GlobalsInstance = ismm->GetCGlobals();
+
 		return true;
 	}
 
 	SourceHook::CallClass<IServerGameDLL> *Extension::GetGameDLLPatch() {
 		return GameDLLPatch;
+	}
+
+	CGlobalVars *Extension::GetGlobals() {
+		return GlobalsInstance;
 	}
 }

@@ -31,6 +31,9 @@
     <Filter Include="Viper\Modules\Datatypes">
       <UniqueIdentifier>{801de44d-04fa-4406-b5c7-ad3a7ec45f27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Viper\Modules\Entity">
+      <UniqueIdentifier>{cc9c73c6-006c-473e-8842-31bc5971aa11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -75,6 +78,30 @@
     </ClCompile>
     <ClCompile Include="..\Modules\Datatypes\VectorType.cpp">
       <Filter>Viper\Modules\Datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Datatypes\ColorType.cpp">
+      <Filter>Viper\Modules\Datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Sys\NullReferenceExceptionType.cpp">
+      <Filter>Viper\Modules\Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Entity\EntityModule.cpp">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Entity\EntityType.cpp">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Entity\EntityClassType.cpp">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Sys\SysHooks.cpp">
+      <Filter>Viper\Modules\Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Entity\InvalidEdictExceptionType.cpp">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modules\Entity\EdictType.cpp">
+      <Filter>Viper\Modules\Entity</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -145,5 +172,32 @@
     <ClInclude Include="..\Modules\Datatypes\VectorType.h">
       <Filter>Viper\Modules\Datatypes</Filter>
     </ClInclude>
+    <ClInclude Include="..\Modules\Datatypes\ColorType.h">
+      <Filter>Viper\Modules\Datatypes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Sys\NullReferenceExceptionType.h">
+      <Filter>Viper\Modules\Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Entity\EntityModule.h">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Entity\EntityType.h">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Entity\EntityClassType.h">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Sys\SysHooks.h">
+      <Filter>Viper\Modules\Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Entity\InvalidEdictExceptionType.h">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modules\Entity\EdictType.h">
+      <Filter>Viper\Modules\Entity</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TODO.txt" />
   </ItemGroup>
 </Project>

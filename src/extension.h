@@ -36,10 +36,10 @@ namespace Viper {
 		~Extension();
 
 		void InitializePython();
-		void InstallViperTypes();
 		void InitializePluginManager();
 
 		SourceHook::CallClass<IServerGameDLL> *GetGameDLLPatch();
+		CGlobalVars *GetGlobals();
 
 	public:
 		virtual bool SDK_OnLoad(char *error, size_t maxlength, bool late);
@@ -68,6 +68,8 @@ namespace Viper {
 		IServerGameClients *ServerGameClientsInstance;
 
 		SourceHook::CallClass<IServerGameDLL> *GameDLLPatch;
+
+		CGlobalVars *GlobalsInstance;
 	};
 }
 

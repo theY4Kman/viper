@@ -3,7 +3,6 @@
 #include "sdk/smsdk_ext.h"
 #include "LoadExtensionException.h"
 #include "Macros.h"
-#include <boost\python\raw_function.hpp>
 
 namespace py = boost::python;
 

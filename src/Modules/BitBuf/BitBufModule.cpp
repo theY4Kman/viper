@@ -29,6 +29,11 @@ namespace Viper {
 					.def("write_num", &BitBufType::WriteNum, (py::arg("num")))
 					.def("__str__", &BitBufType::StrMagic);
 
+				py::class_<BitBufReadType>("BitBufRead", py::no_init)
+					.def("read_angle", &BitBufReadType::ReadAngle, (py::arg("numBits")=8))
+					.def("read_angles", &BitBufReadType::ReadAngles)
+					.def("__str__", &BitBufReadType::StrMagic);
+
 				DEFINE_CUSTOM_EXCEPTION(BitBufVectorException, bitbuf,
 					PyExc_Exception, "bitbuf.BitBufVectorException",
 					"BitBufVectorException")

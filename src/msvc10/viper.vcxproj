@@ -703,12 +703,20 @@
     <ClCompile Include="..\Modules\BitBuf\BitBufReadType.cpp" />
     <ClCompile Include="..\Modules\BitBuf\BitBufType.cpp" />
     <ClCompile Include="..\Modules\BitBuf\BitBufVectorException.cpp" />
+    <ClCompile Include="..\Modules\Datatypes\ColorType.cpp" />
     <ClCompile Include="..\Modules\Datatypes\DatatypesModule.cpp" />
     <ClCompile Include="..\Modules\Datatypes\VectorType.cpp" />
+    <ClCompile Include="..\Modules\Entity\EdictType.cpp" />
+    <ClCompile Include="..\Modules\Entity\EntityClassType.cpp" />
+    <ClCompile Include="..\Modules\Entity\EntityModule.cpp" />
+    <ClCompile Include="..\Modules\Entity\EntityType.cpp" />
+    <ClCompile Include="..\Modules\Entity\InvalidEdictExceptionType.cpp" />
     <ClCompile Include="..\Modules\Halflife\HalflifeModule.cpp" />
     <ClCompile Include="..\Modules\Sourcemod\LoadExtensionException.cpp" />
     <ClCompile Include="..\Modules\Sourcemod\SourcemodModule.cpp" />
+    <ClCompile Include="..\Modules\Sys\NullReferenceExceptionType.cpp" />
     <ClCompile Include="..\Modules\Sys\StdIoRedirect.cpp" />
+    <ClCompile Include="..\Modules\Sys\SysHooks.cpp" />
     <ClCompile Include="..\sdk\smsdk_ext.cpp" />
     <ClCompile Include="..\Util.cpp" />
     <ClCompile Include="..\Extension.cpp" />
@@ -724,12 +732,20 @@
     <ClInclude Include="..\Modules\BitBuf\BitBufType.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufTypes.h" />
     <ClInclude Include="..\Modules\BitBuf\BitBufVectorException.h" />
+    <ClInclude Include="..\Modules\Datatypes\ColorType.h" />
     <ClInclude Include="..\Modules\Datatypes\DatatypesModule.h" />
     <ClInclude Include="..\Modules\Datatypes\VectorType.h" />
+    <ClInclude Include="..\Modules\Entity\EdictType.h" />
+    <ClInclude Include="..\Modules\Entity\EntityClassType.h" />
+    <ClInclude Include="..\Modules\Entity\EntityModule.h" />
+    <ClInclude Include="..\Modules\Entity\EntityType.h" />
+    <ClInclude Include="..\Modules\Entity\InvalidEdictExceptionType.h" />
     <ClInclude Include="..\Modules\Halflife\HalflifeModule.h" />
     <ClInclude Include="..\Modules\Sourcemod\LoadExtensionException.h" />
     <ClInclude Include="..\Modules\Sourcemod\SourcemodModule.h" />
+    <ClInclude Include="..\Modules\Sys\NullReferenceExceptionType.h" />
     <ClInclude Include="..\Modules\Sys\StdIoRedirect.h" />
+    <ClInclude Include="..\Modules\Sys\SysHooks.h" />
     <ClInclude Include="..\STL.h" />
     <ClInclude Include="..\HL2SDK.h" />
     <ClInclude Include="..\sourcemod\convar_sm.h" />
@@ -741,6 +757,9 @@
     <ClInclude Include="..\Extension.h" />
     <ClInclude Include="..\Plugin.h" />
     <ClInclude Include="..\PluginManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
