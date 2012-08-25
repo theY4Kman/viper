@@ -127,8 +127,11 @@ namespace Viper {
 			IFileSystem, FILESYSTEM_INTERFACE_VERSION);
 		GET_V_IFACE_ANY(GetServerFactory, ServerGameClientsInstance,
 			IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
+		GET_V_IFACE_ANY(GetServerFactory, ServerGameEntsInstance,
+			IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
 
 		GlobalsInstance = ismm->GetCGlobals();
+		icvar = CvarInterface;
 
 		return true;
 	}
@@ -139,5 +142,9 @@ namespace Viper {
 
 	CGlobalVars *Extension::GetGlobals() {
 		return GlobalsInstance;
+	}
+
+	IServerGameEnts *Extension::GetServerGameEnts() {
+		return ServerGameEntsInstance;
 	}
 }

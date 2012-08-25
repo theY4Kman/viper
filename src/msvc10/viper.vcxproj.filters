@@ -103,6 +103,8 @@
     <ClCompile Include="..\Modules\Entity\EdictType.cpp">
       <Filter>Viper\Modules\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="..\CompatWrappers.cpp" />
+    <ClCompile Include="..\Globals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -196,6 +198,8 @@
     <ClInclude Include="..\Modules\Entity\EdictType.h">
       <Filter>Viper\Modules\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="..\CompatWrappers.h" />
+    <ClInclude Include="..\Globals.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />

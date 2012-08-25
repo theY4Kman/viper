@@ -4,6 +4,7 @@
 #include "Macros.h"
 #include "Extension.h"
 #include "EdictType.h"
+#include "InvalidEdictExceptionType.h"
 
 namespace py = boost::python;
 
@@ -58,6 +59,16 @@ namespace Viper {
 				return networkable != NULL;
 			}
 
+			EdictType entity__create_edict() {
+				edict_t *edict = engine->CreateEdict();
+
+				if(edict == NULL || edict->IsFree()) {
+					throw InvalidEdictExceptionType(edict);
+				}
+
+				return EdictType(edict);
+			}
+
 			BOOST_PYTHON_MODULE(entity) {
 				py::class_<EdictType>("Edict", py::no_init)
 					.def("is_valid", &EdictType::IsValid)
@@ -65,9 +76,8 @@ namespace Viper {
 
 				py::def("get_max_entities", entity__get_max_entities);
 				py::def("get_entity_count", entity__get_entity_count);
-				py::def("is_valid_entity", entity__is_valid_entity);
-				py::def("is_valid_edict", entity__is_valid_edict);
 				py::def("is_entity_networkable", entity__is_entity_networkable);
+				py::def("create_edict", entity__create_edict);
 			}
 		}
 	}

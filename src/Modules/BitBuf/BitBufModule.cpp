@@ -1,6 +1,7 @@
 #include "BoostPythonSM.h"
 #include "BitBufModule.h"
 #include "BitBufTypes.h"
+#include "BitBufReadType.h"
 #include "BitBufType.h"
 #include "BitBufVectorException.h"
 

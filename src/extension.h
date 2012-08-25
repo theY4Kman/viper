@@ -28,6 +28,7 @@
 #include <boost/python/raw_function.hpp>
 #include "sdk/smsdk_ext.h"
 #include "PluginManager.h"
+#include "Globals.h"
 
 namespace Viper {
 	class Extension : public SDKExtension {
@@ -40,6 +41,7 @@ namespace Viper {
 
 		SourceHook::CallClass<IServerGameDLL> *GetGameDLLPatch();
 		CGlobalVars *GetGlobals();
+		IServerGameEnts *GetServerGameEnts();
 
 	public:
 		virtual bool SDK_OnLoad(char *error, size_t maxlength, bool late);
@@ -66,6 +68,7 @@ namespace Viper {
 		IEngineSound *EngineSoundInstance;
 		IBaseFileSystem *BaseFileSystemInstance;
 		IServerGameClients *ServerGameClientsInstance;
+		IServerGameEnts *ServerGameEntsInstance;
 
 		SourceHook::CallClass<IServerGameDLL> *GameDLLPatch;
 
