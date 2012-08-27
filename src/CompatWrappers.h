@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_COMPATWRAPPERS_H__
 #define __INCLUDE_COMPATWRAPPERS_H__
 
-#include "Extension.h"
+#include "ViperExtension.h"
 #include "HL2SDK.h"
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX

@@ -10,29 +10,26 @@
     <Filter Include="Viper">
       <UniqueIdentifier>{ecc8006b-59b0-46e3-9d83-28c25b7059ce}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Viper\Modules">
-      <UniqueIdentifier>{d1955c68-d691-452e-9e2e-fae6bc7f1470}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Viper\Modules\BitBuf">
+    <Filter Include="BitBuf">
       <UniqueIdentifier>{e6b51bf4-8aca-426e-bd57-76f65a8f2f34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Viper\Modules\Sourcemod">
-      <UniqueIdentifier>{f3868cb0-a88a-40ff-b1db-ed8e61c04adc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Viper\Modules\Sys">
-      <UniqueIdentifier>{813adaad-727f-4eaa-9acf-b62396f16db9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Viper\Modules\Viper">
-      <UniqueIdentifier>{6da5c376-f0c0-4d50-abd3-4c9b1c04e502}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Viper\Modules\Halflife">
-      <UniqueIdentifier>{54923ff9-c1ac-4649-94df-8b038fd46baa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Viper\Modules\Datatypes">
+    <Filter Include="Datatypes">
       <UniqueIdentifier>{801de44d-04fa-4406-b5c7-ad3a7ec45f27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Viper\Modules\Entity">
+    <Filter Include="Entity">
       <UniqueIdentifier>{cc9c73c6-006c-473e-8842-31bc5971aa11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Forwards">
+      <UniqueIdentifier>{715e68c8-55c4-4f49-bb70-5e2b8568936d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Halflife">
+      <UniqueIdentifier>{54923ff9-c1ac-4649-94df-8b038fd46baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sys">
+      <UniqueIdentifier>{813adaad-727f-4eaa-9acf-b62396f16db9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Clients">
+      <UniqueIdentifier>{9c322de6-c833-4b6c-a6e1-15e8cbda1197}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -40,71 +37,87 @@
       <Filter>SDK</Filter>
     </ClCompile>
     <ClCompile Include="..\Util.cpp" />
-    <ClCompile Include="..\Modules\Sourcemod\SourcemodModule.cpp">
-      <Filter>Viper\Modules\Sourcemod</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\BitBuf\BitBufModule.cpp">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Sys\StdIoRedirect.cpp">
-      <Filter>Viper\Modules\Sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\PluginManager.cpp">
-      <Filter>Viper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Plugin.cpp">
-      <Filter>Viper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Extension.cpp">
-      <Filter>Viper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Sourcemod\LoadExtensionException.cpp">
-      <Filter>Viper\Modules\Sourcemod</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\BitBuf\BitBufType.cpp">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\BitBuf\BitBufVectorException.cpp">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Halflife\HalflifeModule.cpp">
-      <Filter>Viper\Modules\Halflife</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\BitBuf\BitBufReadType.cpp">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Datatypes\DatatypesModule.cpp">
-      <Filter>Viper\Modules\Datatypes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Datatypes\VectorType.cpp">
-      <Filter>Viper\Modules\Datatypes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Datatypes\ColorType.cpp">
-      <Filter>Viper\Modules\Datatypes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Sys\NullReferenceExceptionType.cpp">
-      <Filter>Viper\Modules\Sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Entity\EntityModule.cpp">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Entity\EntityType.cpp">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Entity\EntityClassType.cpp">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Sys\SysHooks.cpp">
-      <Filter>Viper\Modules\Sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Entity\InvalidEdictExceptionType.cpp">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Modules\Entity\EdictType.cpp">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClCompile>
     <ClCompile Include="..\CompatWrappers.cpp" />
     <ClCompile Include="..\Globals.cpp" />
+    <ClCompile Include="..\ViperExtension.cpp" />
+    <ClCompile Include="..\ViperPlugin.cpp" />
+    <ClCompile Include="..\BitBufModule.cpp">
+      <Filter>BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BitBufReadType.cpp">
+      <Filter>BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BitBufType.cpp">
+      <Filter>BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BitBufVectorException.cpp">
+      <Filter>BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ColorType.cpp">
+      <Filter>Datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DatatypesModule.cpp">
+      <Filter>Datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\VectorType.cpp">
+      <Filter>Datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EdictType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityClassType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityModule.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidEdictExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ForwardsModule.cpp">
+      <Filter>Forwards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ForwardType.cpp">
+      <Filter>Forwards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HalflifeModule.cpp">
+      <Filter>Halflife</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SourcemodModule.cpp">
+      <Filter>SourceMod</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LoadExtensionException.cpp">
+      <Filter>SourceMod</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NullReferenceExceptionType.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\StdIoRedirect.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SysHooks.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ViperPluginManager.cpp" />
+    <ClCompile Include="..\InterfaceContainer.cpp" />
+    <ClCompile Include="..\ForwardsClientListener.cpp">
+      <Filter>Forwards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientsModule.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidEntityExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientIndexOutOfRangeExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -125,81 +138,95 @@
     <ClInclude Include="..\HL2SDK.h" />
     <ClInclude Include="..\Util.h" />
     <ClInclude Include="..\STL.h" />
-    <ClInclude Include="..\Modules\Sourcemod\SourcemodModule.h">
-      <Filter>Viper\Modules\Sourcemod</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\BitBuf\BitBufModule.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Sys\StdIoRedirect.h">
-      <Filter>Viper\Modules\Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\Macros.h" />
-    <ClInclude Include="..\Modules\BitBuf\BitBufCell.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\PluginManager.h">
-      <Filter>Viper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Plugin.h">
-      <Filter>Viper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Extension.h">
-      <Filter>Viper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Sourcemod\LoadExtensionException.h">
-      <Filter>Viper\Modules\Sourcemod</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BoostPythonSM.h">
-      <Filter>Viper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\BitBuf\BitBufTypes.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\BitBuf\BitBufType.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\BitBuf\BitBufVectorException.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Halflife\HalflifeModule.h">
-      <Filter>Viper\Modules\Halflife</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\BitBuf\BitBufReadType.h">
-      <Filter>Viper\Modules\BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Datatypes\DatatypesModule.h">
-      <Filter>Viper\Modules\Datatypes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Datatypes\VectorType.h">
-      <Filter>Viper\Modules\Datatypes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Datatypes\ColorType.h">
-      <Filter>Viper\Modules\Datatypes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Sys\NullReferenceExceptionType.h">
-      <Filter>Viper\Modules\Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Entity\EntityModule.h">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Entity\EntityType.h">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Entity\EntityClassType.h">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Sys\SysHooks.h">
-      <Filter>Viper\Modules\Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Entity\InvalidEdictExceptionType.h">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Modules\Entity\EdictType.h">
-      <Filter>Viper\Modules\Entity</Filter>
-    </ClInclude>
     <ClInclude Include="..\CompatWrappers.h" />
     <ClInclude Include="..\Globals.h" />
+    <ClInclude Include="..\BoostPythonSM.h" />
+    <ClInclude Include="..\ViperExtension.h" />
+    <ClInclude Include="..\ViperPlugin.h" />
+    <ClInclude Include="..\BitBufCell.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BitBufModule.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BitBufReadType.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BitBufType.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BitBufTypes.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BitBufVectorException.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ColorType.h">
+      <Filter>Datatypes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DatatypesModule.h">
+      <Filter>Datatypes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\VectorType.h">
+      <Filter>Datatypes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EdictType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityClassType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityModule.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidEdictExceptionType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ForwardsModule.h">
+      <Filter>Forwards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ForwardType.h">
+      <Filter>Forwards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HalflifeModule.h">
+      <Filter>Halflife</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SourcemodModule.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LoadExtensionException.h">
+      <Filter>SourceMod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NullReferenceExceptionType.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\StdIoRedirect.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SysHooks.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ViperPluginManager.h" />
+    <ClInclude Include="..\ForwardsClientListener.h">
+      <Filter>Forwards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InterfaceContainer.h" />
+    <ClInclude Include="..\ClientsModule.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidEntityExceptionType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientIndexOutOfRangeExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />

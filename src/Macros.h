@@ -1,7 +1,8 @@
 #ifndef __INCLUDE_MACROS_H__
 #define __INCLUDE_MACROS_H__
 
-#include "Extension.h"
+#include "ViperExtension.h"
+#include "InterfaceContainer.h"
 
 // To define a custom exception type, you need to call the following!
 // Call either DEFINE_CUSTOM_EXCEPTION_INIT or DEFINE_CUSTOM_EXCEPTION_INIT_EX
@@ -35,6 +36,6 @@
 
 #define BOOST_PY_NONE py::object(py::handle<>(py::borrowed(Py_None)))
 
-#define SERVER_CALL(func) SH_CALL(g_Extension.GetGameDLLPatch(), &IServerGameDLL::func)
+#define SERVER_CALL(func) SH_CALL(g_Interfaces.ServerGameDLLCallClass, &IServerGameDLL::func)
 
 #endif
