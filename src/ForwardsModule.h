@@ -33,4 +33,6 @@ extern std::string forwards_ClientConnect_RejectMessage;
 
 extern bool forwards_ClientPreAdminCheck_ReturnValue;
 
+extern void forwards__register(std::string globalForwardName, boost::python::object callbackFunction);
+
 #endif

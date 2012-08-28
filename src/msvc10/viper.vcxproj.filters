@@ -31,6 +31,9 @@
     <Filter Include="Clients">
       <UniqueIdentifier>{9c322de6-c833-4b6c-a6e1-15e8cbda1197}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{e0f13246-3ff3-42c6-b559-4cd378dc4a76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -118,6 +121,36 @@
     <ClCompile Include="..\ClientIndexOutOfRangeExceptionType.cpp">
       <Filter>Clients</Filter>
     </ClCompile>
+    <ClCompile Include="..\EventsModule.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventType.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventFieldType.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventFieldTypes.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventsGameEventListener.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModEventsParser.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventNoLongerValidExceptionType.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidEventExceptionType.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventHook.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EventHookDoesNotExistExceptionType.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -189,9 +222,6 @@
     <ClInclude Include="..\ForwardsModule.h">
       <Filter>Forwards</Filter>
     </ClInclude>
-    <ClInclude Include="..\ForwardType.h">
-      <Filter>Forwards</Filter>
-    </ClInclude>
     <ClInclude Include="..\HalflifeModule.h">
       <Filter>Halflife</Filter>
     </ClInclude>
@@ -226,6 +256,42 @@
     </ClInclude>
     <ClInclude Include="..\ClientIndexOutOfRangeExceptionType.h">
       <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventsModule.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventType.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventFieldType.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventFieldTypes.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventsGameEventListener.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ModEventsParser.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventNoLongerValidExceptionType.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ForwardType.h">
+      <Filter>Forwards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidEventExceptionType.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventHook.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventHookModes.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EventHookDoesNotExistExceptionType.h">
+      <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

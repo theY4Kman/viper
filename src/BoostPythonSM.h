@@ -4,6 +4,7 @@
 #include "STL.h"
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
+#include <boost/algorithm/string.hpp>
 #include <Python.h>
 
 #endif

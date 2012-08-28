@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include "ViperExtension.h"
 #include "SysHooks.h"
+#include "ForwardsModule.h"
 
 namespace py = boost::python;
 
@@ -93,6 +94,7 @@ void ViperPlugin::Run() {
 		py::import("entity");
 		py::import("datatypes");
 		py::import("bitbuf");
+		py::import("events");
 
 		py::exec_file(InitPluginPath.c_str(), mainDict, mainDict);
 	}

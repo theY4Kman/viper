@@ -13,7 +13,7 @@ public:
 	IServerPluginHelpers *ServerPluginsHelperInstance;
 	IGameEventManager2 *GameEventManagerInstance;
 	IEngineSound *EngineSoundInstance;
-	IBaseFileSystem *BaseFileSystemInstance;
+	IFileSystem *BaseFileSystemInstance;
 	IServerGameClients *ServerGameClientsInstance;
 	IServerGameEnts *ServerGameEntsInstance;
 	SourceHook::CallClass<IServerGameDLL> *ServerGameDLLCallClass;
