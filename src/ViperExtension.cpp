@@ -38,6 +38,7 @@
 #include "ForwardsModule.h"
 #include "ClientsModule.h"
 #include "EventsModule.h"
+#include "UserMessagesModule.h"
 #include "InterfaceContainer.h"
 
 namespace py = boost::python;
@@ -70,6 +71,8 @@ void ViperExtension::InitializePython() {
 	PyImport_AppendInittab("forwards", initforwards);
 	PyImport_AppendInittab("clients", initclients);
 	PyImport_AppendInittab("events", initevents);
+	PyImport_AppendInittab("usermessages", initusermessages);
+
 
 	Py_Initialize();
 
@@ -116,6 +119,7 @@ void ViperExtension::SDK_OnUnload() {
 	destroyforwards();
 	destroyclients();
 	destroyevents();
+	destroyusermessages();
 }
 
 void ViperExtension::SDK_OnAllLoaded() {

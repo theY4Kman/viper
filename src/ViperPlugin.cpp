@@ -95,6 +95,7 @@ void ViperPlugin::Run() {
 		py::import("datatypes");
 		py::import("bitbuf");
 		py::import("events");
+		py::import("usermessages");
 
 		py::exec_file(InitPluginPath.c_str(), mainDict, mainDict);
 	}

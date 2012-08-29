@@ -1,8 +1,7 @@
 #include "BoostPythonSM.h"
 #include "BitBufModule.h"
-#include "BitBufTypes.h"
-#include "BitBufReadType.h"
-#include "BitBufType.h"
+#include "BfReadType.h"
+#include "BfWriteType.h"
 #include "BitBufVectorException.h"
 
 namespace py = boost::python;
@@ -10,27 +9,26 @@ namespace py = boost::python;
 DEFINE_CUSTOM_EXCEPTION_INIT(BitBufVectorException, bitbuf)
 
 BOOST_PYTHON_MODULE(bitbuf) {
-	py::class_<BitBufType>("BitBuf", py::init<>())
-		.def("write_angle", &BitBufType::WriteAngle, (py::arg("num"), py::arg("numBits")=8))
-		.def("write_angles", &BitBufType::WriteAngles, (py::arg("angles")))
-		.def("write_byte", &BitBufType::WriteByte, (py::arg("byte")))
-		.def("write_bool", &BitBufType::WriteBool, (py::arg("bit")))
-		.def("write_char", &BitBufType::WriteChar, (py::arg("char")))
-		.def("write_coord", &BitBufType::WriteCoord, (py::arg("coord")))
-		.def("write_entity", &BitBufType::WriteEntity, (py::arg("entity")))
-		.def("write_float", &BitBufType::WriteFloat, (py::arg("num")))
-		.def("write_short", &BitBufType::WriteShort, (py::arg("short")))
-		.def("write_vec_coord", &BitBufType::WriteVecCoord, (py::arg("vec")))
-		.def("write_vec_normal", &BitBufType::WriteVecNormal, (py::arg("vec")))
-		.def("write_word", &BitBufType::WriteWord, (py::arg("word")))
-		.def("write_string", &BitBufType::WriteString, (py::arg("string")))
-		.def("write_num", &BitBufType::WriteNum, (py::arg("num")))
-		.def("__str__", &BitBufType::StrMagic);
+	py::class_<BfWriteType>("BfWrite", py::no_init)
+		.def("write_angle", &BfWriteType::WriteAngle, (py::arg("num"), py::arg("numBits")=8))
+		.def("write_angles", &BfWriteType::WriteAngles, (py::arg("angles")))
+		.def("write_byte", &BfWriteType::WriteByte, (py::arg("byte")))
+		.def("write_bool", &BfWriteType::WriteBool, (py::arg("bit")))
+		.def("write_char", &BfWriteType::WriteChar, (py::arg("char")))
+		.def("write_coord", &BfWriteType::WriteCoord, (py::arg("coord")))
+		.def("write_entity", &BfWriteType::WriteEntity, (py::arg("entity")))
+		.def("write_float", &BfWriteType::WriteFloat, (py::arg("num")))
+		.def("write_short", &BfWriteType::WriteShort, (py::arg("short")))
+		.def("write_vec_coord", &BfWriteType::WriteVecCoord, (py::arg("vec")))
+		.def("write_vec_normal", &BfWriteType::WriteVecNormal, (py::arg("vec")))
+		.def("write_word", &BfWriteType::WriteWord, (py::arg("word")))
+		.def("write_string", &BfWriteType::WriteString, (py::arg("string")))
+		.def("write_num", &BfWriteType::WriteNum, (py::arg("num")));
 
-	py::class_<BitBufReadType>("BitBufRead", py::no_init)
-		.def("read_angle", &BitBufReadType::ReadAngle, (py::arg("numBits")=8))
-		.def("read_angles", &BitBufReadType::ReadAngles)
-		.def("__str__", &BitBufReadType::StrMagic);
+	// TODO: BfRead
+	py::class_<BfReadType>("BfRead", py::no_init)
+		.def("read_angle", &BfReadType::ReadAngle, (py::arg("numBits")=8))
+		.def("read_angles", &BfReadType::ReadAngles);
 
 	DEFINE_CUSTOM_EXCEPTION(BitBufVectorException, bitbuf,
 		PyExc_Exception, "bitbuf.BitBufVectorException",

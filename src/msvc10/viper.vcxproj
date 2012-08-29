@@ -700,8 +700,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\BitBufModule.cpp" />
-    <ClCompile Include="..\BitBufReadType.cpp" />
-    <ClCompile Include="..\BitBufType.cpp" />
+    <ClCompile Include="..\BfReadType.cpp" />
+    <ClCompile Include="..\BfWriteType.cpp" />
     <ClCompile Include="..\BitBufVectorException.cpp" />
     <ClCompile Include="..\ClientIndexOutOfRangeExceptionType.cpp" />
     <ClCompile Include="..\ClientsModule.cpp" />
@@ -737,18 +737,22 @@
     <ClCompile Include="..\SourcemodModule.cpp" />
     <ClCompile Include="..\StdIoRedirect.cpp" />
     <ClCompile Include="..\SysHooks.cpp" />
+    <ClCompile Include="..\UserMessageAlreadyStartedExceptionType.cpp" />
+    <ClCompile Include="..\UserMessageIDDoesNotExistExceptionType.cpp" />
+    <ClCompile Include="..\UserMessageNameDoesNotExistExceptionType.cpp" />
+    <ClCompile Include="..\UserMessageNotStartedExceptionType.cpp" />
+    <ClCompile Include="..\UserMessagesModule.cpp" />
     <ClCompile Include="..\Util.cpp" />
     <ClCompile Include="..\VectorType.cpp" />
     <ClCompile Include="..\ViperExtension.cpp" />
     <ClCompile Include="..\ViperPlugin.cpp" />
     <ClCompile Include="..\ViperPluginManager.cpp" />
+    <ClCompile Include="..\ViperRecipientFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\BitBufCell.h" />
     <ClInclude Include="..\BitBufModule.h" />
-    <ClInclude Include="..\BitBufReadType.h" />
-    <ClInclude Include="..\BitBufType.h" />
-    <ClInclude Include="..\BitBufTypes.h" />
+    <ClInclude Include="..\BfReadType.h" />
+    <ClInclude Include="..\BfWriteType.h" />
     <ClInclude Include="..\BitBufVectorException.h" />
     <ClInclude Include="..\BoostPythonSM.h" />
     <ClInclude Include="..\ClientIndexOutOfRangeExceptionType.h" />
@@ -793,11 +797,17 @@
     <ClInclude Include="..\sdk\smsdk_config.h" />
     <ClInclude Include="..\sdk\smsdk_ext.h" />
     <ClInclude Include="..\SysHooks.h" />
+    <ClInclude Include="..\UserMessageAlreadyStartedExceptionType.h" />
+    <ClInclude Include="..\UserMessageIDDoesNotExistExceptionType.h" />
+    <ClInclude Include="..\UserMessageNameDoesNotExistExceptionType.h" />
+    <ClInclude Include="..\UserMessageNotStartedExceptionType.h" />
+    <ClInclude Include="..\UserMessagesModule.h" />
     <ClInclude Include="..\Util.h" />
     <ClInclude Include="..\VectorType.h" />
     <ClInclude Include="..\ViperExtension.h" />
     <ClInclude Include="..\ViperPlugin.h" />
     <ClInclude Include="..\ViperPluginManager.h" />
+    <ClInclude Include="..\ViperRecipientFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />

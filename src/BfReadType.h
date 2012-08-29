@@ -1,16 +1,15 @@
-#ifndef __INCLUDE_BITBUFREADTYPE_H__
-#define __INCLUDE_BITBUFREADTYPE_H__
+#ifndef __INCLUDE_BFREADTYPE_H__
+#define __INCLUDE_BFREADTYPE_H__
 
 #include "BoostPythonSM.h"
 #include "Macros.h"
 #include "STL.h"
-#include "BitBufCell.h"
 #include "VectorType.h"
 #include "EntityType.h"
 
-class BitBufReadType {
+class BfReadType {
 public:
-	BitBufReadType(bf_read *bfRead);
+	BfReadType(bf_read *bfReadInstance);
 
 	float ReadAngle(int numBits = 8);
 	VectorType ReadAngles();
@@ -28,9 +27,8 @@ public:
 	VectorType ReadVecCoord();
 	VectorType ReadVecNormal();
 
-
 private:
-	bf_read *BfRead;
+	bf_read *BfReadInstance;
 };
 
 #endif

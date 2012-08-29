@@ -34,6 +34,9 @@
     <Filter Include="Events">
       <UniqueIdentifier>{e0f13246-3ff3-42c6-b559-4cd378dc4a76}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UserMessages">
+      <UniqueIdentifier>{07bef3f4-b424-4d79-ac3e-2b9cb3f73848}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -45,12 +48,6 @@
     <ClCompile Include="..\ViperExtension.cpp" />
     <ClCompile Include="..\ViperPlugin.cpp" />
     <ClCompile Include="..\BitBufModule.cpp">
-      <Filter>BitBuf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BitBufReadType.cpp">
-      <Filter>BitBuf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BitBufType.cpp">
       <Filter>BitBuf</Filter>
     </ClCompile>
     <ClCompile Include="..\BitBufVectorException.cpp">
@@ -151,6 +148,28 @@
     <ClCompile Include="..\EventHookDoesNotExistExceptionType.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="..\UserMessagesModule.cpp">
+      <Filter>UserMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UserMessageAlreadyStartedExceptionType.cpp">
+      <Filter>UserMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BfWriteType.cpp">
+      <Filter>BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BfReadType.cpp">
+      <Filter>BitBuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UserMessageNotStartedExceptionType.cpp">
+      <Filter>UserMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UserMessageIDDoesNotExistExceptionType.cpp">
+      <Filter>UserMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UserMessageNameDoesNotExistExceptionType.cpp">
+      <Filter>UserMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ViperRecipientFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -177,19 +196,7 @@
     <ClInclude Include="..\BoostPythonSM.h" />
     <ClInclude Include="..\ViperExtension.h" />
     <ClInclude Include="..\ViperPlugin.h" />
-    <ClInclude Include="..\BitBufCell.h">
-      <Filter>BitBuf</Filter>
-    </ClInclude>
     <ClInclude Include="..\BitBufModule.h">
-      <Filter>BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BitBufReadType.h">
-      <Filter>BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BitBufType.h">
-      <Filter>BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BitBufTypes.h">
       <Filter>BitBuf</Filter>
     </ClInclude>
     <ClInclude Include="..\BitBufVectorException.h">
@@ -293,6 +300,28 @@
     <ClInclude Include="..\EventHookDoesNotExistExceptionType.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="..\UserMessagesModule.h">
+      <Filter>UserMessages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UserMessageAlreadyStartedExceptionType.h">
+      <Filter>UserMessages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BfWriteType.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BfReadType.h">
+      <Filter>BitBuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UserMessageNotStartedExceptionType.h">
+      <Filter>UserMessages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UserMessageIDDoesNotExistExceptionType.h">
+      <Filter>UserMessages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UserMessageNameDoesNotExistExceptionType.h">
+      <Filter>UserMessages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ViperRecipientFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />
