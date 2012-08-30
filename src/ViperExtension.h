@@ -28,6 +28,7 @@
 #include "sdk/smsdk_ext.h"
 #include "ViperPluginManager.h"
 #include "Globals.h"
+#include "IBinTools.h"
 
 class ViperExtension : public SDKExtension {
 public:
@@ -46,7 +47,7 @@ public:
 	virtual bool SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlength, bool late);
 
 public:
-	void GameFrame(bool simulating);
+	void OnGameFrame(bool simulating);
 
 private:
 	// This is available after InitializePython()

@@ -46,6 +46,8 @@ namespace py = boost::python;
 ViperExtension g_ViperExtension;
 SMEXT_LINK(&g_ViperExtension);
 
+SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
+
 ViperExtension::ViperExtension() {
 }
 
@@ -73,7 +75,6 @@ void ViperExtension::InitializePython() {
 	PyImport_AppendInittab("events", initevents);
 	PyImport_AppendInittab("usermessages", initusermessages);
 
-
 	Py_Initialize();
 
 	if(Py_IsInitialized() != 0) {
@@ -97,7 +98,40 @@ void ViperExtension::InitializePluginManager() {
 }
 
 bool ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late) {
+	// We need bintools for the EntityModule
+	sharesys->AddDependency(myself, "bintools.ext", true, true);
+
+	return true;
+}
+
+void ViperExtension::SDK_OnUnload() {
+	Py_Finalize();
+
+	destroyentity();
+	destroyforwards();
+	destroyclients();
+	destroyevents();
+	destroyusermessages();
+
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
+}
+
+void ViperExtension::OnGameFrame(bool simulating) {
+	forwards__GameFrame(simulating);
+	clients__GameFrame(simulating);
+}
+
+void ViperExtension::SDK_OnAllLoaded() {
 	g_Interfaces.ServerGameDLLCallClass = SH_GET_CALLCLASS(gamedll);
+
+	char configError[1024];
+
+	if(!gameconfs->LoadGameConfigFile("viper.games", &g_Interfaces.GameConfigInstance, configError, sizeof(configError))) {
+		g_SMAPI->ConPrintf("%s", "Unable to load signatures and offsets file for viper (viper.games.txt)");
+		return;
+	}
+
+	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
 
 	try {
 		InitializePython();
@@ -106,24 +140,8 @@ bool ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late) {
 		PluginManagerInstance->LoadPluginsInDirectory(PluginsDirectory);
 	}
 	catch(std::exception e) {
-		UTIL_Format(error, maxlength, "%s", e.what());
-		return false;
+		g_SMAPI->ConPrintf("%s", e.what());
 	}
-
-	return true;
-}
-
-void ViperExtension::SDK_OnUnload() {
-	Py_Finalize();
-
-	destroyforwards();
-	destroyclients();
-	destroyevents();
-	destroyusermessages();
-}
-
-void ViperExtension::SDK_OnAllLoaded() {
-
 }
 
 bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen,
@@ -148,5 +166,6 @@ bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen
 	g_Interfaces.GlobalVarsInstance = ismm->GetCGlobals();
 	icvar = g_Interfaces.CvarInstance;
 
+	
 	return true;
 }

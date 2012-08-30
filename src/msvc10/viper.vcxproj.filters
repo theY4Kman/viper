@@ -109,9 +109,6 @@
     <ClCompile Include="..\ClientsModule.cpp">
       <Filter>Clients</Filter>
     </ClCompile>
-    <ClCompile Include="..\ClientType.cpp">
-      <Filter>Clients</Filter>
-    </ClCompile>
     <ClCompile Include="..\InvalidEntityExceptionType.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
@@ -170,6 +167,24 @@
       <Filter>UserMessages</Filter>
     </ClCompile>
     <ClCompile Include="..\ViperRecipientFilter.cpp" />
+    <ClCompile Include="..\ClientDataNotAvailableExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientNotConnectedExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientNotInGameExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientNotFakeExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidUserIdExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidClientSerialExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -255,9 +270,6 @@
     <ClInclude Include="..\ClientsModule.h">
       <Filter>Clients</Filter>
     </ClInclude>
-    <ClInclude Include="..\ClientType.h">
-      <Filter>Clients</Filter>
-    </ClInclude>
     <ClInclude Include="..\InvalidEntityExceptionType.h">
       <Filter>Entity</Filter>
     </ClInclude>
@@ -322,6 +334,25 @@
       <Filter>UserMessages</Filter>
     </ClInclude>
     <ClInclude Include="..\ViperRecipientFilter.h" />
+    <ClInclude Include="..\IEntityFactoryDictionary.h" />
+    <ClInclude Include="..\ClientDataNotAvailableExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientNotConnectedExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientNotInGameExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientNotFakeExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidUserIdExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidClientSerialExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />

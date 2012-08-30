@@ -35,4 +35,6 @@ extern bool forwards_ClientPreAdminCheck_ReturnValue;
 
 extern void forwards__register(std::string globalForwardName, boost::python::object callbackFunction);
 
+extern void forwards__GameFrame(bool simulating);
+
 #endif

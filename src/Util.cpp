@@ -1,6 +1,11 @@
 #include "Util.h"
 #include "STL.h"
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
+
 size_t UTIL_Format(char *buffer, size_t maxlength, char const *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);

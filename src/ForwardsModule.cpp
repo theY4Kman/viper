@@ -55,18 +55,31 @@ py::object forwards__Forward_Fire(py::tuple argumentsTuple, py::dict keywordsLis
 
 	ForwardType *forward = py::extract<ForwardType*>(self);
 
-	forward->Fire(argList);
+	try {
+		forward->Fire(argList);
+	}
+	catch(const py::error_already_set &) {
+		PyErr_Print();
+	}
 
 	return BOOST_PY_NONE;
 }
 
 void forwards__GameFrame(bool simulating) {
+	if(NULL == forwards__GameFrameForward) {
+		return;
+	}
+
 	py::list args;
 	args.append<bool>(simulating);
-	forwards__GameFrameForward->Fire(args);
+	
+	try {
+		forwards__GameFrameForward->Fire(args);
+	}
+	catch(const py::error_already_set &) {
+		PyErr_Print();
+	}
 }
-
-SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
 
 bool forwards__NoOperationCallback(boost::python::object returnValue) {
 	return true;
@@ -114,7 +127,6 @@ bool forwards__ClientPreAdminCheckCallback(boost::python::object returnValue) {
 	return false;
 }
 
-
 BOOST_PYTHON_MODULE(forwards) {
 	forwards__GlobalForwards["game_frame"] = forwards__GameFrameForward = new ForwardType(&forwards__NoOperationCallback, "game_frame");
 	forwards__GlobalForwards["client_connect"] = forwards__ClientConnectForward = new ForwardType(&forwards__ClientConnectCallback, "client_connect");
@@ -138,8 +150,6 @@ BOOST_PYTHON_MODULE(forwards) {
 	py::def("create", forwards__create);
 	py::def("register", forwards__register);
 
-	SH_ADD_HOOK(IServerGameDLL, GameFrame, gamedll, SH_STATIC(forwards__GameFrame), false);
-
 	forwards_ClientListener = new ForwardsClientListener();
 
 	playerhelpers->AddClientListener(forwards_ClientListener);
@@ -152,8 +162,6 @@ void destroyforwards() {
 		std::pair<std::string, ForwardType*> forwardPair = *it;
 		delete forwardPair.second;
 	}
-
-	SH_REMOVE_HOOK(IServerGameDLL, GameFrame, gamedll, SH_STATIC(forwards__GameFrame), false);
 
 	playerhelpers->RemoveClientListener(forwards_ClientListener);
 

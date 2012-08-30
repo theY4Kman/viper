@@ -71,8 +71,53 @@ BOOST_PYTHON_MODULE(entity) {
 		.def("is_valid", &EdictType::IsValid)
 		.def("__str__", &EdictType::StrMagic);
 
+		/**
+		GetMaxEntities
+		GetEntityCount
+		IsValidEntity
+		IsValidEdict
+		IsEntNetworkable
+		CreateEdict
+		RemoveEdict
+		GetEdictFlags
+		SetEdictFlags
+		GetEdictClassname
+		GetEntityNetClass
+		ChangeEdictState
+		GetEntData
+		SetEntData
+		GetEntDataFloat
+		SetEntDataFloat
+		GetEntDataEnt2
+		SetEntDataEnt2
+		GetEntDataVector
+		SetEntDataVector
+		GetEntDataString
+		SetEntDataString
+		FindSendPropOffs
+		FindSendPropInfo
+		FindDataMapOffs
+		GetEntSendPropOffs
+		GetEntProp
+		SetEntProp
+		GetEntPropFloat
+		SetEntPropFloat
+		GetEntPropEnt
+		SetEntPropEnt
+		GetEntPropVector
+		SetEntPropVector
+		GetEntPropString
+		SetEntPropString
+		GetEntPropArraySize
+		GetEntDataArray
+		SetEntDataArray
+		GetEntityClassname
+		*/
 	py::def("get_max_entities", entity__get_max_entities);
 	py::def("get_entity_count", entity__get_entity_count);
 	py::def("is_entity_networkable", entity__is_entity_networkable);
 	py::def("create_edict", entity__create_edict);
+}
+
+void destroyentity() {
 }

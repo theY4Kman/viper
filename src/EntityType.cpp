@@ -7,12 +7,14 @@
 
 namespace py = boost::python;
 
-EntityType::EntityType(CBaseEntity *entity) {
+EntityType::EntityType(int index, std::string entityTrackerGuid, CBaseEntity *entity) {
 	if(entity == NULL) {
 		throw InvalidEntityExceptionType();
 	}
 
+	Index = index;
 	BaseEntity = entity;
+	EntityTrackerGuid = entityTrackerGuid;
 }
 
 bool EntityType::IsValid() {

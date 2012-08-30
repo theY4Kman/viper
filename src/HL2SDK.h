@@ -15,6 +15,7 @@
 #include "filesystem.h"
 #include "icvar.h"
 #include "edict.h"
+#include "shareddefs.h"
 
 #if SOURCE_ENGINE >= SE_LEFT4DEAD
 #   include "convar_sm_l4d.h"
@@ -23,5 +24,7 @@
 #else
 #   include "convar_sm.h"
 #endif
+
+#include "IEntityFactoryDictionary.h"
 
 #endif // !__INCLUDE_HL2SDK_H__

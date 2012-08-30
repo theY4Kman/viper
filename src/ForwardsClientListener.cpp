@@ -2,15 +2,12 @@
 #include "BoostPythonSM.h"
 #include "ForwardsModule.h"
 #include "Util.h"
-#include "ClientType.h"
 
 namespace py = boost::python;
 
 bool ForwardsClientListener::InterceptClientConnect(int clientIndex, char *error, size_t maxlength) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 
 	try {
 		forwards__ClientConnectForward->Fire(args);
@@ -28,10 +25,8 @@ bool ForwardsClientListener::InterceptClientConnect(int clientIndex, char *error
 }
 
 void ForwardsClientListener::OnClientConnected(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 
 	try {
 		forwards__ClientConnectedForward->Fire(args);
@@ -42,10 +37,8 @@ void ForwardsClientListener::OnClientConnected(int clientIndex) {
 }
 
 void ForwardsClientListener::OnClientPutInServer(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 
 	try {
 		forwards__ClientPutInServerForward->Fire(args);
@@ -56,10 +49,8 @@ void ForwardsClientListener::OnClientPutInServer(int clientIndex) {
 }
 
 void ForwardsClientListener::OnClientDisconnecting(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 
 	try {
 		forwards__ClientDisconnectingForward->Fire(args);
@@ -70,10 +61,8 @@ void ForwardsClientListener::OnClientDisconnecting(int clientIndex) {
 }
 
 void ForwardsClientListener::OnClientDisconnected(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 
 	try {
 		forwards__ClientDisconnectedForward->Fire(args);
@@ -84,10 +73,8 @@ void ForwardsClientListener::OnClientDisconnected(int clientIndex) {
 }
 
 void ForwardsClientListener::OnClientAuthorized(int clientIndex, const char *authstring) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 	args.append<std::string>(std::string(authstring));
 
 	try {
@@ -111,10 +98,8 @@ void ForwardsClientListener::OnServerActivated(int max_clients) {
 }
 
 bool ForwardsClientListener::OnClientPreAdminCheck(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 	
 	try {
 		forwards__ClientPreAdminCheckForward->Fire(args);
@@ -127,10 +112,8 @@ bool ForwardsClientListener::OnClientPreAdminCheck(int clientIndex) {
 }
 
 void ForwardsClientListener::OnClientPostAdminCheck(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 	
 	try {
 		forwards__ClientPostAdminCheckForward->Fire(args);
@@ -154,10 +137,8 @@ void ForwardsClientListener::OnMaxPlayersChanged(int newvalue) {
 }
 
 void ForwardsClientListener::OnClientSettingsChanged(int clientIndex) {
-	ClientType client(clientIndex);
-
 	py::list args;
-	args.append<ClientType>(client);
+	args.append<int>(clientIndex);
 	
 	try {
 		forwards__ClientSettingsChangedForward->Fire(args);

@@ -2,7 +2,7 @@
 #define __INCLUDE_INTERFACECONTAINER_H__
 
 #include "HL2SDK.h"
-#include "sdk/smsdk_ext.h"
+#include "ViperExtension.h"
 
 class InterfaceContainer {
 public:
@@ -18,6 +18,9 @@ public:
 	IServerGameEnts *ServerGameEntsInstance;
 	SourceHook::CallClass<IServerGameDLL> *ServerGameDLLCallClass;
 	CGlobalVars *GlobalVarsInstance;
+	SourceMod::IGameConfig *GameConfigInstance;
+	SourceMod::IBinTools *BinToolsInstance;
+	IEntityFactoryDictionary *EntityFactoryDictionaryInstance;
 };
 
 extern InterfaceContainer g_Interfaces;

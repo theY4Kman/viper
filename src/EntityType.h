@@ -8,7 +8,7 @@
 
 class EntityType {
 public:
-	EntityType(CBaseEntity *baseEntity);
+	EntityType(int index, std::string entityTrackerGuid, CBaseEntity *baseEntity);
 
 	bool IsValid();
 	unsigned int GetSendPropOffs(std::string prop);
@@ -16,6 +16,8 @@ public:
 
 private:
 	CBaseEntity *BaseEntity;
+	std::string EntityTrackerGuid;
+	int Index;
 };
 
 #endif

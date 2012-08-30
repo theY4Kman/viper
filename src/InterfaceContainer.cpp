@@ -12,4 +12,5 @@ InterfaceContainer::InterfaceContainer() {
 	ServerGameClientsInstance = NULL;
 	ServerGameDLLCallClass = NULL;
 	GlobalVarsInstance = NULL;
+	GameConfigInstance = NULL;
 }

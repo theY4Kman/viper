@@ -209,7 +209,7 @@
       <AdditionalOptions>/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE)\game\shared\;$(HL2SDKOBVALVE)\game\server\;$(HL2SDKOBVALVE)\public\engine;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\vstdlib;$(HL2SDKOBVALVE)\tier1;$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public\extensions;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE)\game\shared\;$(HL2SDKOBVALVE)\game\;$(HL2SDKOBVALVE)\game\server\;$(HL2SDKOBVALVE)\public\engine;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\vstdlib;$(HL2SDKOBVALVE)\tier1;$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;BOOST_PYTHON_STATIC_LIB;DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -703,9 +703,12 @@
     <ClCompile Include="..\BfReadType.cpp" />
     <ClCompile Include="..\BfWriteType.cpp" />
     <ClCompile Include="..\BitBufVectorException.cpp" />
+    <ClCompile Include="..\ClientNotConnectedExceptionType.cpp" />
+    <ClCompile Include="..\ClientDataNotAvailableExceptionType.cpp" />
     <ClCompile Include="..\ClientIndexOutOfRangeExceptionType.cpp" />
+    <ClCompile Include="..\ClientNotFakeExceptionType.cpp" />
+    <ClCompile Include="..\ClientNotInGameExceptionType.cpp" />
     <ClCompile Include="..\ClientsModule.cpp" />
-    <ClCompile Include="..\ClientType.cpp" />
     <ClCompile Include="..\ColorType.cpp" />
     <ClCompile Include="..\CompatWrappers.cpp" />
     <ClCompile Include="..\DatatypesModule.cpp" />
@@ -727,9 +730,11 @@
     <ClCompile Include="..\Globals.cpp" />
     <ClCompile Include="..\HalflifeModule.cpp" />
     <ClCompile Include="..\InterfaceContainer.cpp" />
+    <ClCompile Include="..\InvalidClientSerialExceptionType.cpp" />
     <ClCompile Include="..\InvalidEdictExceptionType.cpp" />
     <ClCompile Include="..\InvalidEntityExceptionType.cpp" />
     <ClCompile Include="..\InvalidEventExceptionType.cpp" />
+    <ClCompile Include="..\InvalidUserIdExceptionType.cpp" />
     <ClCompile Include="..\LoadExtensionException.cpp" />
     <ClCompile Include="..\ModEventsParser.cpp" />
     <ClCompile Include="..\NullReferenceExceptionType.cpp" />
@@ -755,9 +760,12 @@
     <ClInclude Include="..\BfWriteType.h" />
     <ClInclude Include="..\BitBufVectorException.h" />
     <ClInclude Include="..\BoostPythonSM.h" />
+    <ClInclude Include="..\ClientNotConnectedExceptionType.h" />
+    <ClInclude Include="..\ClientDataNotAvailableExceptionType.h" />
     <ClInclude Include="..\ClientIndexOutOfRangeExceptionType.h" />
+    <ClInclude Include="..\ClientNotFakeExceptionType.h" />
+    <ClInclude Include="..\ClientNotInGameExceptionType.h" />
     <ClInclude Include="..\ClientsModule.h" />
-    <ClInclude Include="..\ClientType.h" />
     <ClInclude Include="..\ColorType.h" />
     <ClInclude Include="..\CompatWrappers.h" />
     <ClInclude Include="..\DatatypesModule.h" />
@@ -779,10 +787,13 @@
     <ClInclude Include="..\ForwardType.h" />
     <ClInclude Include="..\Globals.h" />
     <ClInclude Include="..\HalflifeModule.h" />
+    <ClInclude Include="..\IEntityFactoryDictionary.h" />
     <ClInclude Include="..\InterfaceContainer.h" />
+    <ClInclude Include="..\InvalidClientSerialExceptionType.h" />
     <ClInclude Include="..\InvalidEdictExceptionType.h" />
     <ClInclude Include="..\InvalidEntityExceptionType.h" />
     <ClInclude Include="..\InvalidEventExceptionType.h" />
+    <ClInclude Include="..\InvalidUserIdExceptionType.h" />
     <ClInclude Include="..\LoadExtensionException.h" />
     <ClInclude Include="..\Macros.h" />
     <ClInclude Include="..\ModEventsParser.h" />

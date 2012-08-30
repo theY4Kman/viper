@@ -4,5 +4,6 @@
 #include "Macros.h"
 
 extern "C" __declspec(dllexport) void initentity();
+extern void destroyentity();
 
 #endif
