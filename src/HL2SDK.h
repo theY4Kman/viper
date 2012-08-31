@@ -25,6 +25,4 @@
 #   include "convar_sm.h"
 #endif
 
-#include "IEntityFactoryDictionary.h"
-
 #endif // !__INCLUDE_HL2SDK_H__

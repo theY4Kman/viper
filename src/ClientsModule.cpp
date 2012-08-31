@@ -263,7 +263,7 @@ int clients__create_fake_client(std::string name) {
 	edict_t *edict = engine->CreateFakeClient(name.c_str());
 
 	if(edict == NULL || edict->IsFree()) {
-		throw InvalidEdictExceptionType(edict);
+		return -1;
 	}
 
 	return IndexOfEdict(edict);

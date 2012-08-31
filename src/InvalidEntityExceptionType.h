@@ -5,7 +5,11 @@
 
 class InvalidEntityExceptionType {
 public:
+	InvalidEntityExceptionType(int invalidEntityIndex);
 	std::string what() const;
+
+private:
+	int InvalidEntityIndex;
 };
 
 #endif

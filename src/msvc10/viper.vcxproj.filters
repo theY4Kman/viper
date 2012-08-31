@@ -62,16 +62,7 @@
     <ClCompile Include="..\VectorType.cpp">
       <Filter>Datatypes</Filter>
     </ClCompile>
-    <ClCompile Include="..\EdictType.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EntityClassType.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
     <ClCompile Include="..\EntityModule.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EntityType.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
     <ClCompile Include="..\InvalidEdictExceptionType.cpp">
@@ -185,6 +176,27 @@
     <ClCompile Include="..\InvalidClientSerialExceptionType.cpp">
       <Filter>Clients</Filter>
     </ClCompile>
+    <ClCompile Include="..\EntityNotNetworkableExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntitySendPropertyInfoType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidSendPropertyExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityDataMapInfoType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidDataMapExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidDataMapPropertyExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityOffsetOutOfRangeExceptionType.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -226,16 +238,7 @@
     <ClInclude Include="..\VectorType.h">
       <Filter>Datatypes</Filter>
     </ClInclude>
-    <ClInclude Include="..\EdictType.h">
-      <Filter>Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EntityClassType.h">
-      <Filter>Entity</Filter>
-    </ClInclude>
     <ClInclude Include="..\EntityModule.h">
-      <Filter>Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EntityType.h">
       <Filter>Entity</Filter>
     </ClInclude>
     <ClInclude Include="..\InvalidEdictExceptionType.h">
@@ -352,6 +355,30 @@
     </ClInclude>
     <ClInclude Include="..\InvalidClientSerialExceptionType.h">
       <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityNotNetworkableExceptionType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityPropertyFieldTypes.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntitySendPropertyInfoType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidSendPropertyExceptionType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityDataMapInfoType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidDataMapExceptionType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidDataMapPropertyExceptionType.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityOffsetOutOfRangeExceptionType.h">
+      <Filter>Entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,5 +4,6 @@
 #include "HL2SDK.h"
 
 extern ICvar *icvar;
+extern CSharedEdictChangeInfo *g_pSharedChangeInfo;
 
 #endif

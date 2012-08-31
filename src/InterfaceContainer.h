@@ -20,7 +20,7 @@ public:
 	CGlobalVars *GlobalVarsInstance;
 	SourceMod::IGameConfig *GameConfigInstance;
 	SourceMod::IBinTools *BinToolsInstance;
-	IEntityFactoryDictionary *EntityFactoryDictionaryInstance;
+	CSharedEdictChangeInfo *SharedEdictChangeInfoInstance;
 };
 
 extern InterfaceContainer g_Interfaces;

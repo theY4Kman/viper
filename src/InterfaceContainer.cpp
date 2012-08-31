@@ -13,4 +13,6 @@ InterfaceContainer::InterfaceContainer() {
 	ServerGameDLLCallClass = NULL;
 	GlobalVarsInstance = NULL;
 	GameConfigInstance = NULL;
+	BinToolsInstance = NULL;
+	SharedEdictChangeInfoInstance = NULL;
 }

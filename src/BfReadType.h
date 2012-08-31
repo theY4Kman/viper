@@ -5,7 +5,6 @@
 #include "Macros.h"
 #include "STL.h"
 #include "VectorType.h"
-#include "EntityType.h"
 
 class BfReadType {
 public:
@@ -18,7 +17,7 @@ public:
 	unsigned char ReadByte();
 	char ReadChar();
 	float ReadCoord();
-	EntityType ReadEntity();
+	int ReadEntity();
 	float ReadFloat();
 	int ReadNum();
 	short ReadShort();

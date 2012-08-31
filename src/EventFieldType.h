@@ -4,7 +4,6 @@
 #include "Macros.h"
 #include "ViperExtension.h"
 #include "HL2SDK.h"
-#include "EdictType.h"
 #include "EventFieldTypes.h"
 
 class EventFieldType {

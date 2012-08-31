@@ -101,6 +101,8 @@ bool ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late) {
 	// We need bintools for the EntityModule
 	sharesys->AddDependency(myself, "bintools.ext", true, true);
 
+	g_Interfaces.SharedEdictChangeInfoInstance = g_pSharedChangeInfo = engine->GetSharedEdictChangeInfo();
+
 	return true;
 }
 

@@ -5,11 +5,11 @@
 
 class InvalidEdictExceptionType {
 public:
-	InvalidEdictExceptionType(edict_t *invalidEdict);
+	InvalidEdictExceptionType(int invalidEdictIndex);
 	std::string what() const;
 
 private:
-	edict_t *InvalidEdict;
+	int InvalidEdictIndex;
 };
 
 #endif
