@@ -2,11 +2,8 @@
 #include "BitBufModule.h"
 #include "BfReadType.h"
 #include "BfWriteType.h"
-#include "BitBufVectorException.h"
 
 namespace py = boost::python;
-
-DEFINE_CUSTOM_EXCEPTION_INIT(BitBufVectorException, bitbuf)
 
 BOOST_PYTHON_MODULE(bitbuf) {
 	py::class_<BfWriteType>("BfWrite", py::no_init)
@@ -25,12 +22,19 @@ BOOST_PYTHON_MODULE(bitbuf) {
 		.def("write_string", &BfWriteType::WriteString, (py::arg("string")))
 		.def("write_num", &BfWriteType::WriteNum, (py::arg("num")));
 
-	// TODO: BfRead
 	py::class_<BfReadType>("BfRead", py::no_init)
 		.def("read_angle", &BfReadType::ReadAngle, (py::arg("numBits")=8))
-		.def("read_angles", &BfReadType::ReadAngles);
-
-	DEFINE_CUSTOM_EXCEPTION(BitBufVectorException, bitbuf,
-		PyExc_Exception, "bitbuf.BitBufVectorException",
-		"BitBufVectorException")
+		.def("read_angles", &BfReadType::ReadAngles)
+		.def("read_byte", &BfReadType::ReadByte)
+		.def("read_bool", &BfReadType::ReadBool)
+		.def("read_char", &BfReadType::ReadChar)
+		.def("read_coord", &BfReadType::ReadCoord)
+		.def("read_entity", &BfReadType::ReadEntity)
+		.def("read_float", &BfReadType::ReadFloat)
+		.def("read_short", &BfReadType::ReadShort)
+		.def("read_vec_coord", &BfReadType::ReadVecCoord)
+		.def("read_vec_normal", &BfReadType::ReadVecNormal)
+		.def("read_word", &BfReadType::ReadWord)
+		.def("read_string", &BfReadType::ReadString)
+		.def("read_num", &BfReadType::ReadNum);
 }

@@ -12,7 +12,6 @@ public:
 
 	float ReadAngle(int numBits = 8);
 	VectorType ReadAngles();
-	std::string StrMagic();
 	bool ReadBool();
 	unsigned char ReadByte();
 	char ReadChar();

@@ -50,9 +50,6 @@
     <ClCompile Include="..\BitBufModule.cpp">
       <Filter>BitBuf</Filter>
     </ClCompile>
-    <ClCompile Include="..\BitBufVectorException.cpp">
-      <Filter>BitBuf</Filter>
-    </ClCompile>
     <ClCompile Include="..\ColorType.cpp">
       <Filter>Datatypes</Filter>
     </ClCompile>
@@ -197,6 +194,9 @@
     <ClCompile Include="..\EntityOffsetOutOfRangeExceptionType.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
+    <ClCompile Include="..\UserMessagesUserMessageListener.cpp">
+      <Filter>UserMessages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -224,9 +224,6 @@
     <ClInclude Include="..\ViperExtension.h" />
     <ClInclude Include="..\ViperPlugin.h" />
     <ClInclude Include="..\BitBufModule.h">
-      <Filter>BitBuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BitBufVectorException.h">
       <Filter>BitBuf</Filter>
     </ClInclude>
     <ClInclude Include="..\ColorType.h">
@@ -379,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="..\EntityOffsetOutOfRangeExceptionType.h">
       <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UserMessagesUserMessageListener.h">
+      <Filter>UserMessages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

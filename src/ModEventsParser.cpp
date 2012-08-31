@@ -47,7 +47,6 @@ std::map<std::string, std::vector<EventFieldType>> ModEventsParser::Parse()
 		// Loop through events
 		for (KeyValues *events=kv->GetFirstSubKey(); events; events=events->GetNextKey())
 		{
-			// TODO: do we need to destroy this?
 			std::vector<EventFieldType> fields;
         
 			// Loop through their fields

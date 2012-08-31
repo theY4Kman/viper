@@ -702,7 +702,6 @@
     <ClCompile Include="..\BitBufModule.cpp" />
     <ClCompile Include="..\BfReadType.cpp" />
     <ClCompile Include="..\BfWriteType.cpp" />
-    <ClCompile Include="..\BitBufVectorException.cpp" />
     <ClCompile Include="..\ClientNotConnectedExceptionType.cpp" />
     <ClCompile Include="..\ClientDataNotAvailableExceptionType.cpp" />
     <ClCompile Include="..\ClientIndexOutOfRangeExceptionType.cpp" />
@@ -751,6 +750,7 @@
     <ClCompile Include="..\UserMessageNameDoesNotExistExceptionType.cpp" />
     <ClCompile Include="..\UserMessageNotStartedExceptionType.cpp" />
     <ClCompile Include="..\UserMessagesModule.cpp" />
+    <ClCompile Include="..\UserMessagesUserMessageListener.cpp" />
     <ClCompile Include="..\Util.cpp" />
     <ClCompile Include="..\VectorType.cpp" />
     <ClCompile Include="..\ViperExtension.cpp" />
@@ -762,7 +762,6 @@
     <ClInclude Include="..\BitBufModule.h" />
     <ClInclude Include="..\BfReadType.h" />
     <ClInclude Include="..\BfWriteType.h" />
-    <ClInclude Include="..\BitBufVectorException.h" />
     <ClInclude Include="..\BoostPythonSM.h" />
     <ClInclude Include="..\ClientNotConnectedExceptionType.h" />
     <ClInclude Include="..\ClientDataNotAvailableExceptionType.h" />
@@ -822,6 +821,7 @@
     <ClInclude Include="..\UserMessageNameDoesNotExistExceptionType.h" />
     <ClInclude Include="..\UserMessageNotStartedExceptionType.h" />
     <ClInclude Include="..\UserMessagesModule.h" />
+    <ClInclude Include="..\UserMessagesUserMessageListener.h" />
     <ClInclude Include="..\Util.h" />
     <ClInclude Include="..\VectorType.h" />
     <ClInclude Include="..\ViperExtension.h" />

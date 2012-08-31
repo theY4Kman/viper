@@ -14,6 +14,7 @@ namespace py = boost::python;
 
 ViperRecipientFilter *usermessages__CurrentRecipientFilter = NULL;
 bool usermessages__AlreadyStarted = false;
+std::vector<UserMessagesUserMessageListener*> usermessages__Hooks;
 
 BfWriteType usermessages__start_message(int messageID, boost::python::list clientsList, bool reliable = false, bool initMessage = false) {
 	if(usermessages__AlreadyStarted) {
@@ -70,6 +71,35 @@ void usermessages__end_message() {
 	usermessages__AlreadyStarted = false;
 }
 
+void usermessages__hook_message(int messageID, py::object hookFunction, bool intercept = false, py::object postHookFunction = BOOST_PY_NONE) {
+	PyThreadState *threadState = PyThreadState_Get();
+
+	UserMessagesUserMessageListener *userMessageListener = new UserMessagesUserMessageListener(threadState, messageID, hookFunction, intercept, postHookFunction);
+
+	if(!usermsgs->HookUserMessage2(messageID, userMessageListener, intercept)) {
+		delete userMessageListener;
+		throw UserMessageIDDoesNotExistExceptionType(messageID);
+	}
+
+	usermessages__Hooks.push_back(userMessageListener);
+}
+
+void usermessages__unhook_message(int messageID, py::object hookFunction, bool intercept = false) {
+	for(std::vector<UserMessagesUserMessageListener*>::iterator it = usermessages__Hooks.begin(); it != usermessages__Hooks.end(); it++) {
+		UserMessagesUserMessageListener *userMessageListener = *it;
+
+		if(userMessageListener->MessageID != messageID || userMessageListener->Intercept != intercept || userMessageListener->HookFunction != hookFunction) {
+			continue;
+		}
+
+		usermsgs->UnhookUserMessage2(messageID, userMessageListener, intercept);
+		delete userMessageListener;
+
+		usermessages__Hooks.erase(it);
+		return;
+	}
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(UserMessageAlreadyStartedExceptionType, usermessages)
 DEFINE_CUSTOM_EXCEPTION_INIT(UserMessageIDDoesNotExistExceptionType, usermessages)
 DEFINE_CUSTOM_EXCEPTION_INIT(UserMessageNameDoesNotExistExceptionType, usermessages)
@@ -80,6 +110,8 @@ BOOST_PYTHON_MODULE(usermessages) {
 	py::def("end_message", usermessages__end_message);
 	py::def("get_message_id_by_name", usermessages__get_message_id_by_name);
 	py::def("get_message_name_by_id", usermessages__get_message_name_by_id);
+	py::def("hook_message", usermessages__hook_message, (py::arg("message_id"), py::arg("hook"), py::arg("intercept") = false, py::arg("post_hook") = BOOST_PY_NONE));
+	py::def("unhook_message", usermessages__unhook_message, (py::arg("message_id"), py::arg("hook"), py::arg("intercept") = false));
 
 	DEFINE_CUSTOM_EXCEPTION(UserMessageAlreadyStartedExceptionType, usermessages,
 		PyExc_Exception, "usermessages.UserMessageAlreadyStartedException",

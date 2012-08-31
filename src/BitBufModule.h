@@ -4,6 +4,5 @@
 #include "Macros.h"
 
 extern "C" __declspec(dllexport) void initbitbuf();
-DEFINE_CUSTOM_EXCEPTION_DECL(BitBufVectorException, bitbuf)
 
 #endif

@@ -1,7 +1,6 @@
 #include "BfWriteType.h"
 #include "Macros.h"
 #include "BoostPythonSM.h"
-#include "BitBufVectorException.h"
 #include "Util.h"
 #include "NullReferenceExceptionType.h"
 
@@ -19,12 +18,8 @@ void BfWriteType::WriteAngle(float num, int numBits) {
 	BfWriteInstance->WriteBitAngle(num, numBits);
 }
 
-void BfWriteType::WriteAngles(py::list anglesList) {
-	if(py::len(anglesList) != 3) {
-		throw BitBufVectorException(anglesList);
-	}
-
-	BfWriteInstance->WriteBitAngles(QAngle(py::extract<float>(anglesList[0]), py::extract<float>(anglesList[1]), py::extract<float>(anglesList[2])));
+void BfWriteType::WriteAngles(VectorType anglesVec) {
+	BfWriteInstance->WriteBitAngles(QAngle(anglesVec.X, anglesVec.Y, anglesVec.Z));
 }
 
 void BfWriteType::WriteBool(bool boolValue) {
@@ -47,20 +42,12 @@ void BfWriteType::WriteString(std::string stringValue) {
 	BfWriteInstance->WriteString(stringValue.c_str());
 }
 			
-void BfWriteType::WriteVecCoord(py::list vecCoord) {
-	if(py::len(vecCoord) != 3) {
-		throw BitBufVectorException(vecCoord);
-	}
-
-	BfWriteInstance->WriteBitVec3Coord(Vector(py::extract<float>(vecCoord[0]), py::extract<float>(vecCoord[1]), py::extract<float>(vecCoord[2])));
+void BfWriteType::WriteVecCoord(VectorType vecCoord) {
+	BfWriteInstance->WriteBitVec3Coord(Vector(vecCoord.X, vecCoord.Y, vecCoord.Z));
 }
 			
-void BfWriteType::WriteVecNormal(boost::python::list vecNormal) {
-	if(py::len(vecNormal) != 3) {
-		throw BitBufVectorException(vecNormal);
-	}
-
-	BfWriteInstance->WriteBitVec3Normal(Vector(py::extract<float>(vecNormal[0]), py::extract<float>(vecNormal[1]), py::extract<float>(vecNormal[2])));
+void BfWriteType::WriteVecNormal(VectorType vecNormal) {
+	BfWriteInstance->WriteBitVec3Normal(Vector(vecNormal.X, vecNormal.Y, vecNormal.Z));
 }
 
 void BfWriteType::WriteWord(int word) {

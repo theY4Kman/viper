@@ -4,6 +4,7 @@
 #include "Macros.h"
 #include "BfWriteType.h"
 #include "ViperRecipientFilter.h"
+#include "UserMessagesUserMessageListener.h"
 
 extern "C" __declspec(dllexport) void initusermessages();
 void destroyusermessages();
@@ -15,5 +16,7 @@ DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageNotStartedExceptionType, usermessages)
 
 extern ViperRecipientFilter *usermessages__CurrentRecipientFilter;
 extern bool usermessages__AlreadyStarted;
+
+extern std::vector<UserMessagesUserMessageListener*> usermessages__Hooks;
 
 #endif

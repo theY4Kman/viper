@@ -35,6 +35,12 @@ BOOST_PYTHON_MODULE(sourcemod) {
 		0));
 	py::def("get_game_path", sourcemod_get_game_path);
 	
+	py::enum_<SourceMod::ResultType>("ResultType")
+		.value("Continue", SourceMod::Pl_Continue)
+		.value("Changed", SourceMod::Pl_Changed)
+		.value("Handled", SourceMod::Pl_Handled)
+		.value("Stop", SourceMod::Pl_Stop);
+
 	DEFINE_CUSTOM_EXCEPTION(LoadExtensionException, sourcemod,
 		PyExc_Exception, "sourcemod.LoadExtensionException",
 		"LoadExtensionException")
