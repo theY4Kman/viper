@@ -5,3 +5,8 @@ bitbuf read needs help
 client needs lifestate fix, and IsAlive exceptions
 usermessages needs hooks
 sdktools???
+
+update 9/1 12:03 am
+clients: is alive issues
+all modules destroy cleanup
+sdktools

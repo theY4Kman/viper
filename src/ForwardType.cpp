@@ -33,7 +33,14 @@ void ForwardType::Fire(py::list argumentsList) {
 
 		PyThreadState_Swap(fwdFunction.ThreadState);
 
-		py::object returnValue = fwdFunction.PythonFunction(*py::tuple(argumentsList));
+		py::object returnValue = py::object(true);
+
+		try {
+			py::object returnValue = fwdFunction.PythonFunction(*py::tuple(argumentsList));
+		}
+		catch(const py::error_already_set &) {
+			PyErr_Print();
+		}
 
 		PyThreadState_Swap(oldThreadState);
 

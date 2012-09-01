@@ -1,9 +1,8 @@
 /**
+ * vim: set ts=4 :
  * =============================================================================
- * Viper Base Extension Code
- * Copyright (C) 2012 PimpinJuice
- * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
- * Copyright (C) 2004-2007 AlliedModders LLC.
+ * SourceMod Base Extension Code
+ * Copyright (C) 2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
  * This program is free software; you can redistribute it and/or modify it under
@@ -17,10 +16,21 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * As a special exception, AlliedModders LLC gives you permission to link the
+ * code of this program (as well as its derivative works) to "Half-Life 2," the
+ * "Source Engine," the "SourcePawn JIT," and any Game MODs that run on software
+ * by the Valve Corporation.  You must obey the GNU General Public License in
+ * all respects for all other code used.  Additionally, AlliedModders LLC grants
+ * this exception to all derivative works.  AlliedModders LLC defines further
+ * exceptions, found in LICENSE.txt (as of this writing, version JULY-31-2007),
+ * or <http://www.sourcemod.net/license.php>.
+ *
+ * Version: $Id$
  */
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include "smsdk_ext.h"
 
 /**
@@ -28,67 +38,76 @@
  * @brief Contains wrappers for making Extensions easier to write.
  */
 
-SourceMod::IExtension *myself = NULL;				/**< Ourself */
-SourceMod::IShareSys *g_pShareSys = NULL;			/**< Share system */
-SourceMod::IShareSys *sharesys = NULL;				/**< Share system */
-SourceMod::ISourceMod *g_pSM = NULL;				/**< SourceMod helpers */
-SourceMod::ISourceMod *smutils = NULL;				/**< SourceMod helpers */
+IExtension *myself = NULL;				/**< Ourself */
+IShareSys *g_pShareSys = NULL;			/**< Share system */
+IShareSys *sharesys = NULL;				/**< Share system */
+ISourceMod *g_pSM = NULL;				/**< SourceMod helpers */
+ISourceMod *smutils = NULL;				/**< SourceMod helpers */
 
 #if defined SMEXT_ENABLE_FORWARDSYS
-SourceMod::IForwardManager *g_pForwards = NULL;	/**< Forward system */
-SourceMod::IForwardManager *forwards = NULL;		/**< Forward system */
+IForwardManager *g_pForwards = NULL;	/**< Forward system */
+IForwardManager *forwards = NULL;		/**< Forward system */
 #endif
 #if defined SMEXT_ENABLE_HANDLESYS
-SourceMod::IHandleSys *g_pHandleSys = NULL;		/**< Handle system */
-SourceMod::IHandleSys *handlesys = NULL;			/**< Handle system */
+IHandleSys *g_pHandleSys = NULL;		/**< Handle system */
+IHandleSys *handlesys = NULL;			/**< Handle system */
 #endif
 #if defined SMEXT_ENABLE_PLAYERHELPERS
-SourceMod::IPlayerManager *playerhelpers = NULL;	/**< Player helpers */
+IPlayerManager *playerhelpers = NULL;	/**< Player helpers */
 #endif //SMEXT_ENABLE_PLAYERHELPERS
 #if defined SMEXT_ENABLE_DBMANAGER
-SourceMod::IDBManager *dbi = NULL;					/**< DB Manager */
+IDBManager *dbi = NULL;					/**< DB Manager */
 #endif //SMEXT_ENABLE_DBMANAGER
 #if defined SMEXT_ENABLE_GAMECONF
-SourceMod::IGameConfigManager *gameconfs = NULL;	/**< Game config manager */
+IGameConfigManager *gameconfs = NULL;	/**< Game config manager */
 #endif //SMEXT_ENABLE_DBMANAGER
 #if defined SMEXT_ENABLE_MEMUTILS
-SourceMod::IMemoryUtils *memutils = NULL;
+IMemoryUtils *memutils = NULL;
 #endif //SMEXT_ENABLE_DBMANAGER
 #if defined SMEXT_ENABLE_GAMEHELPERS
-SourceMod::IGameHelpers *gamehelpers = NULL;
+IGameHelpers *gamehelpers = NULL;
 #endif
 #if defined SMEXT_ENABLE_TIMERSYS
-SourceMod::ITimerSystem *timersys = NULL;
+ITimerSystem *timersys = NULL;
 #endif
 #if defined SMEXT_ENABLE_ADTFACTORY
-SourceMod::IADTFactory *adtfactory = NULL;
+IADTFactory *adtfactory = NULL;
 #endif
 #if defined SMEXT_ENABLE_THREADER
-SourceMod::IThreader *threader = NULL;
+IThreader *threader = NULL;
 #endif
 #if defined SMEXT_ENABLE_LIBSYS
-SourceMod::ILibrarySys *libsys = NULL;
+ILibrarySys *libsys = NULL;
 #endif
 #if defined SMEXT_ENABLE_PLUGINSYS
 SourceMod::IPluginManager *plsys;
 #endif
 #if defined SMEXT_ENABLE_MENUS
-SourceMod::IMenuManager *menus = NULL;
+IMenuManager *menus = NULL;
 #endif
 #if defined SMEXT_ENABLE_ADMINSYS
-SourceMod::IAdminSystem *adminsys = NULL;
+IAdminSystem *adminsys = NULL;
 #endif
 #if defined SMEXT_ENABLE_TEXTPARSERS
-SourceMod::ITextParsers *textparsers = NULL;
+ITextParsers *textparsers = NULL;
 #endif
 #if defined SMEXT_ENABLE_USERMSGS
-SourceMod::IUserMessages *usermsgs = NULL;
+IUserMessages *usermsgs = NULL;
+#endif
+#if defined SMEXT_ENABLE_TRANSLATOR
+ITranslator *translator = NULL;
+#endif
+#if defined SMEXT_ENABLE_NINVOKE
+INativeInterface *ninvoke = NULL;
+#endif
+#if defined SMEXT_ENABLE_ROOTCONSOLEMENU
+IRootConsole *rootconsole = NULL;
 #endif
 
 SourceMod::IExtensionManager *extsys = NULL;
 
 /** Exports the main interface */
-PLATFORM_EXTERN_C SourceMod::IExtensionInterface *GetSMExtAPI()
+PLATFORM_EXTERN_C IExtensionInterface *GetSMExtAPI()
 {
 	return g_pExtensionIface;
 }
@@ -102,8 +121,7 @@ SDKExtension::SDKExtension()
 #endif
 }
 
-bool SDKExtension::OnExtensionLoad(SourceMod::IExtension *me, SourceMod::IShareSys *sys,
-                                   char *error, size_t maxlength, bool late)
+bool SDKExtension::OnExtensionLoad(IExtension *me, IShareSys *sys, char *error, size_t maxlength, bool late)
 {
 	g_pShareSys = sharesys = sys;
 	myself = me;
@@ -172,8 +190,17 @@ bool SDKExtension::OnExtensionLoad(SourceMod::IExtension *me, SourceMod::IShareS
 #if defined SMEXT_ENABLE_USERMSGS
 	SM_GET_IFACE(USERMSGS, usermsgs);
 #endif
+#if defined SMEXT_ENABLE_TRANSLATOR
+	SM_GET_IFACE(TRANSLATOR, translator);
+#endif
+#if defined SMEXT_ENABLE_NINVOKE
+	SM_GET_IFACE(NINVOKE, ninvoke);
+#endif
+#if defined SMEXT_ENABLE_ROOTCONSOLEMENU
+	SM_GET_IFACE(ROOTCONSOLE, rootconsole);
+#endif
 
-    SM_GET_IFACE(EXTENSIONMANAGER, extsys);
+	SM_GET_IFACE(EXTENSIONMANAGER, extsys);
 
 	if (SDK_OnLoad(error, maxlength, late))
 	{
@@ -305,8 +332,8 @@ SMM_API void *PL_EXPOSURE(const char *name, int *code)
 bool SDKExtension::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
-    
-#ifndef METAMOD_PLAPI_VERSION
+
+#if !defined METAMOD_PLAPI_VERSION
 	GET_V_IFACE_ANY(serverFactory, gamedll, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_CURRENT(engineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
 #else
@@ -423,7 +450,7 @@ bool SDKExtension::SDK_OnMetamodPauseChange(bool paused, char *error, size_t max
 #endif
 
 /* Overload a few things to prevent libstdc++ linking */
-#if defined __linux__
+#if defined __linux__ || defined __APPLE__
 extern "C" void __cxa_pure_virtual(void)
 {
 }
@@ -448,3 +475,4 @@ void operator delete[](void * ptr)
 	free(ptr);
 }
 #endif
+

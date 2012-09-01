@@ -21,6 +21,7 @@ public:
 	SourceMod::IGameConfig *GameConfigInstance;
 	SourceMod::IBinTools *BinToolsInstance;
 	CSharedEdictChangeInfo *SharedEdictChangeInfoInstance;
+	IServerPluginCallbacks *ServerPluginCallbacksInstance;
 };
 
 extern InterfaceContainer g_Interfaces;

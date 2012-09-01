@@ -15,4 +15,5 @@ InterfaceContainer::InterfaceContainer() {
 	GameConfigInstance = NULL;
 	BinToolsInstance = NULL;
 	SharedEdictChangeInfoInstance = NULL;
+	ServerPluginCallbacksInstance = NULL;
 }

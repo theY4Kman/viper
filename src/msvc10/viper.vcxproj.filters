@@ -37,6 +37,9 @@
     <Filter Include="UserMessages">
       <UniqueIdentifier>{07bef3f4-b424-4d79-ac3e-2b9cb3f73848}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Console">
+      <UniqueIdentifier>{ef660b08-be5b-423a-860e-00476061d7d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -196,6 +199,39 @@
     </ClCompile>
     <ClCompile Include="..\UserMessagesUserMessageListener.cpp">
       <Filter>UserMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleModule.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleCommandBaseAccessor.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleCommandHookInfo.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleCommandInfo.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleVariableInfo.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleVariableType.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleVariableDoesNotExistExceptionType.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ClientIsFakeExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleVariableChangedHookInfo.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleClientVariableQueryInfo.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleCommandDoesNotExistExceptionType.cpp">
+      <Filter>Console</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -379,6 +415,39 @@
     </ClInclude>
     <ClInclude Include="..\UserMessagesUserMessageListener.h">
       <Filter>UserMessages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleModule.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleCommandBaseAccessor.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleCommandHookInfo.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleCommandInfo.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleVariableInfo.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleVariableType.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleVariableDoesNotExistExceptionType.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientIsFakeExceptionType.h">
+      <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleVariableChangedHookInfo.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleClientVariableQueryInfo.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleCommandDoesNotExistExceptionType.h">
+      <Filter>Console</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,8 @@
 /**
+ * vim: set ts=4 :
  * =============================================================================
- * Viper Base Extension Code
- * Copyright (C) 2012 PimpinJuice
- * Copyright (C) 2007-2012 Zach "theY4Kman" Kanzler
- * Copyright (C) 2004-2007 AlliedModders LLC.
+ * SourceMod Base Extension Code
+ * Copyright (C) 2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
  * This program is free software; you can redistribute it and/or modify it under
@@ -17,6 +16,17 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * As a special exception, AlliedModders LLC gives you permission to link the
+ * code of this program (as well as its derivative works) to "Half-Life 2," the
+ * "Source Engine," the "SourcePawn JIT," and any Game MODs that run on software
+ * by the Valve Corporation.  You must obey the GNU General Public License in
+ * all respects for all other code used.  Additionally, AlliedModders LLC grants
+ * this exception to all derivative works.  AlliedModders LLC defines further
+ * exceptions, found in LICENSE.txt (as of this writing, version JULY-31-2007),
+ * or <http://www.sourcemod.net/license.php>.
+ *
+ * Version: $Id$
  */
 
 #ifndef _INCLUDE_SOURCEMOD_EXTENSION_BASESDK_H_
@@ -78,6 +88,15 @@
 #if defined SMEXT_ENABLE_USERMSGS
 #include <IUserMessages.h>
 #endif
+#if defined SMEXT_ENABLE_TRANSLATOR
+#include <ITranslator.h>
+#endif
+#if defined SMEXT_ENABLE_NINVOKE
+#include <INativeInvoker.h>
+#endif
+#if defined SMEXT_ENABLE_ROOTCONSOLEMENU
+#include <IRootConsoleMenu.h>
+#endif
 
 #include <IExtensionSys.h>
 
@@ -86,13 +105,14 @@
 #include <eiface.h>
 #endif
 
+using namespace SourceMod;
 using namespace SourcePawn;
 
 class SDKExtension : 
 #if defined SMEXT_CONF_METAMOD
 	public ISmmPlugin,
 #endif
-	public SourceMod::IExtensionInterface
+	public IExtensionInterface
 {
 public:
 	/** Constructor */
@@ -157,8 +177,7 @@ public:
 #endif
 
 public: //IExtensionInterface
-	virtual bool OnExtensionLoad(SourceMod::IExtension *me, SourceMod::IShareSys *sys,
-	                             char *error, size_t maxlength, bool late);
+	virtual bool OnExtensionLoad(IExtension *me, IShareSys *sys, char *error, size_t maxlength, bool late);
 	virtual void OnExtensionUnload();
 	virtual void OnExtensionsAllLoaded();
 
@@ -220,60 +239,66 @@ private:
 };
 
 extern SDKExtension *g_pExtensionIface;
-extern SourceMod::IExtension *myself;
+extern IExtension *myself;
 
-extern SourceMod::IShareSys *g_pShareSys;
-extern SourceMod::IShareSys *sharesys;				/* Note: Newer name */
-extern SourceMod::ISourceMod *g_pSM;
-extern SourceMod::ISourceMod *smutils;				/* Note: Newer name */
+extern IShareSys *g_pShareSys;
+extern IShareSys *sharesys;				/* Note: Newer name */
+extern ISourceMod *g_pSM;
+extern ISourceMod *smutils;				/* Note: Newer name */
 
 /* Optional interfaces are below */
 #if defined SMEXT_ENABLE_FORWARDSYS
-extern SourceMod::IForwardManager *g_pForwards;
-extern SourceMod::IForwardManager *forwards;		/* Note: Newer name */
+extern IForwardManager *g_pForwards;
+extern IForwardManager *forwards;		/* Note: Newer name */
 #endif //SMEXT_ENABLE_FORWARDSYS
 #if defined SMEXT_ENABLE_HANDLESYS
-extern SourceMod::IHandleSys *g_pHandleSys;
-extern SourceMod::IHandleSys *handlesys;			/* Note: Newer name */
+extern IHandleSys *g_pHandleSys;
+extern IHandleSys *handlesys;			/* Note: Newer name */
 #endif //SMEXT_ENABLE_HANDLESYS
 #if defined SMEXT_ENABLE_PLAYERHELPERS
-extern SourceMod::IPlayerManager *playerhelpers;
+extern IPlayerManager *playerhelpers;
 #endif //SMEXT_ENABLE_PLAYERHELPERS
 #if defined SMEXT_ENABLE_DBMANAGER
-extern SourceMod::IDBManager *dbi;
+extern IDBManager *dbi;
 #endif //SMEXT_ENABLE_DBMANAGER
 #if defined SMEXT_ENABLE_GAMECONF
-extern SourceMod::IGameConfigManager *gameconfs;
+extern IGameConfigManager *gameconfs;
 #endif //SMEXT_ENABLE_DBMANAGER
 #if defined SMEXT_ENABLE_MEMUTILS
-extern SourceMod::IMemoryUtils *memutils;
+extern IMemoryUtils *memutils;
 #endif
 #if defined SMEXT_ENABLE_GAMEHELPERS
-extern SourceMod::IGameHelpers *gamehelpers;
+extern IGameHelpers *gamehelpers;
 #endif
 #if defined SMEXT_ENABLE_TIMERSYS
-extern SourceMod::ITimerSystem *timersys;
+extern ITimerSystem *timersys;
 #endif
 #if defined SMEXT_ENABLE_ADTFACTORY
-extern SourceMod::IADTFactory *adtfactory;
+extern IADTFactory *adtfactory;
 #endif
 #if defined SMEXT_ENABLE_THREADER
-extern SourceMod::IThreader *threader;
+extern IThreader *threader;
 #endif
 #if defined SMEXT_ENABLE_LIBSYS
-extern SourceMod::ILibrarySys *libsys;
+extern ILibrarySys *libsys;
 #endif
 #if defined SMEXT_ENABLE_PLUGINSYS
 extern SourceMod::IPluginManager *plsys;
 #endif
 #if defined SMEXT_ENABLE_MENUS
-extern SourceMod::IMenuManager *menus;
+extern IMenuManager *menus;
 #endif
 #if defined SMEXT_ENABLE_ADMINSYS
-extern SourceMod::IAdminSystem *adminsys;
+extern IAdminSystem *adminsys;
 #endif
 #if defined SMEXT_ENABLE_USERMSGS
-extern SourceMod::IUserMessages *usermsgs;
+extern IUserMessages *usermsgs;
+#endif
+#if defined SMEXT_ENABLE_TRANSLATOR
+extern ITranslator *translator;
+#endif
+#if defined SMEXT_ENABLE_NINVOKE
+extern INativeInterface *ninvoke;
 #endif
 
 extern SourceMod::IExtensionManager *extsys;
@@ -288,7 +313,7 @@ extern IServerGameDLL *gamedll;
 #define SM_MKIFACE(name) SMINTERFACE_##name##_NAME, SMINTERFACE_##name##_VERSION
 /** Automates retrieving SourceMod interfaces */
 #define SM_GET_IFACE(prefix, addr) \
-	if (!g_pShareSys->RequestInterface(SM_MKIFACE(prefix), myself, (SourceMod::SMInterface **)&addr)) \
+	if (!g_pShareSys->RequestInterface(SM_MKIFACE(prefix), myself, (SMInterface **)&addr)) \
 	{ \
 		if (error != NULL && maxlength) \
 		{ \
@@ -302,7 +327,7 @@ extern IServerGameDLL *gamedll;
 	}
 /** Automates retrieving SourceMod interfaces when needed outside of SDK_OnLoad() */
 #define SM_GET_LATE_IFACE(prefix, addr) \
-	g_pShareSys->RequestInterface(SM_MKIFACE(prefix), myself, (SourceMod::SMInterface **)&addr)
+	g_pShareSys->RequestInterface(SM_MKIFACE(prefix), myself, (SMInterface **)&addr)
 /** Validates a SourceMod interface pointer */
 #define SM_CHECK_IFACE(prefix, addr) \
 	if (!addr) \

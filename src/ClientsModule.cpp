@@ -10,6 +10,7 @@
 #include "InvalidEdictExceptionType.h"
 #include "ClientNotInGameExceptionType.h"
 #include "ClientNotFakeExceptionType.h"
+#include "ClientIsFakeExceptionType.h"
 #include "InvalidUserIdExceptionType.h"
 #include "InvalidClientSerialExceptionType.h"
 #include "VectorType.h"
@@ -866,6 +867,7 @@ DEFINE_CUSTOM_EXCEPTION_INIT(ClientDataNotAvailableExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotConnectedExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotInGameExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotFakeExceptionType, clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientIsFakeExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidUserIdExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidClientSerialExceptionType, clients)
 
@@ -930,6 +932,10 @@ BOOST_PYTHON_MODULE(clients) {
 	DEFINE_CUSTOM_EXCEPTION(ClientNotFakeExceptionType, clients,
 		PyExc_Exception, "clients.ClientNotFakeException",
 		"ClientNotFakeException")
+
+	DEFINE_CUSTOM_EXCEPTION(ClientIsFakeExceptionType, clients,
+		PyExc_Exception, "clients.ClientIsFakeException",
+		"ClientIsFakeException")
 
 	DEFINE_CUSTOM_EXCEPTION(ClientNotInGameExceptionType, clients,
 		PyExc_Exception, "clients.ClientNotInGameException",

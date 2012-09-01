@@ -39,6 +39,7 @@
 #include "ClientsModule.h"
 #include "EventsModule.h"
 #include "UserMessagesModule.h"
+#include "ConsoleModule.h"
 #include "InterfaceContainer.h"
 
 namespace py = boost::python;
@@ -74,6 +75,7 @@ void ViperExtension::InitializePython() {
 	PyImport_AppendInittab("clients", initclients);
 	PyImport_AppendInittab("events", initevents);
 	PyImport_AppendInittab("usermessages", initusermessages);
+	PyImport_AppendInittab("console", initconsole);
 
 	Py_Initialize();
 
@@ -109,16 +111,18 @@ bool ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late) {
 void ViperExtension::SDK_OnUnload() {
 	Py_Finalize();
 
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
+
 	destroyentity();
 	destroyforwards();
 	destroyclients();
 	destroyevents();
 	destroyusermessages();
-
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
+	destroyconsole();
 }
 
 void ViperExtension::OnGameFrame(bool simulating) {
+	console__GameFrame(simulating);
 	forwards__GameFrame(simulating);
 	clients__GameFrame(simulating);
 }
@@ -134,6 +138,8 @@ void ViperExtension::SDK_OnAllLoaded() {
 	}
 
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
+
+	g_Interfaces.ServerPluginCallbacksInstance = g_SMAPI->GetVSPInfo(NULL);
 
 	try {
 		InitializePython();
@@ -166,8 +172,7 @@ bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen
 		IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
 
 	g_Interfaces.GlobalVarsInstance = ismm->GetCGlobals();
-	icvar = g_Interfaces.CvarInstance;
-
+	g_pCVar = icvar = g_Interfaces.CvarInstance;
 	
 	return true;
 }
