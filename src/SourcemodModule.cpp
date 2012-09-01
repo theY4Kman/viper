@@ -6,7 +6,7 @@
 
 namespace py = boost::python;
 
-void sourcemod_require_ext(std::string extensionName) {
+void sourcemod__require_ext(std::string extensionName) {
 	std::string fullExtensionName = extensionName + ".ext";
 
 	char error[256];
@@ -18,22 +18,28 @@ void sourcemod_require_ext(std::string extensionName) {
 	throw LoadExtensionException(fullExtensionName, error);
 }
 
-std::string sourcemod_get_game_path() {
-	return g_pSM->GetGamePath();
+std::string sourcemod__get_game_path(std::string path = std::string()) {
+	std::string fullPath(g_pSM->GetGamePath());
+
+	fullPath.append(path.c_str());
+
+	return fullPath;
 }
 
-std::string sourcemod_get_sourcemod_path(py::tuple argumentsTuple,
-	py::dict keywordsDict) {
-	return std::string("");
+std::string sourcemod__get_sourcemod_path(std::string path = std::string()) {
+	std::string fullPath(g_pSM->GetSourceModPath());
+
+	fullPath.append(path.c_str());
+
+	return fullPath;
 }
 
 DEFINE_CUSTOM_EXCEPTION_INIT(LoadExtensionException, sourcemod)
 
 BOOST_PYTHON_MODULE(sourcemod) {
-	py::def("require_ext", sourcemod_require_ext);
-	py::def("get_sourcemod_path", py::raw_function(sourcemod_get_sourcemod_path,
-		0));
-	py::def("get_game_path", sourcemod_get_game_path);
+	py::def("require_ext", sourcemod__require_ext);
+	py::def("get_sourcemod_path", sourcemod__get_sourcemod_path, (py::arg("path") = std::string()));
+	py::def("get_game_path", sourcemod__get_game_path, (py::arg("path") = std::string()));
 	
 	py::enum_<SourceMod::ResultType>("ResultType")
 		.value("Continue", SourceMod::Pl_Continue)
