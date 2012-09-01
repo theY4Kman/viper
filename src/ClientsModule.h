@@ -15,9 +15,12 @@ DEFINE_CUSTOM_EXCEPTION_DECL(ClientNotFakeExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_DECL(ClientIsFakeExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidUserIdExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidClientSerialExceptionType, clients)
+DEFINE_CUSTOM_EXCEPTION_DECL(ClientNotAuthorizedExceptionType, clients)
 
 extern void clients__GameFrame(bool simulating);
 
 extern std::map<int, std::string> clients__KickQueue;
+
+extern int clients__LifeStateOffset;
 
 #endif

@@ -13,12 +13,17 @@
 #include "ClientIsFakeExceptionType.h"
 #include "InvalidUserIdExceptionType.h"
 #include "InvalidClientSerialExceptionType.h"
+#include "ClientNotAuthorizedExceptionType.h"
 #include "VectorType.h"
 #include "inetchannelinfo.h"
+#include "server_class.h"
+#include "dt_common.h"
 
 namespace py = boost::python;
 
 std::map<int, std::string> clients__KickQueue;
+
+int clients__LifeStateOffset = -1;
 
 int clients__get_max_clients() {
 	return g_Interfaces.GlobalVarsInstance->maxClients;
@@ -51,6 +56,10 @@ std::string clients__get_client_name(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
 	const char *playerName = gamePlayer->GetName();
 
 	if(NULL == playerName) {
@@ -66,6 +75,10 @@ std::string clients__get_client_ip(int clientIndex, bool removePort = true) {
 	}
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
+
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
 
 	const char *ipAddress  = gamePlayer->GetIPAddress();
 
@@ -93,6 +106,14 @@ std::string clients__get_client_auth_string(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!gamePlayer->IsAuthorized()) {
+		throw ClientNotAuthorizedExceptionType(clientIndex);
+	}
+
 	const char *authString = gamePlayer->GetAuthString();
 
 	if(NULL == authString) {
@@ -109,11 +130,11 @@ int clients__get_client_user_id(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
-	int userId = gamePlayer->GetUserId();
-
-	if(userId <= 0) {
-		throw ClientDataNotAvailableExceptionType(clientIndex, "user_id"); 
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
 	}
+
+	int userId = gamePlayer->GetUserId();
 
 	return userId;
 }
@@ -135,6 +156,10 @@ bool clients__is_client_in_game(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
 	return gamePlayer->IsInGame();
 }
 
@@ -144,6 +169,10 @@ bool clients__is_client_in_kick_queue(int clientIndex) {
 	}
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
+
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
 
 	return gamePlayer->IsInKickQueue();
 }
@@ -155,6 +184,10 @@ bool clients__is_client_authorized(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
 	return gamePlayer->IsAuthorized();
 }
 
@@ -164,6 +197,10 @@ bool clients__is_client_fake(int clientIndex) {
 	}
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
+
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
 
 	return gamePlayer->IsFakeClient();
 }
@@ -175,6 +212,10 @@ bool clients__is_client_source_tv(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
 	return gamePlayer->IsSourceTV();
 }
 
@@ -184,6 +225,10 @@ bool clients__is_client_replay(int clientIndex) {
 	}
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
+
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
 
 	return gamePlayer->IsReplay();
 }
@@ -196,7 +241,11 @@ bool clients__is_client_observer(int clientIndex) {
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
 	if(!gamePlayer->IsConnected()) {
-		throw ClientDataNotAvailableExceptionType(clientIndex, "player_info"); 
+		throw ClientNotConnectedExceptionType(clientIndex); 
+	}
+
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
 	}
 	
 	IPlayerInfo *playerInfo = gamePlayer->GetPlayerInfo();
@@ -208,6 +257,34 @@ bool clients__is_client_observer(int clientIndex) {
 	return playerInfo->IsObserver();
 }
 
+bool clients__is_client_alive_(IGamePlayer *gamePlayer) {
+	edict_t *edict = gamePlayer->GetEdict();
+
+	if(edict == NULL || edict->IsFree()) {
+		return false;
+	}
+
+	int clientIndex = IndexOfEdict(edict);
+
+	CBaseEntity *baseEntity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(edict);
+
+	if(NULL == baseEntity) {
+		return false;
+	}
+
+	if(clients__LifeStateOffset == -1) {
+		SendProp *lifeState = gamehelpers->FindInSendTable("CBasePlayer", "m_lifeState");
+
+		if(NULL == lifeState) {
+			throw ClientDataNotAvailableExceptionType(clientIndex, "life_state");
+		}
+
+		clients__LifeStateOffset = lifeState->GetOffset();
+	}
+
+	return *((uint8_t *)baseEntity + clients__LifeStateOffset) == LIFE_ALIVE;
+}
+
 bool clients__is_client_alive(int clientIndex) {
 	if(clientIndex < 1 || clientIndex > g_Interfaces.GlobalVarsInstance->maxClients) {
 		throw ClientIndexOutOfRangeExceptionType(clientIndex, g_Interfaces.GlobalVarsInstance->maxClients);
@@ -215,9 +292,11 @@ bool clients__is_client_alive(int clientIndex) {
 
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
 
-	throw ClientDataNotAvailableExceptionType(clientIndex, "lifestate"); 
-	
-	return false;
+	if(!gamePlayer->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	return clients__is_client_alive_(gamePlayer);
 }
 
 std::string clients__get_client_info(int clientIndex, std::string key) {
@@ -249,6 +328,10 @@ int clients__get_client_team(int clientIndex) {
 
 	if(!gamePlayer->IsConnected()) {
 		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
 	}
 
 	IPlayerInfo *playerInfo = gamePlayer->GetPlayerInfo();
@@ -547,6 +630,14 @@ int clients__get_client_data_rate(int clientIndex) {
 		throw ClientNotConnectedExceptionType(clientIndex);
 	}
 
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
+	}
+
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
 
 	if(NULL == netChannelInfo) {
@@ -565,6 +656,14 @@ bool clients__is_client_timing_out(int clientIndex) {
 
 	if(!gamePlayer->IsConnected()) {
 		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
 	}
 
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
@@ -587,6 +686,14 @@ float clients__get_client_time_connected(int clientIndex) {
 		throw ClientNotConnectedExceptionType(clientIndex);
 	}
 
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
+	}
+
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
 
 	if(NULL == netChannelInfo) {
@@ -605,6 +712,14 @@ float clients__get_client_latency(int clientIndex, bool outgoing = false, bool i
 
 	if(!gamePlayer->IsConnected()) {
 		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
 	}
 
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
@@ -637,6 +752,14 @@ float clients__get_client_avg_latency(int clientIndex, bool outgoing = false, bo
 		throw ClientNotConnectedExceptionType(clientIndex);
 	}
 
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
+	}
+
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
 
 	if(NULL == netChannelInfo) {
@@ -665,6 +788,14 @@ float clients__get_client_avg_loss(int clientIndex, bool outgoing = false, bool 
 
 	if(!gamePlayer->IsConnected()) {
 		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
 	}
 
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
@@ -697,6 +828,14 @@ float clients__get_client_avg_choke(int clientIndex, bool outgoing = false, bool
 		throw ClientNotConnectedExceptionType(clientIndex);
 	}
 
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
+	}
+
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
 
 	if(NULL == netChannelInfo) {
@@ -727,6 +866,14 @@ float clients__get_client_avg_data(int clientIndex, bool outgoing = false, bool 
 		throw ClientNotConnectedExceptionType(clientIndex);
 	}
 
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
+	}
+
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
 
 	if(NULL == netChannelInfo) {
@@ -755,6 +902,14 @@ float clients__get_client_avg_packets(int clientIndex, bool outgoing = false, bo
 
 	if(!gamePlayer->IsConnected()) {
 		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!gamePlayer->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	if(gamePlayer->IsFakeClient()) {
+		throw ClientIsFakeExceptionType(clientIndex);
 	}
 
 	INetChannelInfo *netChannelInfo = engine->GetPlayerNetInfo(clientIndex);
@@ -791,6 +946,10 @@ void clients__kick_client(int clientIndex, std::string disconnectMessage = std::
 
 	if(!gamePlayer->IsConnected()) {
 		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(clients__is_client_in_kick_queue(clientIndex)) {
+		return;
 	}
 
 	clients__KickQueue[clientIndex] = disconnectMessage;
@@ -867,6 +1026,7 @@ DEFINE_CUSTOM_EXCEPTION_INIT(ClientDataNotAvailableExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotConnectedExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotInGameExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotFakeExceptionType, clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotAuthorizedExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientIsFakeExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidUserIdExceptionType, clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidClientSerialExceptionType, clients)
@@ -948,6 +1108,10 @@ BOOST_PYTHON_MODULE(clients) {
 	DEFINE_CUSTOM_EXCEPTION(InvalidClientSerialExceptionType, clients,
 		PyExc_Exception, "clients.InvalidClientSerialException",
 		"InvalidClientSerialException")
+
+	DEFINE_CUSTOM_EXCEPTION(ClientNotAuthorizedExceptionType, clients,
+		PyExc_Exception, "clients.ClientNotAuthorizedException",
+		"ClientNotAuthorizedException")
 }
 
 void destroyclients() {

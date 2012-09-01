@@ -233,6 +233,9 @@
     <ClCompile Include="..\ConsoleCommandDoesNotExistExceptionType.cpp">
       <Filter>Console</Filter>
     </ClCompile>
+    <ClCompile Include="..\ClientNotAuthorizedExceptionType.cpp">
+      <Filter>Clients</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -448,6 +451,9 @@
     </ClInclude>
     <ClInclude Include="..\ConsoleCommandDoesNotExistExceptionType.h">
       <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ClientNotAuthorizedExceptionType.h">
+      <Filter>Clients</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

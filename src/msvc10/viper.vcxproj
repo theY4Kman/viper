@@ -703,6 +703,7 @@
     <ClCompile Include="..\BfReadType.cpp" />
     <ClCompile Include="..\BfWriteType.cpp" />
     <ClCompile Include="..\ClientIsFakeExceptionType.cpp" />
+    <ClCompile Include="..\ClientNotAuthorizedExceptionType.cpp" />
     <ClCompile Include="..\ClientNotConnectedExceptionType.cpp" />
     <ClCompile Include="..\ClientDataNotAvailableExceptionType.cpp" />
     <ClCompile Include="..\ClientIndexOutOfRangeExceptionType.cpp" />
@@ -775,6 +776,7 @@
     <ClInclude Include="..\BfWriteType.h" />
     <ClInclude Include="..\BoostPythonSM.h" />
     <ClInclude Include="..\ClientIsFakeExceptionType.h" />
+    <ClInclude Include="..\ClientNotAuthorizedExceptionType.h" />
     <ClInclude Include="..\ClientNotConnectedExceptionType.h" />
     <ClInclude Include="..\ClientDataNotAvailableExceptionType.h" />
     <ClInclude Include="..\ClientIndexOutOfRangeExceptionType.h" />
