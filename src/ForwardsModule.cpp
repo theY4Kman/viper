@@ -127,7 +127,7 @@ bool forwards__ClientPreAdminCheckCallback(boost::python::object returnValue) {
 	return false;
 }
 
-BOOST_PYTHON_MODULE(forwards) {
+BOOST_PYTHON_MODULE(Forwards) {
 	forwards__GlobalForwards["game_frame"] = forwards__GameFrameForward = new ForwardType(&forwards__NoOperationCallback, "game_frame");
 	forwards__GlobalForwards["client_connect"] = forwards__ClientConnectForward = new ForwardType(&forwards__ClientConnectCallback, "client_connect");
 	forwards__GlobalForwards["client_connected"] = forwards__ClientConnectedForward = new ForwardType(&forwards__NoOperationCallback, "client_connected");
@@ -142,20 +142,20 @@ BOOST_PYTHON_MODULE(forwards) {
 	forwards__GlobalForwards["client_settings_changed"] = forwards__ClientSettingsChangedForward = new ForwardType(&forwards__NoOperationCallback, "client_settings_changed");
 
 	py::class_<ForwardType>("Forward", py::no_init)
-		.def("add_function", &ForwardType::AddFunction)
-		.def("fire", py::raw_function(&forwards__Forward_Fire, 1))
-		.def("get_function_count", &ForwardType::GetFunctionCount)
-		.def("remove_function", &ForwardType::RemoveFunction);
+		.def("AddFunction", &ForwardType::AddFunction)
+		.def("Fire", py::raw_function(&forwards__Forward_Fire, 1))
+		.def("GetFunctionCount", &ForwardType::GetFunctionCount)
+		.def("RemoveFunction", &ForwardType::RemoveFunction);
 
-	py::def("create", forwards__create);
-	py::def("register", forwards__register);
+	py::def("Create", forwards__create);
+	py::def("Register", forwards__register);
 
 	forwards_ClientListener = new ForwardsClientListener();
 
 	playerhelpers->AddClientListener(forwards_ClientListener);
 }
 
-void destroyforwards() {
+void destroyForwards() {
 	for(std::map<std::string, ForwardType*>::iterator it =
 		forwards__GlobalForwards.begin(); it !=
 		forwards__GlobalForwards.end(); it++) {

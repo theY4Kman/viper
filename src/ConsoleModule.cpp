@@ -564,56 +564,56 @@ void console__GameFrame(bool simulating) {
 	console__FakeClientCommandQueue.clear();
 }
 
-DEFINE_CUSTOM_EXCEPTION_INIT(ConsoleVariableDoesNotExistExceptionType, console)
-DEFINE_CUSTOM_EXCEPTION_INIT(ConsoleCommandDoesNotExistExceptionType, console)
+DEFINE_CUSTOM_EXCEPTION_INIT(ConsoleVariableDoesNotExistExceptionType, Console)
+DEFINE_CUSTOM_EXCEPTION_INIT(ConsoleCommandDoesNotExistExceptionType, Console)
 
-BOOST_PYTHON_MODULE(console) {
+BOOST_PYTHON_MODULE(Console) {
 	py::class_<ConsoleVariableType>("ConsoleVariable", py::no_init)
-		.def("get_bool", &ConsoleVariableType::GetBool)
-		.def("get_int", &ConsoleVariableType::GetInt)
-		.def("get_float", &ConsoleVariableType::GetFloat)
-		.def("get_string", &ConsoleVariableType::GetString)
-		.def("set_bool", &ConsoleVariableType::SetBool, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
-		.def("set_int", &ConsoleVariableType::SetInt, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
-		.def("set_float", &ConsoleVariableType::SetFloat, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
-		.def("set_string", &ConsoleVariableType::SetString, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
-		.def("reset", &ConsoleVariableType::Reset, (py::arg("replicate") = false, py::arg("notify") = false))
-		.def("get_default", &ConsoleVariableType::GetDefault)
-		.def("get_flags", &ConsoleVariableType::GetFlags)
-		.def("set_flags", &ConsoleVariableType::SetFlags, (py::arg("flags")))
-		.def("has_minimum", &ConsoleVariableType::HasMinimum)
-		.def("has_maximum", &ConsoleVariableType::HasMaximum)
-		.def("set_minimum", &ConsoleVariableType::SetMinimum, (py::arg("has_minimum"), py::arg("minimum") = 0.0f))
-		.def("set_maximum", &ConsoleVariableType::SetMaximum, (py::arg("has_maximum"), py::arg("maximum") = 0.0f))
-		.def("get_name", &ConsoleVariableType::GetName)
-		.def("send_value_to_client", &ConsoleVariableType::SendValueToClient, (py::arg("client_index"), py::arg("value")))
-		.def("hook_change", &ConsoleVariableType::HookChange, (py::arg("callback")))
-		.def("unhook_change", &ConsoleVariableType::UnhookChange, (py::arg("callback")));
+		.def("GetBool", &ConsoleVariableType::GetBool)
+		.def("GetInt", &ConsoleVariableType::GetInt)
+		.def("GetFloat", &ConsoleVariableType::GetFloat)
+		.def("GetString", &ConsoleVariableType::GetString)
+		.def("SetBool", &ConsoleVariableType::SetBool, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
+		.def("SetInt", &ConsoleVariableType::SetInt, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
+		.def("SetFloat", &ConsoleVariableType::SetFloat, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
+		.def("SetString", &ConsoleVariableType::SetString, (py::arg("value"), py::arg("replicate") = false, py::arg("notify") = false))
+		.def("Reset", &ConsoleVariableType::Reset, (py::arg("replicate") = false, py::arg("notify") = false))
+		.def("GetDefault", &ConsoleVariableType::GetDefault)
+		.def("GetFlags", &ConsoleVariableType::GetFlags)
+		.def("SetFlags", &ConsoleVariableType::SetFlags, (py::arg("flags")))
+		.def("HasMinimum", &ConsoleVariableType::HasMinimum)
+		.def("HasMaximum", &ConsoleVariableType::HasMaximum)
+		.def("SetMinimum", &ConsoleVariableType::SetMinimum, (py::arg("has_minimum"), py::arg("minimum") = 0.0f))
+		.def("SetMaximum", &ConsoleVariableType::SetMaximum, (py::arg("has_maximum"), py::arg("maximum") = 0.0f))
+		.def("GetName", &ConsoleVariableType::GetName)
+		.def("SendValueToClient", &ConsoleVariableType::SendValueToClient, (py::arg("client_index"), py::arg("value")))
+		.def("HookChange", &ConsoleVariableType::HookChange, (py::arg("callback")))
+		.def("UnhookChange", &ConsoleVariableType::UnhookChange, (py::arg("callback")));
 
-	py::def("server_command", &console__server_command, (py::arg("command")));
-	py::def("insert_server_command", &console__insert_server_command, (py::arg("command")));
-	py::def("server_execute", &console__server_execute);
-	py::def("client_command", &console__client_command, (py::arg("client_index"), py::arg("command")));
-	py::def("fake_client_command", &console__fake_client_command, (py::arg("client_index"), py::arg("command")));
-	py::def("fake_client_command_ex", &console__fake_client_command_ex, (py::arg("client_index"), py::arg("command")));
-	py::def("print_to_server", &console__print_to_server, (py::arg("text"), py::arg("append_newline") = true));
-	py::def("print_to_console", &console__print_to_console, (py::arg("client_index"), py::arg("text"), py::arg("append_newline") = true));
-	py::def("register_server_command", &console__register_server_command, (py::arg("command"), py::arg("callback"), py::arg("description") = std::string(), py::arg("flags") = 0));
-	py::def("register_console_command", &console__register_console_command, (py::arg("command"), py::arg("callback"), py::arg("description") = std::string(), py::arg("flags") = 0));
-	py::def("create_console_variable", &console__create_console_variable, (py::arg("name"), py::arg("default_value"), py::arg("description") = std::string(), py::arg("flags") = 0, py::arg("has_minimum") = false, py::arg("minimum") = 0.0f, py::arg("has_maximum") = false, py::arg("maximum") = 0.0f));
-	py::def("get_console_variable_by_name", &console__get_console_variable_by_name, (py::arg("name")));
-	py::def("console_variable_exists", &console__console_variable_exists, (py::arg("name")));
-	py::def("console_command_exists", &console__console_command_exists, (py::arg("name")));
-	py::def("query_client_console_variable", &console__query_client_console_variable, (py::arg("client_index"), py::arg("name"), py::arg("callback")));
-	py::def("get_command_flags", &console__get_command_flags, (py::arg("name")));
-	py::def("set_command_flags", &console__set_command_flags, (py::arg("name"), py::arg("flags")));
+	py::def("ServerCommand", &console__server_command, (py::arg("command")));
+	py::def("InsertServerCommand", &console__insert_server_command, (py::arg("command")));
+	py::def("ServerExecute", &console__server_execute);
+	py::def("ClientCommand", &console__client_command, (py::arg("client_index"), py::arg("command")));
+	py::def("FakeClientCommand", &console__fake_client_command, (py::arg("client_index"), py::arg("command")));
+	py::def("FakeClientCommandEx", &console__fake_client_command_ex, (py::arg("client_index"), py::arg("command")));
+	py::def("PrintToServer", &console__print_to_server, (py::arg("text"), py::arg("append_newline") = true));
+	py::def("PrintToConsole", &console__print_to_console, (py::arg("client_index"), py::arg("text"), py::arg("append_newline") = true));
+	py::def("RegisterServerCommand", &console__register_server_command, (py::arg("command"), py::arg("callback"), py::arg("description") = std::string(), py::arg("flags") = 0));
+	py::def("RegisterConsoleCommand", &console__register_console_command, (py::arg("command"), py::arg("callback"), py::arg("description") = std::string(), py::arg("flags") = 0));
+	py::def("CreateConsoleVariable", &console__create_console_variable, (py::arg("name"), py::arg("default_value"), py::arg("description") = std::string(), py::arg("flags") = 0, py::arg("has_minimum") = false, py::arg("minimum") = 0.0f, py::arg("has_maximum") = false, py::arg("maximum") = 0.0f));
+	py::def("GetConsoleVariableByName", &console__get_console_variable_by_name, (py::arg("name")));
+	py::def("ConsoleVariableExists", &console__console_variable_exists, (py::arg("name")));
+	py::def("ConsoleCommandExists", &console__console_command_exists, (py::arg("name")));
+	py::def("QueryClientConsoleVariable", &console__query_client_console_variable, (py::arg("client_index"), py::arg("name"), py::arg("callback")));
+	py::def("GetCommandFlags", &console__get_command_flags, (py::arg("name")));
+	py::def("SetCommandFlags", &console__set_command_flags, (py::arg("name"), py::arg("flags")));
 
-	DEFINE_CUSTOM_EXCEPTION(ConsoleVariableDoesNotExistExceptionType, console,
-		PyExc_Exception, "console.ConsoleVariableDoesNotExistException",
+	DEFINE_CUSTOM_EXCEPTION(ConsoleVariableDoesNotExistExceptionType, Console,
+		PyExc_Exception, "Console.ConsoleVariableDoesNotExistException",
 		"ConsoleVariableDoesNotExistException")
 
-	DEFINE_CUSTOM_EXCEPTION(ConsoleCommandDoesNotExistExceptionType, console,
-		PyExc_Exception, "console.ConsoleCommandDoesNotExistException",
+	DEFINE_CUSTOM_EXCEPTION(ConsoleCommandDoesNotExistExceptionType, Console,
+		PyExc_Exception, "Console.ConsoleCommandDoesNotExistException",
 		"ConsoleCommandDoesNotExistException")
 
 	#if SOURCE_ENGINE != SE_DARKMESSIAH
@@ -639,5 +639,5 @@ BOOST_PYTHON_MODULE(console) {
 	CONVAR_REGISTER(&console__CommandBaseAccessor);
 }
 
-void destroyconsole() {
+void destroyConsole() {
 }

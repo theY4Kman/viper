@@ -9,17 +9,16 @@
 #include "EventHookDoesNotExistExceptionType.h"
 #include "EventHook.h"
 
-extern "C" __declspec(dllexport) void initevents();
-void destroyevents();
+extern "C" __declspec(dllexport) void initEvents();
+void destroyEvents();
 
 extern std::map<std::string, std::vector<EventFieldType>> events__ModEvents;
 extern std::vector<EventHook> events__Hooks;
 extern std::map<IGameEvent*, IGameEvent*> events__EventCopies;
 extern std::vector<IGameEvent*> events__CanceledEvents;
 
-DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEventExceptionType, events)
-DEFINE_CUSTOM_EXCEPTION_DECL(EventNoLongerValidExceptionType, events)
-DEFINE_CUSTOM_EXCEPTION_DECL(EventHookDoesNotExistExceptionType, events)
-
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEventExceptionType, Events)
+DEFINE_CUSTOM_EXCEPTION_DECL(EventNoLongerValidExceptionType, Events)
+DEFINE_CUSTOM_EXCEPTION_DECL(EventHookDoesNotExistExceptionType, Events)
 
 #endif

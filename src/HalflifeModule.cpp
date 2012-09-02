@@ -103,26 +103,29 @@ bool halflife__is_sound_precached(std::string sound) {
 	return g_Interfaces.EngineSoundInstance->IsSoundPrecached(sound.c_str());
 }
 
-BOOST_PYTHON_MODULE(halflife) {
-	py::def("log_to_game", &halflife__log_to_game, (py::arg("text"), py::arg("append_newline") = true));
-	py::def("set_random_seed", &halflife__set_random_seed, (py::arg("seed")));
-	py::def("get_random_float", &halflife__get_random_float, (py::arg("minimum") = 0.0f, py::arg("maximum") = 1.0f));
-	py::def("get_random_int", &halflife__get_random_int, (py::arg("minimum"), py::arg("maximum")));
-	py::def("is_map_valid", &halflife__is_map_valid, (py::arg("map")));
-	py::def("is_dedicated_server", &halflife__is_dedicated_server);
-	py::def("get_engine_time", &halflife__get_engine_time);
-	py::def("get_game_time", &halflife__get_game_time);
-	py::def("get_game_tick_count", &halflife__get_game_tick_count);
-	py::def("get_game_description", &halflife__get_game_description, (py::arg("original") = false));
-	py::def("get_game_folder_name", &halflife__get_game_folder_name);
-	py::def("get_current_map", &halflife__get_current_map);
-	py::def("precache_model", &halflife__precache_model, (py::arg("model"), py::arg("preload") = false));
-	py::def("precache_sentence_file", &halflife__precache_sentence_file, (py::arg("file"), py::arg("preload") = false));
-	py::def("precache_decal", &halflife__precache_decal, (py::arg("decal"), py::arg("preload") = false));
-	py::def("precache_generic", &halflife__precache_generic, (py::arg("generic"), py::arg("preload") = false));
-	py::def("precache_sound", &halflife__precache_sound, (py::arg("sound"), py::arg("preload") = false));
-	py::def("is_model_precached", &halflife__is_model_precached, (py::arg("model")));
-	py::def("is_generic_precached", &halflife__is_generic_precached, (py::arg("generic")));
-	py::def("is_decal_precached", &halflife__is_decal_precached, (py::arg("decal")));
-	py::def("is_sound_precached", &halflife__is_sound_precached, (py::arg("sound")));
+BOOST_PYTHON_MODULE(Halflife) {
+	py::def("LogToGame", &halflife__log_to_game, (py::arg("text"), py::arg("append_newline") = true));
+	py::def("SetRandomSeed", &halflife__set_random_seed, (py::arg("seed")));
+	py::def("GetRandomFloat", &halflife__get_random_float, (py::arg("minimum") = 0.0f, py::arg("maximum") = 1.0f));
+	py::def("GetRandomInt", &halflife__get_random_int, (py::arg("minimum"), py::arg("maximum")));
+	py::def("IsMapValid", &halflife__is_map_valid, (py::arg("map")));
+	py::def("IsDedicatedServer", &halflife__is_dedicated_server);
+	py::def("GetEngineTime", &halflife__get_engine_time);
+	py::def("GetGameTime", &halflife__get_game_time);
+	py::def("GetGameTickCount", &halflife__get_game_tick_count);
+	py::def("GetGameDescription", &halflife__get_game_description, (py::arg("original") = false));
+	py::def("GetGameFolderName", &halflife__get_game_folder_name);
+	py::def("GetCurrentMap", &halflife__get_current_map);
+	py::def("PrecacheModel", &halflife__precache_model, (py::arg("model"), py::arg("preload") = false));
+	py::def("PrecacheSentenceFile", &halflife__precache_sentence_file, (py::arg("file"), py::arg("preload") = false));
+	py::def("PrecacheDecal", &halflife__precache_decal, (py::arg("decal"), py::arg("preload") = false));
+	py::def("PrecacheGeneric", &halflife__precache_generic, (py::arg("generic"), py::arg("preload") = false));
+	py::def("PrecacheSound", &halflife__precache_sound, (py::arg("sound"), py::arg("preload") = false));
+	py::def("IsModelPrecached", &halflife__is_model_precached, (py::arg("model")));
+	py::def("IsGenericPrecached", &halflife__is_generic_precached, (py::arg("generic")));
+	py::def("IsDecalPrecached", &halflife__is_decal_precached, (py::arg("decal")));
+	py::def("IsSoundPrecached", &halflife__is_sound_precached, (py::arg("sound")));
+}
+
+void destroyHalflife() {
 }

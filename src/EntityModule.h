@@ -3,15 +3,15 @@
 
 #include "Macros.h"
 
-extern "C" __declspec(dllexport) void initentity();
-extern void destroyentity();
+extern "C" __declspec(dllexport) void initEntity();
+extern void destroyEntity();
 
-DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEdictExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEntityExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_DECL(EntityNotNetworkableExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_DECL(InvalidSendPropertyExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_DECL(InvalidDataMapExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_DECL(InvalidDataMapPropertyExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_DECL(EntityOffsetOutOfRangeExceptionType, entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEdictExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEntityExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(EntityNotNetworkableExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidSendPropertyExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidDataMapExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidDataMapPropertyExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_DECL(EntityOffsetOutOfRangeExceptionType, Entity)
 
 #endif

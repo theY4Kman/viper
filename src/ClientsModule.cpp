@@ -1021,98 +1021,98 @@ void clients__GameFrame(bool simulating) {
 	clients__KickQueue.clear();
 }
 
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientIndexOutOfRangeExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientDataNotAvailableExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotConnectedExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotInGameExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotFakeExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotAuthorizedExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(ClientIsFakeExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidUserIdExceptionType, clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidClientSerialExceptionType, clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientIndexOutOfRangeExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientDataNotAvailableExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotConnectedExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotInGameExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotFakeExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotAuthorizedExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(ClientIsFakeExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidUserIdExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidClientSerialExceptionType, Clients)
 
-BOOST_PYTHON_MODULE(clients) {
-	py::def("get_max_clients", &clients__get_max_clients);
-	py::def("get_client_count", &clients__get_client_count, (py::arg("in_game_only") = true));
-	py::def("get_client_name", &clients__get_client_name, (py::arg("client_index")));
-	py::def("get_client_ip", &clients__get_client_ip, (py::arg("client_index"), py::arg("remove_port") = true));
-	py::def("get_client_auth_string", &clients__get_client_auth_string, (py::arg("client_index")));
-	py::def("get_client_user_id", &clients__get_client_user_id, (py::arg("client_index")));
-	py::def("is_client_connected", &clients__is_client_connected, (py::arg("client_index")));
-	py::def("is_client_in_game", &clients__is_client_in_game, (py::arg("client_index")));
-	py::def("is_client_in_kick_queue", &clients__is_client_in_kick_queue, (py::arg("client_index")));
-	py::def("is_client_authorized", &clients__is_client_authorized, (py::arg("client_index")));
-	py::def("is_client_fake", &clients__is_client_fake, (py::arg("client_index")));
-	py::def("is_client_source_tv", &clients__is_client_source_tv, (py::arg("client_index")));
-	py::def("is_client_replay", &clients__is_client_replay, (py::arg("client_index")));
-	py::def("is_client_observer", &clients__is_client_observer, (py::arg("client_index")));
-	py::def("is_client_alive", &clients__is_client_alive, (py::arg("client_index")));
-	py::def("get_client_info", &clients__get_client_info, (py::arg("client_index"), py::arg("key")));
-	py::def("get_client_team", &clients__get_client_team, (py::arg("client_index")));
-	py::def("create_fake_client", &clients__create_fake_client, (py::arg("name")));
-	py::def("set_fake_client_cvar", &clients__set_fake_client_cvar, (py::arg("client_index"), py::arg("cvar_name"), py::arg("new_value")));
-	py::def("get_client_health", &clients__get_client_health, (py::arg("client_index")));
-	py::def("get_client_model", &clients__get_client_model, (py::arg("client_index")));
-	py::def("get_client_weapon", &clients__get_client_weapon, (py::arg("client_index")));
-	py::def("get_client_maxs", &clients__get_client_maxs, (py::arg("client_index")));
-	py::def("get_client_mins", &clients__get_client_mins, (py::arg("client_index")));
-	py::def("get_client_abs_angles", &clients__get_client_abs_angles, (py::arg("client_index")));
-	py::def("get_client_abs_origin", &clients__get_client_abs_origin, (py::arg("client_index")));
-	py::def("get_client_armor", &clients__get_client_armor, (py::arg("client_index")));
-	py::def("get_client_deaths", &clients__get_client_deaths, (py::arg("client_index")));
-	py::def("get_client_frags", &clients__get_client_frags, (py::arg("client_index")));
-	py::def("get_client_data_rate", &clients__get_client_data_rate, (py::arg("client_index")));
-	py::def("is_client_timing_out", &clients__is_client_timing_out, (py::arg("client_index")));
-	py::def("get_client_time_connected", &clients__get_client_time_connected, (py::arg("client_index")));
-	py::def("get_client_latency", &clients__get_client_latency, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
-	py::def("get_client_avg_latency", &clients__get_client_avg_latency, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
-	py::def("get_client_avg_loss", &clients__get_client_avg_loss, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
-	py::def("get_client_avg_choke", &clients__get_client_avg_choke, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
-	py::def("get_client_avg_data", &clients__get_client_avg_data, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
-	py::def("get_client_avg_packets", &clients__get_client_avg_packets, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
-	py::def("get_client_index_by_user_id", &clients__get_client_index_by_user_id, (py::arg("user_id")));
-	py::def("kick_client", &clients__kick_client, (py::arg("client_index"), py::arg("disconnect_reason") = std::string()));
-	py::def("kick_client_ex", &clients__kick_client_ex, (py::arg("client_index"), py::arg("disconnect_reason") = std::string()));
-	py::def("change_client_team", &clients__change_client_team, (py::arg("client_index"), py::arg("team_index")));
-	py::def("get_client_serial", &clients__get_client_serial, (py::arg("client_index")));
-	py::def("get_client_index_from_serial", &clients__get_client_index_from_serial, (py::arg("serial")));
+BOOST_PYTHON_MODULE(Clients) {
+	py::def("GetMaxClients", &clients__get_max_clients);
+	py::def("GetClientCount", &clients__get_client_count, (py::arg("in_game_only") = true));
+	py::def("GetClientName", &clients__get_client_name, (py::arg("client_index")));
+	py::def("GetClientIP", &clients__get_client_ip, (py::arg("client_index"), py::arg("remove_port") = true));
+	py::def("GetClientAuthString", &clients__get_client_auth_string, (py::arg("client_index")));
+	py::def("GetClientUserID", &clients__get_client_user_id, (py::arg("client_index")));
+	py::def("IsClientConnected", &clients__is_client_connected, (py::arg("client_index")));
+	py::def("IsClientInGame", &clients__is_client_in_game, (py::arg("client_index")));
+	py::def("IsClientInKickQueue", &clients__is_client_in_kick_queue, (py::arg("client_index")));
+	py::def("IsClientAuthorized", &clients__is_client_authorized, (py::arg("client_index")));
+	py::def("IsClientFake", &clients__is_client_fake, (py::arg("client_index")));
+	py::def("IsClientSourceTV", &clients__is_client_source_tv, (py::arg("client_index")));
+	py::def("IsClientReplay", &clients__is_client_replay, (py::arg("client_index")));
+	py::def("IsClientObserver", &clients__is_client_observer, (py::arg("client_index")));
+	py::def("IsClientAlive", &clients__is_client_alive, (py::arg("client_index")));
+	py::def("GetClientInfo", &clients__get_client_info, (py::arg("client_index"), py::arg("key")));
+	py::def("GetClientTeam", &clients__get_client_team, (py::arg("client_index")));
+	py::def("CreateFakeClient", &clients__create_fake_client, (py::arg("name")));
+	py::def("SetFakeClientCvar", &clients__set_fake_client_cvar, (py::arg("client_index"), py::arg("cvar_name"), py::arg("new_value")));
+	py::def("GetClientHealth", &clients__get_client_health, (py::arg("client_index")));
+	py::def("GetClientModel", &clients__get_client_model, (py::arg("client_index")));
+	py::def("GetClientWeapon", &clients__get_client_weapon, (py::arg("client_index")));
+	py::def("GetClientMaxs", &clients__get_client_maxs, (py::arg("client_index")));
+	py::def("GetClientMins", &clients__get_client_mins, (py::arg("client_index")));
+	py::def("GetClientAbsAngles", &clients__get_client_abs_angles, (py::arg("client_index")));
+	py::def("GetClientAbsOrigin", &clients__get_client_abs_origin, (py::arg("client_index")));
+	py::def("GetClientArmor", &clients__get_client_armor, (py::arg("client_index")));
+	py::def("GetClientDeaths", &clients__get_client_deaths, (py::arg("client_index")));
+	py::def("GetClientFrags", &clients__get_client_frags, (py::arg("client_index")));
+	py::def("GetClientDataRate", &clients__get_client_data_rate, (py::arg("client_index")));
+	py::def("IsClientTimingOut", &clients__is_client_timing_out, (py::arg("client_index")));
+	py::def("GetClientTimeConnected", &clients__get_client_time_connected, (py::arg("client_index")));
+	py::def("GetClientLatency", &clients__get_client_latency, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
+	py::def("GetClientAvgLatency", &clients__get_client_avg_latency, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
+	py::def("GetClientAvgLoss", &clients__get_client_avg_loss, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
+	py::def("GetClientAvgChoke", &clients__get_client_avg_choke, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
+	py::def("GetClientAvgData", &clients__get_client_avg_data, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
+	py::def("GetClientAvgPackets", &clients__get_client_avg_packets, (py::arg("client_index"), py::arg("outgoing") = false, py::arg("incoming") = false));
+	py::def("GetClientIndexByUserID", &clients__get_client_index_by_user_id, (py::arg("user_id")));
+	py::def("KickClient", &clients__kick_client, (py::arg("client_index"), py::arg("disconnect_reason") = std::string()));
+	py::def("KickClientEx", &clients__kick_client_ex, (py::arg("client_index"), py::arg("disconnect_reason") = std::string()));
+	py::def("ChangeClientTeam", &clients__change_client_team, (py::arg("client_index"), py::arg("team_index")));
+	py::def("GetClientSerial", &clients__get_client_serial, (py::arg("client_index")));
+	py::def("GetClientIndexFromSerial", &clients__get_client_index_from_serial, (py::arg("serial")));
 
-	DEFINE_CUSTOM_EXCEPTION(ClientIndexOutOfRangeExceptionType, clients,
-		PyExc_Exception, "clients.ClientIndexOutOfRangeException",
+	DEFINE_CUSTOM_EXCEPTION(ClientIndexOutOfRangeExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientIndexOutOfRangeException",
 		"ClientIndexOutOfRangeException")
 
-	DEFINE_CUSTOM_EXCEPTION(ClientDataNotAvailableExceptionType, clients,
-		PyExc_Exception, "clients.ClientDataNotAvailableException",
+	DEFINE_CUSTOM_EXCEPTION(ClientDataNotAvailableExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientDataNotAvailableException",
 		"ClientDataNotAvailableException")
 
-	DEFINE_CUSTOM_EXCEPTION(ClientNotConnectedExceptionType, clients,
-		PyExc_Exception, "clients.ClientNotConnectedException",
+	DEFINE_CUSTOM_EXCEPTION(ClientNotConnectedExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientNotConnectedException",
 		"ClientNotConnectedException")
 
-	DEFINE_CUSTOM_EXCEPTION(ClientNotFakeExceptionType, clients,
-		PyExc_Exception, "clients.ClientNotFakeException",
+	DEFINE_CUSTOM_EXCEPTION(ClientNotFakeExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientNotFakeException",
 		"ClientNotFakeException")
 
-	DEFINE_CUSTOM_EXCEPTION(ClientIsFakeExceptionType, clients,
-		PyExc_Exception, "clients.ClientIsFakeException",
+	DEFINE_CUSTOM_EXCEPTION(ClientIsFakeExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientIsFakeException",
 		"ClientIsFakeException")
 
-	DEFINE_CUSTOM_EXCEPTION(ClientNotInGameExceptionType, clients,
-		PyExc_Exception, "clients.ClientNotInGameException",
+	DEFINE_CUSTOM_EXCEPTION(ClientNotInGameExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientNotInGameException",
 		"ClientNotInGameException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidUserIdExceptionType, clients,
-		PyExc_Exception, "clients.InvalidUserIdException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidUserIdExceptionType, Clients,
+		PyExc_Exception, "Clients.InvalidUserIdException",
 		"InvalidUserIdException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidClientSerialExceptionType, clients,
-		PyExc_Exception, "clients.InvalidClientSerialException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidClientSerialExceptionType, Clients,
+		PyExc_Exception, "Clients.InvalidClientSerialException",
 		"InvalidClientSerialException")
 
-	DEFINE_CUSTOM_EXCEPTION(ClientNotAuthorizedExceptionType, clients,
-		PyExc_Exception, "clients.ClientNotAuthorizedException",
+	DEFINE_CUSTOM_EXCEPTION(ClientNotAuthorizedExceptionType, Clients,
+		PyExc_Exception, "Clients.ClientNotAuthorizedException",
 		"ClientNotAuthorizedException")
 }
 
-void destroyclients() {
+void destroyClients() {
 }

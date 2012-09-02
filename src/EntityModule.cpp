@@ -818,13 +818,13 @@ std::string entity__set_entity_string(int entityIndex, int offset, std::string n
 	return oldValue;
 }
 
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidEdictExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidEntityExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_INIT(EntityNotNetworkableExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidSendPropertyExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidDataMapExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidDataMapPropertyExceptionType, entity)
-DEFINE_CUSTOM_EXCEPTION_INIT(EntityOffsetOutOfRangeExceptionType, entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidEdictExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidEntityExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(EntityNotNetworkableExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidSendPropertyExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidDataMapExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidDataMapPropertyExceptionType, Entity)
+DEFINE_CUSTOM_EXCEPTION_INIT(EntityOffsetOutOfRangeExceptionType, Entity)
 
 #if SOURCE_ENGINE != SE_DARKMESSIAH
 IChangeInfoAccessor *CBaseEdict::GetChangeAccessor()
@@ -833,7 +833,7 @@ IChangeInfoAccessor *CBaseEdict::GetChangeAccessor()
 }
 #endif
 
-BOOST_PYTHON_MODULE(entity) {
+BOOST_PYTHON_MODULE(Entity) {
 	py::enum_<EntityPropertyFieldTypes>("EntityPropertyFieldType")
 		.value("Unsupported", PropField_Unsupported)
 		.value("Integer", PropField_Integer)
@@ -844,80 +844,80 @@ BOOST_PYTHON_MODULE(entity) {
 		.value("String_T", PropField_String_T);
 
 	py::class_<EntitySendPropertyInfoType>("EntitySendPropertyInfo", py::no_init)
-		.def_readonly("property_field_type", &EntitySendPropertyInfoType::PropertyFieldType)
-		.def_readonly("num_bits", &EntitySendPropertyInfoType::NumBits)
-		.def_readonly("local_offset", &EntitySendPropertyInfoType::LocalOffset)
-		.def_readonly("absolute_offset", &EntitySendPropertyInfoType::AbsoluteOffset);
+		.def_readonly("PropertyFieldType", &EntitySendPropertyInfoType::PropertyFieldType)
+		.def_readonly("NumBits", &EntitySendPropertyInfoType::NumBits)
+		.def_readonly("LocalOffset", &EntitySendPropertyInfoType::LocalOffset)
+		.def_readonly("AbsoluteOffset", &EntitySendPropertyInfoType::AbsoluteOffset);
 
 	py::class_<EntityDataMapInfoType>("EntityDataMapInfo", py::no_init)
-		.def_readonly("property_field_type", &EntityDataMapInfoType::PropertyFieldType)
-		.def_readonly("num_bits", &EntityDataMapInfoType::NumBits)
-		.def_readonly("offset", &EntityDataMapInfoType::Offset);
+		.def_readonly("PropertyFieldType", &EntityDataMapInfoType::PropertyFieldType)
+		.def_readonly("NumBits", &EntityDataMapInfoType::NumBits)
+		.def_readonly("Offset", &EntityDataMapInfoType::Offset);
 
-	py::def("get_max_entities", &entity__get_max_entities);
-	py::def("get_entity_count", &entity__get_entity_count);
-	py::def("is_valid_entity", &entity__is_valid_entity, (py::arg("entity_index")));
-	py::def("is_valid_edict", &entity__is_valid_edict, (py::arg("edict_index")));
-	py::def("is_entity_networkable", &entity__is_entity_networkable, (py::arg("entity_index")));
-	py::def("create_edict", &entity__create_edict);
-	py::def("remove_edict", &entity__remove_edict, (py::arg("edict_index")));
-	py::def("get_edict_flags", &entity__get_edict_flags, (py::arg("edict_index")));
-	py::def("set_edict_flags", &entity__set_edict_flags, (py::arg("edict_index"), py::arg("edict_flags")));
-	py::def("get_edict_class_name", &entity__get_edict_class_name, (py::arg("edict_index")));
-	py::def("get_entity_net_class", &entity__get_entity_net_class, (py::arg("entity_index")));
-	py::def("change_edict_state", &entity__change_edict_state, (py::arg("edict_index"), py::arg("offset") = 0));
-	py::def("find_send_property_offset", &entity__find_send_property_offset, (py::arg("class_name"), py::arg("property_name")));
-	py::def("find_send_property_info", &entity__find_send_property_info, (py::arg("class_name"), py::arg("property_name")));
-	py::def("find_data_map_info", &entity__find_data_map_info, (py::arg("entity_index"), py::arg("property_name")));
-	py::def("get_entity_int", &entity__get_entity_int, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_unsigned_int", &entity__get_entity_unsigned_int, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_short", &entity__get_entity_short, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_unsigned_short", &entity__get_entity_unsigned_short, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_char", &entity__get_entity_char, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_unsigned_char", &entity__get_entity_unsigned_char, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_float", &entity__get_entity_float, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_entity", &entity__get_entity_entity, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_vector", &entity__get_entity_vector, (py::arg("entity_index"), py::arg("offset")));
-	py::def("get_entity_string", &entity__get_entity_string, (py::arg("entity_index"), py::arg("offset")));
-	py::def("set_entity_int", &entity__set_entity_int, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_unsigned_int", &entity__set_entity_unsigned_int, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_short", &entity__set_entity_short, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_unsigned_short", &entity__set_entity_unsigned_short, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_char", &entity__set_entity_char, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_unsigned_char", &entity__set_entity_unsigned_char, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_float", &entity__set_entity_float, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_entity", &entity__set_entity_entity, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_vector", &entity__set_entity_vector, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
-	py::def("set_entity_string", &entity__set_entity_string, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("max_length"), py::arg("change_state") = false));
+	py::def("GetMaxEntities", &entity__get_max_entities);
+	py::def("GetEntityCount", &entity__get_entity_count);
+	py::def("IsValidEntity", &entity__is_valid_entity, (py::arg("entity_index")));
+	py::def("IsValidEdict", &entity__is_valid_edict, (py::arg("edict_index")));
+	py::def("IsEntityNetworkable", &entity__is_entity_networkable, (py::arg("entity_index")));
+	py::def("CreateEdict", &entity__create_edict);
+	py::def("RemoveEdict", &entity__remove_edict, (py::arg("edict_index")));
+	py::def("GetEdictFlags", &entity__get_edict_flags, (py::arg("edict_index")));
+	py::def("SetEdictFlags", &entity__set_edict_flags, (py::arg("edict_index"), py::arg("edict_flags")));
+	py::def("GetEdictClassName", &entity__get_edict_class_name, (py::arg("edict_index")));
+	py::def("GetEntityNetClass", &entity__get_entity_net_class, (py::arg("entity_index")));
+	py::def("ChangeEdictState", &entity__change_edict_state, (py::arg("edict_index"), py::arg("offset") = 0));
+	py::def("FindSendPropertyOffset", &entity__find_send_property_offset, (py::arg("class_name"), py::arg("property_name")));
+	py::def("FindSendPropertyInfo", &entity__find_send_property_info, (py::arg("class_name"), py::arg("property_name")));
+	py::def("FindDataMapInfo", &entity__find_data_map_info, (py::arg("entity_index"), py::arg("property_name")));
+	py::def("GetEntityInt", &entity__get_entity_int, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityUnsignedInt", &entity__get_entity_unsigned_int, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityShort", &entity__get_entity_short, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityUnsignedShort", &entity__get_entity_unsigned_short, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityChar", &entity__get_entity_char, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityUnsignedChar", &entity__get_entity_unsigned_char, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityFloat", &entity__get_entity_float, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityEntity", &entity__get_entity_entity, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityVector", &entity__get_entity_vector, (py::arg("entity_index"), py::arg("offset")));
+	py::def("GetEntityString", &entity__get_entity_string, (py::arg("entity_index"), py::arg("offset")));
+	py::def("SetEntityInt", &entity__set_entity_int, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityUnsignedInt", &entity__set_entity_unsigned_int, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityShort", &entity__set_entity_short, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityUnsignedShort", &entity__set_entity_unsigned_short, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityChar", &entity__set_entity_char, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityUnsignedChar", &entity__set_entity_unsigned_char, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityFloat", &entity__set_entity_float, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityEntity", &entity__set_entity_entity, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityVector", &entity__set_entity_vector, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetEntityString", &entity__set_entity_string, (py::arg("entity_index"), py::arg("offset"), py::arg("new_value"), py::arg("max_length"), py::arg("change_state") = false));
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidEdictExceptionType, entity,
-		PyExc_Exception, "entity.InvalidEdictException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidEdictExceptionType, Entity,
+		PyExc_Exception, "Entity.InvalidEdictException",
 		"InvalidEdictException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidEntityExceptionType, entity,
-		PyExc_Exception, "entity.InvalidEntityException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidEntityExceptionType, Entity,
+		PyExc_Exception, "Entity.InvalidEntityException",
 		"InvalidEntityException")
 
-	DEFINE_CUSTOM_EXCEPTION(EntityNotNetworkableExceptionType, entity,
-		PyExc_Exception, "entity.EntityNotNetworkableException",
+	DEFINE_CUSTOM_EXCEPTION(EntityNotNetworkableExceptionType, Entity,
+		PyExc_Exception, "Entity.EntityNotNetworkableException",
 		"EntityNotNetworkableException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidSendPropertyExceptionType, entity,
-		PyExc_Exception, "entity.InvalidSendPropertyException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidSendPropertyExceptionType, Entity,
+		PyExc_Exception, "Entity.InvalidSendPropertyException",
 		"InvalidSendPropertyException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidDataMapExceptionType, entity,
-		PyExc_Exception, "entity.InvalidDataMapException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidDataMapExceptionType, Entity,
+		PyExc_Exception, "Entity.InvalidDataMapException",
 		"InvalidDataMapException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidDataMapPropertyExceptionType, entity,
-		PyExc_Exception, "entity.InvalidDataMapPropertyException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidDataMapPropertyExceptionType, Entity,
+		PyExc_Exception, "Entity.InvalidDataMapPropertyException",
 		"InvalidDataMapPropertyException")
 
-	DEFINE_CUSTOM_EXCEPTION(EntityOffsetOutOfRangeExceptionType, entity,
-		PyExc_Exception, "entity.EntityOffsetOutOfRangeException",
+	DEFINE_CUSTOM_EXCEPTION(EntityOffsetOutOfRangeExceptionType, Entity,
+		PyExc_Exception, "Entity.EntityOffsetOutOfRangeException",
 		"EntityOffsetOutOfRangeException")
 }
 
-void destroyentity() {
+void destroyEntity() {
 }

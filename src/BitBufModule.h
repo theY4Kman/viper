@@ -3,6 +3,7 @@
 
 #include "Macros.h"
 
-extern "C" __declspec(dllexport) void initbitbuf();
+extern "C" __declspec(dllexport) void initBitBuf();
+extern void destroyBitBuf();
 
 #endif

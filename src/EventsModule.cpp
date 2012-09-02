@@ -230,47 +230,46 @@ bool events__OnFireEventPost(IGameEvent *gameEvent, bool dontBroadcast) {
 	return true;
 }
 
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidEventExceptionType, events)
-DEFINE_CUSTOM_EXCEPTION_INIT(EventNoLongerValidExceptionType, events)
-DEFINE_CUSTOM_EXCEPTION_INIT(EventHookDoesNotExistExceptionType, events)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidEventExceptionType, Events)
+DEFINE_CUSTOM_EXCEPTION_INIT(EventNoLongerValidExceptionType, Events)
+DEFINE_CUSTOM_EXCEPTION_INIT(EventHookDoesNotExistExceptionType, Events)
 
-
-BOOST_PYTHON_MODULE(events) {
+BOOST_PYTHON_MODULE(Events) {
 	py::enum_<EventHookModes>("EventHookMode")
         .value("Pre", EventHookMode_Pre)
         .value("Post", EventHookMode_Post);
 
 	py::class_<EventType>("Event", py::no_init)
-		.def("cancel", &EventType::Cancel)
-		.def("fire", &EventType::Fire, (py::arg("dont_broadcast") = false))
-		.def("get_fields", &EventType::GetFields)
-		.def("is_empty", &EventType::IsEmpty)
-		.def("get_name", &EventType::GetName)
-		.def("is_reliable", &EventType::IsReliable)
-		.def("is_local", &EventType::IsLocal)
-		.def("get_bool", &EventType::GetBool, (py::arg("field"), py::arg("default_value") = false))
-		.def("get_int", &EventType::GetInt, (py::arg("field"), py::arg("default_value") = 0))
-		.def("get_float", &EventType::GetFloat, (py::arg("field"), py::arg("default_value") = 0.0f))
-		.def("get_string", &EventType::GetString, (py::arg("field"), py::arg("default_value") = std::string()))
-		.def("set_bool", &EventType::SetBool)
-		.def("set_int", &EventType::SetInt)
-		.def("set_float", &EventType::SetFloat)
-		.def("set_string", &EventType::SetString);
+		.def("Cancel", &EventType::Cancel)
+		.def("Fire", &EventType::Fire, (py::arg("dont_broadcast") = false))
+		.def("GetFields", &EventType::GetFields)
+		.def("IsEmpty", &EventType::IsEmpty)
+		.def("GetName", &EventType::GetName)
+		.def("IsReliable", &EventType::IsReliable)
+		.def("IsLocal", &EventType::IsLocal)
+		.def("GetBool", &EventType::GetBool, (py::arg("field"), py::arg("default_value") = false))
+		.def("GetInt", &EventType::GetInt, (py::arg("field"), py::arg("default_value") = 0))
+		.def("GetFloat", &EventType::GetFloat, (py::arg("field"), py::arg("default_value") = 0.0f))
+		.def("GetString", &EventType::GetString, (py::arg("field"), py::arg("default_value") = std::string()))
+		.def("SetBool", &EventType::SetBool)
+		.def("SetInt", &EventType::SetInt)
+		.def("SetFloat", &EventType::SetFloat)
+		.def("SetString", &EventType::SetString);
 	
-	py::def("create", events__create);
-	py::def("hook", events__hook, (py::arg("event"), py::arg("callback"), py::arg("mode") = EventHookMode_Post));
-	py::def("unhook", events__unhook, (py::arg("event"), py::arg("callback"), py::arg("mode") = EventHookMode_Post));
+	py::def("Create", events__create);
+	py::def("Hook", events__hook, (py::arg("event"), py::arg("callback"), py::arg("mode") = EventHookMode_Post));
+	py::def("Unhook", events__unhook, (py::arg("event"), py::arg("callback"), py::arg("mode") = EventHookMode_Post));
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidEventExceptionType, events,
-		PyExc_Exception, "events.InvalidEventException",
+	DEFINE_CUSTOM_EXCEPTION(InvalidEventExceptionType, Events,
+		PyExc_Exception, "Events.InvalidEventException",
 		"InvalidEventException")
 
-	DEFINE_CUSTOM_EXCEPTION(EventNoLongerValidExceptionType, events,
-		PyExc_Exception, "events.EventNoLongerValidException",
+	DEFINE_CUSTOM_EXCEPTION(EventNoLongerValidExceptionType, Events,
+		PyExc_Exception, "Events.EventNoLongerValidException",
 		"EventNoLongerValidException")
 
-	DEFINE_CUSTOM_EXCEPTION(EventHookDoesNotExistExceptionType, events,
-		PyExc_Exception, "events.EventHookDoesNotExistException",
+	DEFINE_CUSTOM_EXCEPTION(EventHookDoesNotExistExceptionType, Events,
+		PyExc_Exception, "Events.EventHookDoesNotExistException",
 		"EventHookDoesNotExistException")
 
 	ModEventsParser modEventsParser;
@@ -283,7 +282,7 @@ BOOST_PYTHON_MODULE(events) {
 		SH_STATIC(events__OnFireEventPost), true);
 }
 
-void destroyevents() {
+void destroyEvents() {
 	SH_REMOVE_HOOK(IGameEventManager2, FireEvent, g_Interfaces.GameEventManagerInstance,
 		SH_STATIC(events__OnFireEvent), false);
 	SH_REMOVE_HOOK(IGameEventManager2, FireEvent, g_Interfaces.GameEventManagerInstance,

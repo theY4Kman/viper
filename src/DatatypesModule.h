@@ -3,6 +3,6 @@
 
 #include "Macros.h"
 
-extern "C" __declspec(dllexport) void initdatatypes();
-
+extern "C" __declspec(dllexport) void initDatatypes();
+extern void destroyDatatypes();
 #endif

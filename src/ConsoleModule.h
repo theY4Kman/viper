@@ -8,11 +8,11 @@
 #include "ConsoleVariableChangedHookInfo.h"
 #include "ConsoleClientVariableQueryInfo.h"
 
-extern "C" __declspec(dllexport) void initconsole();
-extern void destroyconsole();
+extern "C" __declspec(dllexport) void initConsole();
+extern void destroyConsole();
 
-DEFINE_CUSTOM_EXCEPTION_DECL(ConsoleVariableDoesNotExistExceptionType, console)
-DEFINE_CUSTOM_EXCEPTION_DECL(ConsoleCommandDoesNotExistExceptionType, console)
+DEFINE_CUSTOM_EXCEPTION_DECL(ConsoleVariableDoesNotExistExceptionType, Console)
+DEFINE_CUSTOM_EXCEPTION_DECL(ConsoleCommandDoesNotExistExceptionType, Console)
 
 extern std::vector<std::pair<int, std::string>> console__FakeClientCommandQueue;
 extern std::vector<ConsoleCommandInfo> console__Commands;

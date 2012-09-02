@@ -6,13 +6,13 @@
 #include "ViperRecipientFilter.h"
 #include "UserMessagesUserMessageListener.h"
 
-extern "C" __declspec(dllexport) void initusermessages();
-void destroyusermessages();
+extern "C" __declspec(dllexport) void initUserMessages();
+void destroyUserMessages();
 
-DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageAlreadyStartedExceptionType, usermessages)
-DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageIDDoesNotExistExceptionType, usermessages)
-DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageNameDoesNotExistExceptionType, usermessages)
-DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageNotStartedExceptionType, usermessages)
+DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageAlreadyStartedExceptionType, UserMessages)
+DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageIDDoesNotExistExceptionType, UserMessages)
+DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageNameDoesNotExistExceptionType, UserMessages)
+DEFINE_CUSTOM_EXCEPTION_DECL(UserMessageNotStartedExceptionType, UserMessages)
 
 extern ViperRecipientFilter *usermessages__CurrentRecipientFilter;
 extern bool usermessages__AlreadyStarted;

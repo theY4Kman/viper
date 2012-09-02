@@ -7,9 +7,6 @@
     <Filter Include="SourceMod">
       <UniqueIdentifier>{7144b0a4-1cca-427e-809c-4407a7e5d532}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Viper">
-      <UniqueIdentifier>{ecc8006b-59b0-46e3-9d83-28c25b7059ce}</UniqueIdentifier>
-    </Filter>
     <Filter Include="BitBuf">
       <UniqueIdentifier>{e6b51bf4-8aca-426e-bd57-76f65a8f2f34}</UniqueIdentifier>
     </Filter>

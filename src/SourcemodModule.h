@@ -4,7 +4,9 @@
 #include "LoadExtensionException.h"
 #include "Macros.h"
 
-extern "C" __declspec(dllexport) void initsourcemod();
-DEFINE_CUSTOM_EXCEPTION_DECL(LoadExtensionException, sourcemod)
+extern "C" __declspec(dllexport) void initSourcemod();
+extern void destroySourcemod();
+
+DEFINE_CUSTOM_EXCEPTION_DECL(LoadExtensionException, Sourcemod)
 
 #endif

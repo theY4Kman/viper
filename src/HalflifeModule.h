@@ -3,6 +3,7 @@
 
 #include "Macros.h"
 
-extern "C" __declspec(dllexport) void inithalflife();
+extern "C" __declspec(dllexport) void initHalflife();
+extern void destroyHalflife();
 
 #endif

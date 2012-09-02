@@ -66,16 +66,16 @@ void ViperExtension::InitializePython() {
 
 	Py_SetPythonHome(pythonPath);
 
-	PyImport_AppendInittab("sourcemod", initsourcemod);
-	PyImport_AppendInittab("bitbuf", initbitbuf);
-	PyImport_AppendInittab("halflife", inithalflife);
-	PyImport_AppendInittab("datatypes", initdatatypes);
-	PyImport_AppendInittab("entity", initentity);
-	PyImport_AppendInittab("forwards", initforwards);
-	PyImport_AppendInittab("clients", initclients);
-	PyImport_AppendInittab("events", initevents);
-	PyImport_AppendInittab("usermessages", initusermessages);
-	PyImport_AppendInittab("console", initconsole);
+	PyImport_AppendInittab("Sourcemod", initSourcemod);
+	PyImport_AppendInittab("BitBuf", initBitBuf);
+	PyImport_AppendInittab("Halflife", initHalflife);
+	PyImport_AppendInittab("Datatypes", initDatatypes);
+	PyImport_AppendInittab("Entity", initEntity);
+	PyImport_AppendInittab("Forwards", initForwards);
+	PyImport_AppendInittab("Clients", initClients);
+	PyImport_AppendInittab("Events", initEvents);
+	PyImport_AppendInittab("UserMessages", initUserMessages);
+	PyImport_AppendInittab("Console", initConsole);
 
 	Py_Initialize();
 
@@ -113,12 +113,16 @@ void ViperExtension::SDK_OnUnload() {
 
 	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
 
-	destroyentity();
-	destroyforwards();
-	destroyclients();
-	destroyevents();
-	destroyusermessages();
-	destroyconsole();
+	destroySourcemod();
+	destroyBitBuf();
+	destroyHalflife();
+	destroyDatatypes();
+	destroyEntity();
+	destroyForwards();
+	destroyClients();
+	destroyEvents();
+	destroyUserMessages();
+	destroyConsole();
 }
 
 void ViperExtension::OnGameFrame(bool simulating) {

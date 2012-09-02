@@ -6,8 +6,8 @@
 #include "ForwardType.h"
 #include "ForwardsClientListener.h"
 
-extern "C" __declspec(dllexport) void initforwards();
-extern void destroyforwards();
+extern "C" __declspec(dllexport) void initForwards();
+extern void destroyForwards();
 
 extern bool forwards__GameFrameCallback(boost::python::object returnValue);
 extern bool forwards__ClientConnectCallback(boost::python::object returnValue);

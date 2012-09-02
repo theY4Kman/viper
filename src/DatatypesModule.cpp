@@ -7,7 +7,7 @@
 
 namespace py = boost::python;
 
-BOOST_PYTHON_MODULE(datatypes) {
+BOOST_PYTHON_MODULE(Datatypes) {
 	py::class_<VectorType>("Vector", py::init<float, float, float>((py::arg("x") = 0.0f, py::arg("y") = 0.0f, py::arg("z") = 0.0f)))
 		.def(py::init<VectorType>((py::arg("v"))))
 		.def_readwrite("x", &VectorType::X)
@@ -36,4 +36,7 @@ BOOST_PYTHON_MODULE(datatypes) {
 		.def("__le__", &ColorType::CompareLessThanOrEqual)
 		.def("__ge__", &ColorType::CompareGreaterThanOrEqual)
 		.def("__repr__", &ColorType::ReprMagic);
+}
+
+void destroyDatatypes() {
 }
