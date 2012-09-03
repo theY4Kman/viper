@@ -129,3 +129,6 @@ BOOST_PYTHON_MODULE(Halflife) {
 
 void destroyHalflife() {
 }
+
+void unloadThreadStateHalflife(PyThreadState *threadState) {
+}

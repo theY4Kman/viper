@@ -41,3 +41,6 @@ BOOST_PYTHON_MODULE(BitBuf) {
 
 void destroyBitBuf() {
 }
+
+void unloadThreadStateBitBuf(PyThreadState *threadState) {
+}

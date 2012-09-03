@@ -8,12 +8,14 @@
 #include "EventNoLongerValidExceptionType.h"
 #include "EventHookDoesNotExistExceptionType.h"
 #include "EventHook.h"
+#include "BoostPythonSM.h"
 
 extern "C" __declspec(dllexport) void initEvents();
-void destroyEvents();
+extern void destroyEvents();
+extern void unloadThreadStateEvents(PyThreadState *threadState);
 
 extern std::map<std::string, std::vector<EventFieldType>> events__ModEvents;
-extern std::vector<EventHook> events__Hooks;
+extern std::list<EventHook> events__Hooks;
 extern std::map<IGameEvent*, IGameEvent*> events__EventCopies;
 extern std::vector<IGameEvent*> events__CanceledEvents;
 

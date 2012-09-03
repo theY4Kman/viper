@@ -11,7 +11,7 @@
 #include "ClientNotInGameExceptionType.h"
 #include "ClientNotFakeExceptionType.h"
 #include "ClientIsFakeExceptionType.h"
-#include "InvalidUserIdExceptionType.h"
+#include "InvalidUserIDExceptionType.h"
 #include "InvalidClientSerialExceptionType.h"
 #include "ClientNotAuthorizedExceptionType.h"
 #include "VectorType.h"
@@ -20,8 +20,6 @@
 #include "dt_common.h"
 
 namespace py = boost::python;
-
-std::map<int, std::string> clients__KickQueue;
 
 int clients__LifeStateOffset = -1;
 
@@ -935,7 +933,7 @@ int clients__get_client_index_by_user_id(int userId) {
 	int clientIndex = playerhelpers->GetClientOfUserId(userId);
 
 	if(0 == clientIndex) {
-		throw InvalidUserIdExceptionType(userId);
+		throw InvalidUserIDExceptionType(userId);
 	}
 
 	return clientIndex;
@@ -948,11 +946,11 @@ void clients__kick_client(int clientIndex, std::string disconnectMessage = std::
 		throw ClientNotConnectedExceptionType(clientIndex);
 	}
 
-	if(clients__is_client_in_kick_queue(clientIndex)) {
+	if(gamePlayer->IsInKickQueue()) {
 		return;
 	}
 
-	clients__KickQueue[clientIndex] = disconnectMessage;
+	gamehelpers->AddDelayedKick(clientIndex, gamePlayer->GetUserId(), disconnectMessage.c_str());
 }
 
 void clients__kick_client_ex(int clientIndex, std::string disconnectMessage = std::string()) {
@@ -1006,19 +1004,7 @@ int clients__get_client_index_from_serial(int serial) {
 }
 
 void clients__GameFrame(bool simulating) {
-	for(std::map<int, std::string>::iterator it = clients__KickQueue.begin(); it != clients__KickQueue.end(); it++) {
-		std::pair<int, std::string> kickQueuePair = *it;
 
-		SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(kickQueuePair.first);
-
-		if(!gamePlayer->IsConnected()) {
-			continue;
-		}
-
-		gamePlayer->Kick(kickQueuePair.second.c_str());
-	}
-
-	clients__KickQueue.clear();
 }
 
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientIndexOutOfRangeExceptionType, Clients)
@@ -1028,7 +1014,7 @@ DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotInGameExceptionType, Clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotFakeExceptionType, Clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientNotAuthorizedExceptionType, Clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(ClientIsFakeExceptionType, Clients)
-DEFINE_CUSTOM_EXCEPTION_INIT(InvalidUserIdExceptionType, Clients)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidUserIDExceptionType, Clients)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidClientSerialExceptionType, Clients)
 
 BOOST_PYTHON_MODULE(Clients) {
@@ -1101,9 +1087,9 @@ BOOST_PYTHON_MODULE(Clients) {
 		PyExc_Exception, "Clients.ClientNotInGameException",
 		"ClientNotInGameException")
 
-	DEFINE_CUSTOM_EXCEPTION(InvalidUserIdExceptionType, Clients,
-		PyExc_Exception, "Clients.InvalidUserIdException",
-		"InvalidUserIdException")
+	DEFINE_CUSTOM_EXCEPTION(InvalidUserIDExceptionType, Clients,
+		PyExc_Exception, "Clients.InvalidUserIDException",
+		"InvalidUserIDException")
 
 	DEFINE_CUSTOM_EXCEPTION(InvalidClientSerialExceptionType, Clients,
 		PyExc_Exception, "Clients.InvalidClientSerialException",
@@ -1115,4 +1101,7 @@ BOOST_PYTHON_MODULE(Clients) {
 }
 
 void destroyClients() {
+}
+
+void unloadThreadStateClients(PyThreadState *threadState) {
 }

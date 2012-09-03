@@ -40,3 +40,6 @@ BOOST_PYTHON_MODULE(Datatypes) {
 
 void destroyDatatypes() {
 }
+
+void unloadThreadStateDatatypes(PyThreadState *threadState) {
+}

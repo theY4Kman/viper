@@ -19,12 +19,12 @@
 namespace py = boost::python;
 
 std::vector<std::pair<int, std::string>> console__FakeClientCommandQueue;
-std::vector<ConsoleCommandHookInfo> console__ServerCommandHooks;
-std::vector<ConsoleCommandHookInfo> console__ConsoleCommandHooks;
+std::list<ConsoleCommandHookInfo> console__ServerCommandHooks;
+std::list<ConsoleCommandHookInfo> console__ConsoleCommandHooks;
 std::vector<ConsoleCommandInfo> console__Commands;
 std::vector<ConsoleVariableInfo> console__Variables;
-std::vector<ConsoleVariableChangedHookInfo> console__VariableChangedHooks;
-std::vector<ConsoleClientVariableQueryInfo> console__PendingClientVariableQueries;
+std::list<ConsoleVariableChangedHookInfo> console__VariableChangedHooks;
+std::list<ConsoleClientVariableQueryInfo> console__PendingClientVariableQueries;
 bool console__VSPQueryHooked = false;
 bool console__DLLQueryHooked = false;
 
@@ -165,10 +165,9 @@ bool console__CommandHandler(int clientIndex, const CCommand &command) {
 
 	// then go through the server hooks if index is 0
 	if(0 == clientIndex) {
-		int serverHookCount = console__ServerCommandHooks.size();
-
-		for(int serverHookIndex = 0; serverHookIndex < serverHookCount; serverHookIndex++) {
-			ConsoleCommandHookInfo commandHookInfo = console__ServerCommandHooks[serverHookIndex];
+		for(std::list<ConsoleCommandHookInfo>::iterator it = console__ServerCommandHooks.begin();
+			it != console__ServerCommandHooks.end(); it++) {
+			ConsoleCommandHookInfo commandHookInfo = *it;
 
 			if(commandHookInfo.Name != baseCommand) {
 				continue;
@@ -200,10 +199,9 @@ bool console__CommandHandler(int clientIndex, const CCommand &command) {
 		}
 	}
 
-	int consoleHookCount = console__ConsoleCommandHooks.size();
-
-	for(int consoleHookIndex = 0; consoleHookIndex < consoleHookCount; consoleHookIndex++) {
-		ConsoleCommandHookInfo commandHookInfo = console__ConsoleCommandHooks[consoleHookIndex];
+	for(std::list<ConsoleCommandHookInfo>::iterator it = console__ConsoleCommandHooks.begin();
+		it != console__ConsoleCommandHooks.end(); it++) {
+		ConsoleCommandHookInfo commandHookInfo = *it;
 
 		if(commandHookInfo.Name != baseCommand) {
 			continue;
@@ -307,10 +305,9 @@ void console__OnConVarChanged(ConVar *conVar, const char *oldValue) {
 
 	ConsoleVariableType consoleVariable = console__get_console_variable_by_name(name);
 
-	int variableChangedHookCount = console__VariableChangedHooks.size();
-
-	for(int variableChangedHookIndex = 0; variableChangedHookIndex < variableChangedHookCount; variableChangedHookIndex++) {
-		ConsoleVariableChangedHookInfo variableChangedHookInfo = console__VariableChangedHooks[variableChangedHookIndex];
+	for(std::list<ConsoleVariableChangedHookInfo>::iterator it = console__VariableChangedHooks.begin();
+		it != console__VariableChangedHooks.end(); it++) {
+		ConsoleVariableChangedHookInfo variableChangedHookInfo = *it;
 
 		if(variableChangedHookInfo.Name != name) {
 			continue;
@@ -338,7 +335,7 @@ void console__OnQueryCvarValueFinished(QueryCvarCookie_t cookie, edict_t *pPlaye
 	int clientIndex = IndexOfEdict(pPlayer);
 
 	// loop through the remaining queries and find the one we are looking for
-	for(std::vector<ConsoleClientVariableQueryInfo>::iterator it = console__PendingClientVariableQueries.begin();
+	for(std::list<ConsoleClientVariableQueryInfo>::iterator it = console__PendingClientVariableQueries.begin();
 		it != console__PendingClientVariableQueries.end(); it++) {
 		ConsoleClientVariableQueryInfo queryInfo = *it;
 
@@ -640,4 +637,107 @@ BOOST_PYTHON_MODULE(Console) {
 }
 
 void destroyConsole() {
+}
+
+bool RemoveFirstConsoleCommandHookByThreadState(PyThreadState *threadState) {
+	for(std::list<ConsoleCommandHookInfo>::iterator it = console__ConsoleCommandHooks.begin();
+		it != console__ConsoleCommandHooks.end(); it++) {
+		ConsoleCommandHookInfo hookInfo = *it;
+
+		if(hookInfo.ThreadState != threadState) {
+			continue;
+		}
+
+		console__ConsoleCommandHooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllConsoleCommandHooksByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstConsoleCommandHookByThreadState(threadState);
+	}
+}
+
+bool RemoveFirstServerCommandHookByThreadState(PyThreadState *threadState) {
+	for(std::list<ConsoleCommandHookInfo>::iterator it = console__ServerCommandHooks.begin();
+		it != console__ServerCommandHooks.end(); it++) {
+		ConsoleCommandHookInfo hookInfo = *it;
+
+		if(hookInfo.ThreadState != threadState) {
+			continue;
+		}
+
+		console__ServerCommandHooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllServerCommandHooksByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstServerCommandHookByThreadState(threadState);
+	}
+}
+
+bool RemoveFirstVariableChangedHookByThreadState(PyThreadState *threadState) {
+	for(std::list<ConsoleVariableChangedHookInfo>::iterator it = console__VariableChangedHooks.begin();
+		it != console__VariableChangedHooks.end(); it++) {
+		ConsoleVariableChangedHookInfo hookInfo = *it;
+
+		if(hookInfo.ThreadState != threadState) {
+			continue;
+		}
+
+		console__VariableChangedHooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllVariableChangedHooksByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstVariableChangedHookByThreadState(threadState);
+	}
+}
+
+bool RemoveFirstPendingClientVariableQueryByThreadState(PyThreadState *threadState) {
+	for(std::list<ConsoleClientVariableQueryInfo>::iterator it = console__PendingClientVariableQueries.begin();
+		it != console__PendingClientVariableQueries.end(); it++) {
+		ConsoleClientVariableQueryInfo hookInfo = *it;
+
+		if(hookInfo.ThreadState != threadState) {
+			continue;
+		}
+
+		console__PendingClientVariableQueries.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllPendingClientVariableQueriesByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstPendingClientVariableQueryByThreadState(threadState);
+	}
+}
+
+void unloadThreadStateConsole(PyThreadState *threadState) {
+	RemoveAllConsoleCommandHooksByThreadState(threadState);
+	RemoveAllServerCommandHooksByThreadState(threadState);
+	RemoveAllVariableChangedHooksByThreadState(threadState);
+	RemoveAllPendingClientVariableQueriesByThreadState(threadState);
 }

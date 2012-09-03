@@ -16,4 +16,5 @@ InterfaceContainer::InterfaceContainer() {
 	BinToolsInstance = NULL;
 	SharedEdictChangeInfoInstance = NULL;
 	ServerPluginCallbacksInstance = NULL;
+	RootConsoleCommandInstance = NULL;
 }

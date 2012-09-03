@@ -233,6 +233,7 @@
     <ClCompile Include="..\ClientNotAuthorizedExceptionType.cpp">
       <Filter>Clients</Filter>
     </ClCompile>
+    <ClCompile Include="..\ViperRootConsoleCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -451,6 +452,10 @@
     </ClInclude>
     <ClInclude Include="..\ClientNotAuthorizedExceptionType.h">
       <Filter>Clients</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ViperRootConsoleCommand.h" />
+    <ClInclude Include="..\ForwardFunction.h">
+      <Filter>Forwards</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

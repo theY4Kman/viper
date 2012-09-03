@@ -12,7 +12,7 @@
 namespace py = boost::python;
 
 std::map<std::string, std::vector<EventFieldType>> events__ModEvents;
-std::vector<EventHook> events__Hooks;
+std::list<EventHook> events__Hooks;
 std::map<IGameEvent*, IGameEvent*> events__EventCopies;
 std::vector<IGameEvent*> events__CanceledEvents;
 
@@ -46,18 +46,17 @@ void events__hook(std::string eventName, py::object pythonCallback, EventHookMod
 	}
 
 	// lets try to update an existing eventhook
-	size_t hookCount = events__Hooks.size();
-
-	for(size_t hookIndex = 0; hookIndex < hookCount; hookIndex++) {
-		EventHook eventHook = events__Hooks[hookIndex];
+	for(std::list<EventHook>::iterator it = events__Hooks.begin(); it != events__Hooks.end(); it++) {
+		EventHook eventHook = *it;
 
 		if(eventHook.EventName != eventName || eventHook.PythonCallback != pythonCallback || eventHook.HookMode != hookMode) {
 			continue;
 		}
 
-		events__Hooks[hookIndex] = EventHook(eventName, pythonCallback, threadState, hookMode);
+		*it = EventHook(eventName, pythonCallback, threadState, hookMode);
 		return;
 	}
+
 	// otherwise make a new one
 	events__Hooks.push_back(EventHook(eventName, pythonCallback, threadState, hookMode));
 }
@@ -67,19 +66,14 @@ void events__unhook(std::string eventName, py::object pythonCallback, EventHookM
 		throw InvalidEventExceptionType(eventName);
 	}
 
-	size_t hookCount = events__Hooks.size();
+	for(std::list<EventHook>::iterator it = events__Hooks.begin(); it != events__Hooks.end(); it++) {
+		EventHook eventHook = *it;
 
-	for(size_t hookIndex = 0; hookIndex < hookCount; hookIndex++) {
-		EventHook eventHook = events__Hooks[hookIndex];
-
-		if(!eventHook.IsHooked || eventHook.EventName != eventName || eventHook.PythonCallback != pythonCallback || eventHook.HookMode != hookMode) {
+		if(eventHook.EventName != eventName || eventHook.PythonCallback != pythonCallback || eventHook.HookMode != hookMode) {
 			continue;
 		}
 
-		eventHook.IsHooked = false;
-
-		events__Hooks[hookIndex] = eventHook;
-
+		events__Hooks.erase(it);
 		return;
 	}
 
@@ -90,12 +84,10 @@ bool events__OnFireEvent(IGameEvent *gameEvent, bool dontBroadcast) {
 	// Make a copy of the current event for any post hooks.
 	events__EventCopies[gameEvent] = g_Interfaces.GameEventManagerInstance->DuplicateEvent(gameEvent);
 
-	size_t hookCount = events__Hooks.size();
+	for(std::list<EventHook>::iterator it = events__Hooks.begin(); it != events__Hooks.end(); it++) {
+		EventHook eventHook = *it;
 
-	for(size_t hookIndex = 0; hookIndex < hookCount; hookIndex++) {
-		EventHook eventHook = events__Hooks[hookIndex];
-
-		if(!eventHook.IsHooked || eventHook.HookMode != EventHookMode_Pre) {
+		if(eventHook.HookMode != EventHookMode_Pre) {
 			continue;
 		}
 
@@ -122,8 +114,8 @@ bool events__OnFireEvent(IGameEvent *gameEvent, bool dontBroadcast) {
 		// If the event was canceled, we need to break this loop. We need to make sure to preserve the events__CanceledEvents vector so the post hook knows to ignore it
 		bool eventCanceled = false;
 
-		for(std::vector<IGameEvent*>::iterator it = events__CanceledEvents.begin(); it != events__CanceledEvents.end(); it++) {
-		IGameEvent *canceledEvent = *it;
+		for(std::vector<IGameEvent*>::iterator eventIt = events__CanceledEvents.begin(); eventIt != events__CanceledEvents.end(); eventIt++) {
+		IGameEvent *canceledEvent = *eventIt;
 		
 			if(canceledEvent != gameEvent) {
 				continue;
@@ -160,12 +152,10 @@ bool events__OnFireEventPost(IGameEvent *gameEvent, bool dontBroadcast) {
 
 	std::string eventName(gameEventCopy->GetName());
 
-	size_t hookCount = events__Hooks.size();
+	for(std::list<EventHook>::iterator it = events__Hooks.begin(); it != events__Hooks.end(); it++) {
+		EventHook eventHook = *it;
 
-	for(size_t hookIndex = 0; hookIndex < hookCount; hookIndex++) {
-		EventHook eventHook = events__Hooks[hookIndex];
-
-		if(!eventHook.IsHooked || eventHook.HookMode != EventHookMode_Post) {
+		if(eventHook.HookMode != EventHookMode_Post) {
 			continue;
 		}
 
@@ -190,8 +180,8 @@ bool events__OnFireEventPost(IGameEvent *gameEvent, bool dontBroadcast) {
 		// Okay sometimes these sneaky sneakies will cancel the copy. We need to make sure to break this loop if they did.
 		bool copyAlreadyCanceled = false;
 
-		for(std::vector<IGameEvent*>::iterator it = events__CanceledEvents.begin(); it != events__CanceledEvents.end(); it++) {
-			IGameEvent *canceledEvent = *it;
+		for(std::vector<IGameEvent*>::iterator eventIt = events__CanceledEvents.begin(); eventIt != events__CanceledEvents.end(); eventIt++) {
+			IGameEvent *canceledEvent = *eventIt;
 		
 			if(canceledEvent != gameEventCopy) {
 				continue;
@@ -289,4 +279,32 @@ void destroyEvents() {
 		SH_STATIC(events__OnFireEventPost), true);
 
 	g_Interfaces.GameEventManagerInstance->RemoveListener(&events__GameEventListener);
+}
+
+bool RemoveFirstEventHookByThreadState(PyThreadState *threadState) {
+	for(std::list<EventHook>::iterator it = events__Hooks.begin();
+		it != events__Hooks.end(); it++) {
+		EventHook eventHook = *it;
+
+		if(eventHook.ThreadState != threadState) {
+			continue;
+		}
+
+		events__Hooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllEventHooksByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstEventHookByThreadState(threadState);
+	}
+}
+
+void unloadThreadStateEvents(PyThreadState *threadState) {
+	RemoveAllEventHooksByThreadState(threadState);
 }

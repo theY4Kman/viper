@@ -14,7 +14,7 @@ namespace py = boost::python;
 
 ViperRecipientFilter *usermessages__CurrentRecipientFilter = NULL;
 bool usermessages__AlreadyStarted = false;
-std::vector<UserMessagesUserMessageListener*> usermessages__Hooks;
+std::list<UserMessagesUserMessageListener*> usermessages__Hooks;
 
 BfWriteType usermessages__start_message(int messageID, boost::python::list clientsList, bool reliable = false, bool initMessage = false) {
 	if(usermessages__AlreadyStarted) {
@@ -85,7 +85,7 @@ void usermessages__hook_message(int messageID, py::object hookFunction, bool int
 }
 
 void usermessages__unhook_message(int messageID, py::object hookFunction, bool intercept = false) {
-	for(std::vector<UserMessagesUserMessageListener*>::iterator it = usermessages__Hooks.begin(); it != usermessages__Hooks.end(); it++) {
+	for(std::list<UserMessagesUserMessageListener*>::iterator it = usermessages__Hooks.begin(); it != usermessages__Hooks.end(); it++) {
 		UserMessagesUserMessageListener *userMessageListener = *it;
 
 		if(userMessageListener->MessageID != messageID || userMessageListener->Intercept != intercept || userMessageListener->HookFunction != hookFunction) {
@@ -135,4 +135,34 @@ void destroyUserMessages() {
 		delete usermessages__CurrentRecipientFilter;
 		usermessages__CurrentRecipientFilter = NULL;
 	}
+}
+
+bool RemoveFirstUserMessageHookByThreadState(PyThreadState *threadState) {
+	for(std::list<UserMessagesUserMessageListener*>::iterator it = usermessages__Hooks.begin(); it != usermessages__Hooks.end(); it++) {
+		UserMessagesUserMessageListener *userMessageListener = *it;
+
+		if(userMessageListener->ThreadState != threadState) {
+			continue;
+		}
+
+		usermsgs->UnhookUserMessage2(userMessageListener->MessageID, userMessageListener, userMessageListener->Intercept);
+		delete userMessageListener;
+
+		usermessages__Hooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllUserMessageHooksByThreadState(PyThreadState *threadState) {
+	bool searchAgain = true;
+	
+	while(searchAgain) {
+		searchAgain = RemoveFirstUserMessageHookByThreadState(threadState);
+	}
+}
+
+void unloadThreadStateUserMessages(PyThreadState *threadState) {
+	RemoveAllUserMessageHooksByThreadState(threadState);
 }

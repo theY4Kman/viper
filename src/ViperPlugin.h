@@ -11,6 +11,8 @@ public:
 	~ViperPlugin();
 
 	void Run();
+	void Unload();
+
 	std::string GetInitPluginPath();
 	std::string GetPluginDirectory();
 

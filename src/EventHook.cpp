@@ -5,10 +5,9 @@
 
 namespace py = boost::python;
 
-EventHook::EventHook(std::string eventName, py::object pythonCallback, PyThreadState *threadState, EventHookModes hookMode, bool isHooked) {
+EventHook::EventHook(std::string eventName, py::object pythonCallback, PyThreadState *threadState, EventHookModes hookMode) {
 	EventName = eventName;
 	PythonCallback = pythonCallback;
 	ThreadState = threadState;
 	HookMode = hookMode;
-	IsHooked = true;
 }

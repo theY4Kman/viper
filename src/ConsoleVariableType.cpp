@@ -241,7 +241,7 @@ void ConsoleVariableType::HookChange(boost::python::object callbackFunction) {
 }
 
 void ConsoleVariableType::UnhookChange(boost::python::object callbackFunction) {
-	for(std::vector<ConsoleVariableChangedHookInfo>::iterator it = console__VariableChangedHooks.begin();
+	for(std::list<ConsoleVariableChangedHookInfo>::iterator it = console__VariableChangedHooks.begin();
 		it != console__VariableChangedHooks.end(); it++) {
 		ConsoleVariableChangedHookInfo hookInfo = *it;
 		

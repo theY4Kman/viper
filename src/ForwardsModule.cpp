@@ -167,3 +167,12 @@ void destroyForwards() {
 
 	delete forwards_ClientListener;
 }
+
+void unloadThreadStateForwards(PyThreadState *threadState) {
+	for(std::map<std::string, ForwardType*>::iterator it = forwards__GlobalForwards.begin();
+		it != forwards__GlobalForwards.end(); it++) {
+		std::pair<std::string, ForwardType*> globalForwardPair = *it;
+
+		globalForwardPair.second->RemoveFunctionsByThreadState(threadState);
+	}
+}

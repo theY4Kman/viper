@@ -54,3 +54,6 @@ BOOST_PYTHON_MODULE(Sourcemod) {
 
 void destroySourcemod() {
 }
+
+void unloadThreadStateSourcemod(PyThreadState *threadState) {
+}

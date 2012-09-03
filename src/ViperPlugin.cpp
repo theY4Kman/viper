@@ -4,6 +4,17 @@
 #include "ViperExtension.h"
 #include "SysHooks.h"
 #include "ForwardsModule.h"
+#include "SourcemodModule.h"
+#include "BitBufModule.h"
+#include "HalflifeModule.h"
+#include "DatatypesModule.h"
+#include "EntityModule.h"
+#include "SysHooks.h"
+#include "ForwardsModule.h"
+#include "ClientsModule.h"
+#include "EventsModule.h"
+#include "UserMessagesModule.h"
+#include "ConsoleModule.h"
 
 namespace py = boost::python;
 
@@ -15,18 +26,8 @@ ViperPlugin::ViperPlugin(std::string initPluginPath, std::string pythonHome) {
 
 	boost::filesystem::path fileSystemPath(InitPluginPath);
 	PluginDirectory = fileSystemPath.parent_path().string();
-
-	PyThreadState *currentThreadState = PyThreadState_Get();
-
-	ThreadState = Py_NewInterpreter();
-
-	if(ThreadState == NULL) {
-		boost::throw_exception(
-			std::exception("Failed to create sub-interpreter")
-		);
-	}
-
-	PyThreadState_Swap(currentThreadState);
+	
+	ThreadState = NULL;
 }
 
 ViperPlugin::~ViperPlugin() {
@@ -59,11 +60,17 @@ std::string ViperPlugin::GetInitPluginPath() {
 }
 
 void ViperPlugin::Run() {
-	boost::filesystem::path fileSystemPath(InitPluginPath);
-
 	PyThreadState *oldThreadState = PyThreadState_Get();
 
-	PyThreadState_Swap(ThreadState);
+	ThreadState = Py_NewInterpreter();
+
+	if(ThreadState == NULL) {
+		boost::throw_exception(
+			std::exception("Failed to create sub-interpreter")
+		);
+	}
+
+	boost::filesystem::path fileSystemPath(InitPluginPath);
 
 	py::list pathList;
 	pathList.append<std::string>(fileSystemPath.parent_path().string());
@@ -87,15 +94,16 @@ void ViperPlugin::Run() {
 	initsyshooks(mainDict, sysModule);
 
 	try {
-		py::import("sourcemod");
-		py::import("clients");
-		py::import("forwards");
-		py::import("halflife");
-		py::import("entity");
-		py::import("datatypes");
-		py::import("bitbuf");
-		py::import("events");
-		py::import("usermessages");
+		py::import("Sourcemod");
+		py::import("BitBuf");
+		py::import("Halflife");
+		py::import("Datatypes");
+		py::import("Entity");
+		py::import("Forwards");
+		py::import("Clients");
+		py::import("Events");
+		py::import("UserMessages");
+		py::import("Console");
 
 		py::exec_file(InitPluginPath.c_str(), mainDict, mainDict);
 	}
@@ -104,6 +112,23 @@ void ViperPlugin::Run() {
 	}
 	
 	PyThreadState_Swap(oldThreadState);
+}
+
+void ViperPlugin::Unload() {
+	if(!ThreadState) {
+		return;
+	}
+
+	unloadThreadStateSourcemod(ThreadState);
+	unloadThreadStateBitBuf(ThreadState);
+	unloadThreadStateHalflife(ThreadState);
+	unloadThreadStateDatatypes(ThreadState);
+	unloadThreadStateEntity(ThreadState);
+	unloadThreadStateForwards(ThreadState);
+	unloadThreadStateClients(ThreadState);
+	unloadThreadStateEvents(ThreadState);
+	unloadThreadStateUserMessages(ThreadState);
+	unloadThreadStateConsole(ThreadState);
 }
 
 std::string ViperPlugin::GetPluginDirectory() {

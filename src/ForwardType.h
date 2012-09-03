@@ -4,11 +4,7 @@
 #include "BoostPythonSM.h"
 #include "Macros.h"
 #include "STL.h"
-
-struct ForwardFunction {
-	boost::python::object PythonFunction;
-	PyThreadState *ThreadState;
-};
+#include "ForwardFunction.h"
 
 typedef bool (*ForwardCallback)(boost::python::object returnValue);
 
@@ -23,9 +19,13 @@ class ForwardType {
 
 		boost::python::object StrMagic();
 
+	public:// Called when forwards are unloading
+		bool RemoveFirstFunctionByThreadState(PyThreadState *threadState);
+		void RemoveFunctionsByThreadState(PyThreadState *threadState);
+
 	private:
 		std::string Name;
-		std::vector<ForwardFunction> Functions;
+		std::list<ForwardFunction> Functions;
 		ForwardCallback Callback;
 };
 

@@ -769,6 +769,7 @@
     <ClCompile Include="..\ViperPlugin.cpp" />
     <ClCompile Include="..\ViperPluginManager.cpp" />
     <ClCompile Include="..\ViperRecipientFilter.cpp" />
+    <ClCompile Include="..\ViperRootConsoleCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\BitBufModule.h" />
@@ -811,6 +812,7 @@
     <ClInclude Include="..\EventsGameEventListener.h" />
     <ClInclude Include="..\EventsModule.h" />
     <ClInclude Include="..\EventType.h" />
+    <ClInclude Include="..\ForwardFunction.h" />
     <ClInclude Include="..\ForwardsClientListener.h" />
     <ClInclude Include="..\ForwardsModule.h" />
     <ClInclude Include="..\ForwardType.h" />
@@ -852,6 +854,7 @@
     <ClInclude Include="..\ViperPlugin.h" />
     <ClInclude Include="..\ViperPluginManager.h" />
     <ClInclude Include="..\ViperRecipientFilter.h" />
+    <ClInclude Include="..\ViperRootConsoleCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />

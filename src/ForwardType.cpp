@@ -2,6 +2,7 @@
 #include "Macros.h"
 #include "BoostPythonSM.h"
 #include "Util.h"
+#include "ForwardFunction.h"
 
 namespace py = boost::python;
 
@@ -24,12 +25,11 @@ int ForwardType::GetFunctionCount() {
 }
 
 void ForwardType::Fire(py::list argumentsList) {
-	int fnCount = GetFunctionCount();
+	for(std::list<ForwardFunction>::iterator it = Functions.begin();
+		it != Functions.end(); it++) {
+		ForwardFunction fwdFunction = *it;
 
-	for(int x = 0; x < fnCount; x++) {
 		PyThreadState *oldThreadState = PyThreadState_Get();
-
-		ForwardFunction fwdFunction = Functions[x];
 
 		PyThreadState_Swap(fwdFunction.ThreadState);
 
@@ -52,18 +52,41 @@ void ForwardType::Fire(py::list argumentsList) {
 }
 
 bool ForwardType::RemoveFunction(py::object fn) {
-	int fnCount = GetFunctionCount();
+	for(std::list<ForwardFunction>::iterator it = Functions.begin();
+		it != Functions.end(); it++) {
+		ForwardFunction otherFn = *it;
 
-	for(int x = 0; x < fnCount; x++) {
-		py::object otherFn = Functions[x].PythonFunction;
-
-		if(fn != otherFn) {
+		if(fn != otherFn.PythonFunction) {
 			continue;
 		}
 		
-		Functions.erase(Functions.begin() + x);
+		Functions.erase(it);
 		return true;
 	}
 
 	return false;
+}
+
+bool ForwardType::RemoveFirstFunctionByThreadState(PyThreadState *threadState) {
+	for(std::list<ForwardFunction>::iterator it = Functions.begin();
+		it != Functions.end(); it++) {
+		ForwardFunction fn = *it;
+
+		if(fn.ThreadState != threadState) {
+			continue;
+		}
+
+		it = Functions.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void ForwardType::RemoveFunctionsByThreadState(PyThreadState *threadState) {
+	bool searchAgain = true;
+	
+	while(searchAgain) {
+		searchAgain = RemoveFirstFunctionByThreadState(threadState);
+	}
 }

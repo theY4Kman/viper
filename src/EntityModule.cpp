@@ -921,3 +921,6 @@ BOOST_PYTHON_MODULE(Entity) {
 
 void destroyEntity() {
 }
+
+void unloadThreadStateEntity(PyThreadState *threadState) {
+}

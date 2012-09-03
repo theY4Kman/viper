@@ -3,6 +3,9 @@
 
 #include "HL2SDK.h"
 #include "ViperExtension.h"
+#include "ViperRootConsoleCommand.h"
+
+class ViperRootConsoleCommand;
 
 class InterfaceContainer {
 public:
@@ -22,6 +25,7 @@ public:
 	SourceMod::IBinTools *BinToolsInstance;
 	CSharedEdictChangeInfo *SharedEdictChangeInfoInstance;
 	IServerPluginCallbacks *ServerPluginCallbacksInstance;
+	ViperRootConsoleCommand *RootConsoleCommandInstance;
 };
 
 extern InterfaceContainer g_Interfaces;

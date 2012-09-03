@@ -113,6 +113,10 @@ void ViperExtension::SDK_OnUnload() {
 
 	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
 
+	rootconsole->RemoveRootConsoleCommand("py", g_Interfaces.RootConsoleCommandInstance);
+
+	delete g_Interfaces.RootConsoleCommandInstance;
+
 	destroySourcemod();
 	destroyBitBuf();
 	destroyHalflife();
@@ -149,6 +153,10 @@ void ViperExtension::SDK_OnAllLoaded() {
 		InitializePython();
 		InitializePluginManager();
 
+		g_Interfaces.RootConsoleCommandInstance = new ViperRootConsoleCommand();
+
+		rootconsole->AddRootConsoleCommand2("py", "Viper root console command", g_Interfaces.RootConsoleCommandInstance);
+
 		PluginManagerInstance->LoadPluginsInDirectory(PluginsDirectory);
 	}
 	catch(std::exception e) {
@@ -179,4 +187,8 @@ bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen
 	g_pCVar = icvar = g_Interfaces.CvarInstance;
 	
 	return true;
+}
+
+ViperPluginManager *ViperExtension::GetPluginManager() {
+	return PluginManagerInstance;
 }

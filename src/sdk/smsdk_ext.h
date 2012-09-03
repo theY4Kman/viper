@@ -300,6 +300,9 @@ extern ITranslator *translator;
 #if defined SMEXT_ENABLE_NINVOKE
 extern INativeInterface *ninvoke;
 #endif
+#if defined SMEXT_ENABLE_ROOTCONSOLEMENU
+extern IRootConsole *rootconsole;
+#endif
 
 extern SourceMod::IExtensionManager *extsys;
 

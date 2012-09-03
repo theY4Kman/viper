@@ -2,9 +2,11 @@
 #define __INCLUDE_ENTITYMODULE_H__
 
 #include "Macros.h"
+#include "BoostPythonSM.h"
 
 extern "C" __declspec(dllexport) void initEntity();
 extern void destroyEntity();
+extern void unloadThreadStateEntity(PyThreadState *threadState);
 
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEdictExceptionType, Entity)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidEntityExceptionType, Entity)

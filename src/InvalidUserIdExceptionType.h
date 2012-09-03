@@ -3,9 +3,9 @@
 
 #include "ViperExtension.h"
 
-class InvalidUserIdExceptionType {
+class InvalidUserIDExceptionType {
 public:
-	InvalidUserIdExceptionType(int invalidUserId);
+	InvalidUserIDExceptionType(int invalidUserId);
 	std::string what() const;
 
 private:

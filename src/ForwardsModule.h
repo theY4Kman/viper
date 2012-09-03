@@ -5,9 +5,11 @@
 #include "STL.h"
 #include "ForwardType.h"
 #include "ForwardsClientListener.h"
+#include "BoostPythonSM.h"
 
 extern "C" __declspec(dllexport) void initForwards();
 extern void destroyForwards();
+extern void unloadThreadStateForwards(PyThreadState *threadState);
 
 extern bool forwards__GameFrameCallback(boost::python::object returnValue);
 extern bool forwards__ClientConnectCallback(boost::python::object returnValue);

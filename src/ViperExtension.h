@@ -37,7 +37,6 @@ public:
 
 	void InitializePython();
 	void InitializePluginManager();
-
 public:
 	virtual bool SDK_OnLoad(char *error, size_t maxlength, bool late);
 	virtual void SDK_OnUnload();
@@ -48,6 +47,8 @@ public:
 
 public:
 	void OnGameFrame(bool simulating);
+
+	ViperPluginManager *GetPluginManager();
 
 private:
 	// This is available after InitializePython()

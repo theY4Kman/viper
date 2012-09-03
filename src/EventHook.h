@@ -8,13 +8,12 @@
 
 class EventHook {
 public:
-	EventHook(std::string eventName, boost::python::object pythonCallback, PyThreadState *threadState, EventHookModes hookMode, bool isHooked = true);
+	EventHook(std::string eventName, boost::python::object pythonCallback, PyThreadState *threadState, EventHookModes hookMode);
 
 	std::string EventName;
 	boost::python::object PythonCallback;
 	PyThreadState *ThreadState;
 	EventHookModes HookMode;
-	bool IsHooked;
 };
 
 #endif

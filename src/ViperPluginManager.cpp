@@ -5,7 +5,6 @@
 
 ViperPluginManager::ViperPluginManager(std::string pythonHome) {
 	PythonHome = pythonHome;
-	Plugins = new SourceHook::List<ViperPlugin*>();
 }
 
 void ViperPluginManager::LoadPluginsInDirectory(std::string pluginsDirectory) {
@@ -57,15 +56,79 @@ void ViperPluginManager::LoadPlugin(std::string initPluginPath) {
 
 	plugin = new ViperPlugin(initPluginPath, PythonHome);
 	plugin->Run();
+
+	LoadedPlugins.push_back(plugin);
+}
+
+void ViperPluginManager::UnloadPlugin(ViperPlugin *plugin) {
+	plugin->Unload();
+
+	for(std::vector<ViperPlugin*>::iterator it = LoadedPlugins.begin();
+		it != LoadedPlugins.end(); it++) {
+		ViperPlugin *otherPlugin = *it;
+
+		if(plugin != otherPlugin) {
+			continue;
+		}
+
+		LoadedPlugins.erase(it);
+		break;
+	}
+
+	delete plugin;
+}
+
+void ViperPluginManager::UnloadPluginByPath(std::string pluginPath) {
+	ViperPlugin *plugin = FindPluginByInitPluginPath(pluginPath);
+
+	if(plugin != NULL) {
+		UnloadPlugin(plugin);
+		return;
+	}
+
+	plugin = FindPluginByDirectory(pluginPath);
+
+	if(plugin != NULL) {
+		UnloadPlugin(plugin);
+		return;
+	}
+
+	char str[1024];
+	UTIL_Format(str, sizeof(str), "Plugin not loaded: %s", pluginPath.c_str());
+
+	boost::throw_exception(std::exception(str));
+}
+
+void ViperPluginManager::UnloadPluginByID(int pluginID) {
+	if(pluginID > LoadedPlugins.size()) {
+		char str[256];
+		UTIL_Format(str, sizeof(str), "Plugin not loaded: #%d", pluginID);
+
+		boost::throw_exception(std::exception(str));
+	}
+	
+	int pluginIndex = pluginID - 1;
+
+	ViperPlugin *plugin = LoadedPlugins[pluginIndex];
+
+	UnloadPlugin(plugin);
+}
+
+ViperPlugin *ViperPluginManager::FindPluginByID(int pluginID) {
+	if(pluginID < 1 || pluginID > LoadedPlugins.size()) {
+		return NULL;
+	}
+
+	return LoadedPlugins[pluginID - 1];
 }
 
 ViperPlugin *ViperPluginManager::FindPluginByInitPluginPath(
 	std::string initPluginPath) {
-	for(SourceHook::List<ViperPlugin*>::iterator it = Plugins->begin(); 
-		it != Plugins->end(); it++) {
+	for(std::vector<ViperPlugin*>::iterator it = LoadedPlugins.begin(); 
+		it != LoadedPlugins.end(); it++) {
 		ViperPlugin *Plugin = *it;
 
-		if(Plugin->GetInitPluginPath() != initPluginPath) {
+		if(boost::filesystem::path(Plugin->GetInitPluginPath()) != boost::filesystem::path(initPluginPath)) {
 			continue;
 		}
 
@@ -77,11 +140,11 @@ ViperPlugin *ViperPluginManager::FindPluginByInitPluginPath(
 
 ViperPlugin *ViperPluginManager::FindPluginByDirectory(
 	std::string pluginDirectory) {
-	for(SourceHook::List<ViperPlugin*>::iterator it = Plugins->begin(); 
-		it != Plugins->end(); it++) {
+	for(std::vector<ViperPlugin*>::iterator it = LoadedPlugins.begin(); 
+		it != LoadedPlugins.end(); it++) {
 		ViperPlugin *plugin = *it;
 
-		if(plugin->GetPluginDirectory() != pluginDirectory) {
+		if(boost::filesystem::path(plugin->GetPluginDirectory()) != boost::filesystem::path(pluginDirectory)) {
 			continue;
 		}
 
@@ -89,4 +152,8 @@ ViperPlugin *ViperPluginManager::FindPluginByDirectory(
 	}
 	
 	return NULL;
+}
+
+int ViperPluginManager::GetLoadedPluginCount() {
+	return LoadedPlugins.size();
 }
