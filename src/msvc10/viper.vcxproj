@@ -209,7 +209,7 @@
       <AdditionalOptions>/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public\extensions;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE)\game\shared\;$(HL2SDKOBVALVE)\game\;$(HL2SDKOBVALVE)\game\server\;$(HL2SDKOBVALVE)\public\engine;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\vstdlib;$(HL2SDKOBVALVE)\tier1;$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public\extensions;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE);$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;BOOST_PYTHON_STATIC_LIB;DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -750,9 +750,13 @@
     <ClCompile Include="..\InvalidEventExceptionType.cpp" />
     <ClCompile Include="..\InvalidSendPropertyExceptionType.cpp" />
     <ClCompile Include="..\InvalidUserIdExceptionType.cpp" />
+    <ClCompile Include="..\IServerNotFoundExceptionType.cpp" />
+    <ClCompile Include="..\LightStyleOutOfRangeExceptionType.cpp" />
     <ClCompile Include="..\LoadExtensionException.cpp" />
     <ClCompile Include="..\ModEventsParser.cpp" />
     <ClCompile Include="..\NullReferenceExceptionType.cpp" />
+    <ClCompile Include="..\SDKToolsModSupportNotAvailableExceptionType.cpp" />
+    <ClCompile Include="..\SDKToolsModule.cpp" />
     <ClCompile Include="..\sdk\smsdk_ext.cpp" />
     <ClCompile Include="..\SourcemodModule.cpp" />
     <ClCompile Include="..\StdIoRedirect.cpp" />
@@ -828,10 +832,13 @@
     <ClInclude Include="..\InvalidEventExceptionType.h" />
     <ClInclude Include="..\InvalidSendPropertyExceptionType.h" />
     <ClInclude Include="..\InvalidUserIdExceptionType.h" />
+    <ClInclude Include="..\IServerNotFoundExceptionType.h" />
+    <ClInclude Include="..\LightStyleOutOfRangeExceptionType.h" />
     <ClInclude Include="..\LoadExtensionException.h" />
     <ClInclude Include="..\Macros.h" />
     <ClInclude Include="..\ModEventsParser.h" />
     <ClInclude Include="..\NullReferenceExceptionType.h" />
+    <ClInclude Include="..\SDKToolsModSupportNotAvailableExceptionType.h" />
     <ClInclude Include="..\SourcemodModule.h" />
     <ClInclude Include="..\StdIoRedirect.h" />
     <ClInclude Include="..\STL.h" />
@@ -857,6 +864,7 @@
     <ClInclude Include="..\ViperRootConsoleCommand.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\SDKToolsModule.h" />
     <None Include="..\TODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

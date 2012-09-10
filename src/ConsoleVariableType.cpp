@@ -1,8 +1,6 @@
 #include "BoostPythonSM.h"
 #include "ConsoleVariableType.h"
 #include "sdk/smsdk_ext.h"
-#include "Macros.h"
-#include "ViperExtension.h"
 #include "CompatWrappers.h"
 #include "inetchannel.h"
 #include "ClientIndexOutOfRangeExceptionType.h"
@@ -10,6 +8,7 @@
 #include "ClientIsFakeExceptionType.h"
 #include "ClientDataNotAvailableExceptionType.h"
 #include "ConsoleModule.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
 

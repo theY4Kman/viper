@@ -1,4 +1,3 @@
-#include "BoostPythonSM.h"
 #include "ClientsModule.h"
 #include "InterfaceContainer.h"
 #include "ClientDataNotAvailableExceptionType.h"

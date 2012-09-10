@@ -5,6 +5,7 @@
 #include "InvalidEventExceptionType.h"
 #include "EventNoLongerValidExceptionType.h"
 #include "EventsModule.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
 

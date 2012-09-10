@@ -1,10 +1,7 @@
 #include "BfReadType.h"
 #include "Macros.h"
-#include "BoostPythonSM.h"
 #include "Util.h"
 #include "NullReferenceExceptionType.h"
-
-namespace py = boost::python;
 
 BfReadType::BfReadType(bf_read *bfReadInstance) {
 	if(bfReadInstance == NULL) {

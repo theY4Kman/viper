@@ -1,8 +1,11 @@
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
 #include "BoostPythonSM.h"
 #include "EntityModule.h"
 #include "sdk/smsdk_ext.h"
 #include "Macros.h"
-#include "ViperExtension.h"
 #include "InvalidEdictExceptionType.h"
 #include "InvalidEntityExceptionType.h"
 #include "EntityNotNetworkableExceptionType.h"
@@ -18,12 +21,9 @@
 #include "server_class.h"
 #include "dt_common.h"
 #include "Util.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
-
-#ifdef GetClassName
-#undef GetClassName
-#endif
 
 int entity__get_max_entities() {
 	return g_Interfaces.GlobalVarsInstance->maxEntities;

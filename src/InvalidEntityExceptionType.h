@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_INVALIDENTITYEXCEPTIONTYPE_H__
 #define __INCLUDE_INVALIDENTITYEXCEPTIONTYPE_H__
 
-#include "ViperExtension.h"
+#include "STL.h"
 
 class InvalidEntityExceptionType {
 public:

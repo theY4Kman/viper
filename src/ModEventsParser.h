@@ -1,7 +1,6 @@
 #ifndef __INCLUDE_MODEVENTSPARSER_H__
 #define __INCLUDE_MODEVENTSPARSER_H__
 
-#include "Macros.h"
 #include "STL.h"
 #include "EventFieldType.h"
 

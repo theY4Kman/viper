@@ -2,6 +2,7 @@
 #include "HalflifeModule.h"
 #include "sdk/smsdk_ext.h"
 #include "Macros.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
 

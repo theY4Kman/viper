@@ -2,12 +2,12 @@
 #include "EventsModule.h"
 #include "sdk/smsdk_ext.h"
 #include "Macros.h"
-#include "ViperExtension.h"
 #include "EventType.h"
 #include "ModEventsParser.h"
 #include "EventHookModes.h"
 #include "EventsGameEventListener.h"
 #include "EventHookDoesNotExistExceptionType.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
 

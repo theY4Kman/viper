@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CONSOLECOMMANDINFO_H__
 #define __INCLUDE_CONSOLECOMMANDINFO_H__
 
-#include "Macros.h"
+#include "STL.h"
 #include "HL2SDK.h"
 
 class ConsoleCommandInfo {

@@ -1,8 +1,7 @@
 #ifndef __INCLUDE_VIPERRECIPIENTFILTER_H__
 #define __INCLUDE_VIPERRECIPIENTFILTER_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
+#include "STL.h"
 #include "HL2SDK.h"
 
 class ViperRecipientFilter : public IRecipientFilter {

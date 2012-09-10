@@ -1,10 +1,4 @@
-#include "BoostPythonSM.h"
 #include "ViperRecipientFilter.h"
-#include "Macros.h"
-#include "CompatWrappers.h"
-#include "ViperExtension.h"
-
-namespace py = boost::python;
 
 ViperRecipientFilter::ViperRecipientFilter(std::vector<int> clients, bool reliable, bool initMessage) {
 	Clients = clients;

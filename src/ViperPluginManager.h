@@ -10,11 +10,8 @@ public:
 	ViperPluginManager(std::string pythonHome);
 
 	void LoadPluginsInDirectory(std::string pluginsDirectory);
-	void LoadPlugin(std::string initPluginPath);
+	ViperPlugin *LoadPlugin(std::string initPluginPath);
 
-	
-	void UnloadPluginByID(int pluginID);
-	void UnloadPluginByPath(std::string pluginPath);
 	void UnloadPlugin(ViperPlugin *plugin);
 
 	ViperPlugin *FindPluginByInitPluginPath(std::string initPluginPath);

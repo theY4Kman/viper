@@ -2,6 +2,7 @@
 #include "BoostPythonSM.h"
 #include "ForwardsModule.h"
 #include "Util.h"
+#include "sdk/smsdk_ext.h"
 
 namespace py = boost::python;
 

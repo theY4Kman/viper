@@ -31,6 +31,12 @@ private:
 
 	// Python lib directory
 	std::string PythonLibDirectory;
+
+public:
+	std::string Name;
+	std::string Author;
+	std::string Description;
+	std::string Version;
 };
 
 #endif

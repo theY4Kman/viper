@@ -43,7 +43,7 @@ void ViperPluginManager::LoadPluginsInDirectory(std::string pluginsDirectory) {
 	libsys->CloseDirectory(directoryInstance);
 }
 
-void ViperPluginManager::LoadPlugin(std::string initPluginPath) {
+ViperPlugin *ViperPluginManager::LoadPlugin(std::string initPluginPath) {
 	ViperPlugin *plugin = FindPluginByInitPluginPath(initPluginPath);
 
 	boost::filesystem::path fileSystemPath(initPluginPath);
@@ -58,6 +58,8 @@ void ViperPluginManager::LoadPlugin(std::string initPluginPath) {
 	plugin->Run();
 
 	LoadedPlugins.push_back(plugin);
+	
+	return plugin;
 }
 
 void ViperPluginManager::UnloadPlugin(ViperPlugin *plugin) {
@@ -76,42 +78,6 @@ void ViperPluginManager::UnloadPlugin(ViperPlugin *plugin) {
 	}
 
 	delete plugin;
-}
-
-void ViperPluginManager::UnloadPluginByPath(std::string pluginPath) {
-	ViperPlugin *plugin = FindPluginByInitPluginPath(pluginPath);
-
-	if(plugin != NULL) {
-		UnloadPlugin(plugin);
-		return;
-	}
-
-	plugin = FindPluginByDirectory(pluginPath);
-
-	if(plugin != NULL) {
-		UnloadPlugin(plugin);
-		return;
-	}
-
-	char str[1024];
-	UTIL_Format(str, sizeof(str), "Plugin not loaded: %s", pluginPath.c_str());
-
-	boost::throw_exception(std::exception(str));
-}
-
-void ViperPluginManager::UnloadPluginByID(int pluginID) {
-	if(pluginID > LoadedPlugins.size()) {
-		char str[256];
-		UTIL_Format(str, sizeof(str), "Plugin not loaded: #%d", pluginID);
-
-		boost::throw_exception(std::exception(str));
-	}
-	
-	int pluginIndex = pluginID - 1;
-
-	ViperPlugin *plugin = LoadedPlugins[pluginIndex];
-
-	UnloadPlugin(plugin);
 }
 
 ViperPlugin *ViperPluginManager::FindPluginByID(int pluginID) {

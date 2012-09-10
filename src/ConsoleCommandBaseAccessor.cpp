@@ -1,11 +1,7 @@
-#include "BoostPythonSM.h"
 #include "ConsoleCommandBaseAccessor.h"
+#include "STL.h"
 #include "sdk/smsdk_ext.h"
-#include "Macros.h"
-#include "ViperExtension.h"
 #include "CompatWrappers.h"
-
-namespace py = boost::python;
 
 ConsoleCommandBaseAccessor console__CommandBaseAccessor;
 

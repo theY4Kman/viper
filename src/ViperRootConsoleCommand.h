@@ -1,9 +1,9 @@
 #ifndef __INCLUDE_VIPERROOTCONSOLECOMMAND_H__
 #define __INCLUDE_VIPERROOTCONSOLECOMMAND_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
+#include "STL.h"
 #include "HL2SDK.h"
+#include "CompatWrappers.h"
 
 class ViperRootConsoleCommand : public SourceMod::IRootConsoleCommand {
 public:

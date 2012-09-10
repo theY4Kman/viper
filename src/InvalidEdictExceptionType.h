@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_INVALIDEDICTEXCEPTIONTYPE_H__
 #define __INCLUDE_INVALIDEDICTEXCEPTIONTYPE_H__
 
-#include "ViperExtension.h"
+#include "STL.h"
 
 class InvalidEdictExceptionType {
 public:

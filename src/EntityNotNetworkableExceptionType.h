@@ -1,9 +1,7 @@
 #ifndef __INCLUDE_ENTITYNOTNETWORKABLEEXCEPTIONTYPE_H__
 #define __INCLUDE_ENTITYNOTNETWORKABLEEXCEPTIONTYPE_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
-#include "HL2SDK.h"
+#include "STL.h"
 
 class EntityNotNetworkableExceptionType {
 public:

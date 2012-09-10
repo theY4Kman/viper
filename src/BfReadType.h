@@ -1,9 +1,8 @@
 #ifndef __INCLUDE_BFREADTYPE_H__
 #define __INCLUDE_BFREADTYPE_H__
 
-#include "BoostPythonSM.h"
-#include "Macros.h"
 #include "STL.h"
+#include "HL2SDK.h"
 #include "VectorType.h"
 
 class BfReadType {

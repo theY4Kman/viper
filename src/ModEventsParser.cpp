@@ -1,9 +1,6 @@
 #include "BoostPythonSM.h"
-#include "EventsModule.h"
-#include "sdk/smsdk_ext.h"
-#include "Macros.h"
-#include "ViperExtension.h"
 #include "ModEventsParser.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
 

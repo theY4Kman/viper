@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_INVALIDUSERIDEXCEPTIONTYPE_H__
 #define __INCLUDE_INVALIDUSERIDEXCEPTIONTYPE_H__
 
-#include "ViperExtension.h"
+#include "STL.h"
 
 class InvalidUserIDExceptionType {
 public:

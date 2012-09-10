@@ -40,6 +40,7 @@
 #include "EventsModule.h"
 #include "UserMessagesModule.h"
 #include "ConsoleModule.h"
+#include "SDKToolsModule.h"
 #include "InterfaceContainer.h"
 
 namespace py = boost::python;
@@ -76,6 +77,7 @@ void ViperExtension::InitializePython() {
 	PyImport_AppendInittab("Events", initEvents);
 	PyImport_AppendInittab("UserMessages", initUserMessages);
 	PyImport_AppendInittab("Console", initConsole);
+	PyImport_AppendInittab("Console", initSDKTools);
 
 	Py_Initialize();
 
@@ -103,6 +105,12 @@ bool ViperExtension::SDK_OnLoad(char *error, size_t maxlength, bool late) {
 	// We need bintools for the EntityModule
 	sharesys->AddDependency(myself, "bintools.ext", true, true);
 
+	// We need sdktools for the SDKToolsModule
+	sharesys->AddDependency(myself, "sdktools.ext", true, true);
+
+	SM_GET_LATE_IFACE(BINTOOLS, g_Interfaces.BinToolsInstance);
+	SM_GET_LATE_IFACE(SDKTOOLS, g_Interfaces.SDKToolsInstance);
+
 	g_Interfaces.SharedEdictChangeInfoInstance = g_pSharedChangeInfo = engine->GetSharedEdictChangeInfo();
 
 	return true;
@@ -127,6 +135,7 @@ void ViperExtension::SDK_OnUnload() {
 	destroyEvents();
 	destroyUserMessages();
 	destroyConsole();
+	destroySDKTools();
 }
 
 void ViperExtension::OnGameFrame(bool simulating) {
@@ -140,8 +149,8 @@ void ViperExtension::SDK_OnAllLoaded() {
 
 	char configError[1024];
 
-	if(!gameconfs->LoadGameConfigFile("viper.games", &g_Interfaces.GameConfigInstance, configError, sizeof(configError))) {
-		g_SMAPI->ConPrintf("%s", "Unable to load signatures and offsets file for viper (viper.games.txt)");
+	if(!gameconfs->LoadGameConfigFile("sdktools.games", &g_Interfaces.GameConfigInstance, configError, sizeof(configError))) {
+		g_SMAPI->ConPrintf("%s", "Unable to load signatures and offsets file for SDKTools (sdktools.games)");
 		return;
 	}
 

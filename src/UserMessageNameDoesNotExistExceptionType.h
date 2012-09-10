@@ -1,9 +1,7 @@
 #ifndef __INCLUDE_USERMESSAGENAMEDOESNOTEXISTEXCEPTIONTYPE_H__
 #define __INCLUDE_USERMESSAGENAMEDOESNOTEXISTEXCEPTIONTYPE_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
-#include "HL2SDK.h"
+#include "STL.h"
 
 class UserMessageNameDoesNotExistExceptionType {
 public:

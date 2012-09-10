@@ -1,8 +1,6 @@
 #include "BoostPythonSM.h"
 #include "UserMessagesModule.h"
 #include "sdk/smsdk_ext.h"
-#include "Macros.h"
-#include "ViperExtension.h"
 #include "ViperRecipientFilter.h"
 #include "BfWriteType.h"
 #include "UserMessageAlreadyStartedExceptionType.h"

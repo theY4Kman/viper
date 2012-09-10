@@ -1,4 +1,3 @@
-#include "BoostPythonSM.h"
 #include "BitBufModule.h"
 #include "BfReadType.h"
 #include "BfWriteType.h"

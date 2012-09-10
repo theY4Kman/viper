@@ -2,8 +2,8 @@
 #define __INCLUDE_INTERFACECONTAINER_H__
 
 #include "HL2SDK.h"
-#include "ViperExtension.h"
 #include "ViperRootConsoleCommand.h"
+#include "ISDKTools.h"
 
 class ViperRootConsoleCommand;
 
@@ -26,6 +26,7 @@ public:
 	CSharedEdictChangeInfo *SharedEdictChangeInfoInstance;
 	IServerPluginCallbacks *ServerPluginCallbacksInstance;
 	ViperRootConsoleCommand *RootConsoleCommandInstance;
+	ISDKTools *SDKToolsInstance;
 };
 
 extern InterfaceContainer g_Interfaces;

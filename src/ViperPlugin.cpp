@@ -1,7 +1,6 @@
 #include "ViperPlugin.h"
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
-#include "ViperExtension.h"
 #include "SysHooks.h"
 #include "ForwardsModule.h"
 #include "SourcemodModule.h"
@@ -15,6 +14,7 @@
 #include "EventsModule.h"
 #include "UserMessagesModule.h"
 #include "ConsoleModule.h"
+#include "SDKToolsModule.h"
 
 namespace py = boost::python;
 
@@ -28,6 +28,11 @@ ViperPlugin::ViperPlugin(std::string initPluginPath, std::string pythonHome) {
 	PluginDirectory = fileSystemPath.parent_path().string();
 	
 	ThreadState = NULL;
+
+	Name = "<Untitled Plugin>";
+	Author = "<Author N/A>";
+	Version = "<Version N/A>";
+	Description = "<Description N/A>";
 }
 
 ViperPlugin::~ViperPlugin() {
@@ -104,8 +109,49 @@ void ViperPlugin::Run() {
 		py::import("Events");
 		py::import("UserMessages");
 		py::import("Console");
+		py::import("SDKTools");
 
 		py::exec_file(InitPluginPath.c_str(), mainDict, mainDict);
+
+		if(mainDict.contains("myinfo")) {
+			py::extract<py::dict> dictExtractor(mainDict["myinfo"]);
+
+			if(dictExtractor.check()) {
+				py::dict myInfoDict = dictExtractor();
+
+				if(myInfoDict.contains("name")) {
+					py::extract<std::string> extractor(myInfoDict["name"]);
+				
+					if(extractor.check()) {
+						Name = extractor();
+					}
+				}
+
+				if(myInfoDict.contains("author")) {
+					py::extract<std::string> extractor(myInfoDict["author"]);
+				
+					if(extractor.check()) {
+						Author = extractor();
+					}
+				}
+
+				if(myInfoDict.contains("description")) {
+					py::extract<std::string> extractor(myInfoDict["description"]);
+				
+					if(extractor.check()) {
+						Description = extractor();
+					}
+				}
+
+				if(myInfoDict.contains("version")) {
+					py::extract<std::string> extractor(myInfoDict["version"]);
+				
+					if(extractor.check()) {
+						Version = extractor();
+					}
+				}
+			}
+		}
 	}
 	catch(const py::error_already_set &) {
 		PyErr_Print();
@@ -129,6 +175,10 @@ void ViperPlugin::Unload() {
 	unloadThreadStateEvents(ThreadState);
 	unloadThreadStateUserMessages(ThreadState);
 	unloadThreadStateConsole(ThreadState);
+	unloadThreadStateSDKTools(ThreadState);
+
+	PyThreadState_Delete(ThreadState);
+	ThreadState = NULL;
 }
 
 std::string ViperPlugin::GetPluginDirectory() {

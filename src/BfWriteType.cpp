@@ -1,10 +1,6 @@
 #include "BfWriteType.h"
-#include "Macros.h"
-#include "BoostPythonSM.h"
 #include "Util.h"
 #include "NullReferenceExceptionType.h"
-
-namespace py = boost::python;
 
 BfWriteType::BfWriteType(bf_write *bfWriteInstance) {
 	if(NULL == bfWriteInstance) {

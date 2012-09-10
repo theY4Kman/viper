@@ -37,6 +37,9 @@
     <Filter Include="Console">
       <UniqueIdentifier>{ef660b08-be5b-423a-860e-00476061d7d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDKTools">
+      <UniqueIdentifier>{f3b0ba36-1647-451b-8f2a-404fe863faf0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -234,6 +237,18 @@
       <Filter>Clients</Filter>
     </ClCompile>
     <ClCompile Include="..\ViperRootConsoleCommand.cpp" />
+    <ClCompile Include="..\SDKToolsModule.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IServerNotFoundExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LightStyleOutOfRangeExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SDKToolsModSupportNotAvailableExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -457,8 +472,20 @@
     <ClInclude Include="..\ForwardFunction.h">
       <Filter>Forwards</Filter>
     </ClInclude>
+    <ClInclude Include="..\IServerNotFoundExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LightStyleOutOfRangeExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SDKToolsModSupportNotAvailableExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TODO.txt" />
+    <None Include="..\SDKToolsModule.h">
+      <Filter>SDKTools</Filter>
+    </None>
   </ItemGroup>
 </Project>

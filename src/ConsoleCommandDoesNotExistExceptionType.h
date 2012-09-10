@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CONSOLECOMMANDDOESNOTEXISTEXCEPTIONTYPE_H__
 #define __INCLUDE_CONSOLECOMMANDDOESNOTEXISTEXCEPTIONTYPE_H__
 
-#include "ViperExtension.h"
+#include "STL.h"
 
 class ConsoleCommandDoesNotExistExceptionType {
 public:

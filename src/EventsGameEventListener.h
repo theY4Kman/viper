@@ -3,7 +3,6 @@
 
 #include "STL.h"
 #include "HL2SDK.h"
-#include "Macros.h"
 
 class EventsGameEventListener : public IGameEventListener2 {
 public:

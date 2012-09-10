@@ -1,9 +1,7 @@
 #ifndef __INCLUDE_INVALIDSENDPROPERTYEXCEPTIONTYPE_H__
 #define __INCLUDE_INVALIDSENDPROPERTYEXCEPTIONTYPE_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
-#include "HL2SDK.h"
+#include "STL.h"
 
 class InvalidSendPropertyExceptionType {
 public:

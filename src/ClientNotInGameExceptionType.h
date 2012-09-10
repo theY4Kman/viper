@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CLIENTNOTINGAMEEXCEPTIONTYPE_H__
 #define __INCLUDE_CLIENTNOTINGAMEEXCEPTIONTYPE_H__
 
-#include "ViperExtension.h"
+#include "STL.h"
 
 class ClientNotInGameExceptionType {
 public:

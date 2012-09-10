@@ -2,7 +2,6 @@
 #include "ConsoleModule.h"
 #include "sdk/smsdk_ext.h"
 #include "Macros.h"
-#include "ViperExtension.h"
 #include "CompatWrappers.h"
 #include "server_class.h"
 #include "dt_common.h"
@@ -15,6 +14,7 @@
 #include "ClientIsFakeExceptionType.h"
 #include "ClientDataNotAvailableExceptionType.h"
 #include "ConsoleCommandDoesNotExistExceptionType.h"
+#include "InterfaceContainer.h"
 
 namespace py = boost::python;
 

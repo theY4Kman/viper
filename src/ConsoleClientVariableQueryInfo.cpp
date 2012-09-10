@@ -1,9 +1,4 @@
-#include "BoostPythonSM.h"
 #include "ConsoleClientVariableQueryInfo.h"
-#include "sdk/smsdk_ext.h"
-#include "Macros.h"
-#include "ViperExtension.h"
-#include "CompatWrappers.h"
 
 namespace py = boost::python;
 

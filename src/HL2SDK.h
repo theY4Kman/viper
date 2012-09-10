@@ -9,13 +9,14 @@
 #define GAME_DLL 1
 #endif // !GAME_DLL
 
-#include "vstdlib/random.h"
-#include "igameevents.h"
-#include "IEngineSound.h"
-#include "filesystem.h"
-#include "icvar.h"
-#include "edict.h"
-#include "shareddefs.h"
+#include <public/vstdlib/random.h>
+#include <public/igameevents.h>
+#include <public/engine/IEngineSound.h>
+#include <public/filesystem.h>
+#include <public/icvar.h>
+#include <public/edict.h>
+#include <public/iserver.h>
+#include <game/shared/shareddefs.h>
 
 #if SOURCE_ENGINE >= SE_LEFT4DEAD
 #   include "convar_sm_l4d.h"

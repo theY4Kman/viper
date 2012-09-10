@@ -1,9 +1,7 @@
 #ifndef __INCLUDE_USERMESSAGEIDDOESNOTEXISTEXCEPTIONTYPE_H__
 #define __INCLUDE_USERMESSAGEIDDOESNOTEXISTEXCEPTIONTYPE_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
-#include "HL2SDK.h"
+#include "STL.h"
 
 class UserMessageIDDoesNotExistExceptionType {
 public:

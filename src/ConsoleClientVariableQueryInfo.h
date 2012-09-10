@@ -1,8 +1,10 @@
 #ifndef __INCLUDE_CONSOLECLIENTVARIABLEQUERYINFO_H__
 #define __INCLUDE_CONSOLECLIENTVARIABLEQUERYINFO_H__
 
-#include "Macros.h"
+#include "STL.h"
 #include "HL2SDK.h"
+#include "BoostPythonSM.h"
+#include <public\engine\iserverplugin.h>
 
 class ConsoleClientVariableQueryInfo {
 public:

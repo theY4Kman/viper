@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CLIENTDATANOTAVAILABLEEXCEPTIONTYPE_H__
 #define __INCLUDE_CLIENTDATANOTAVAILABLEEXCEPTIONTYPE_H__
 
-#include "ViperExtension.h"
+#include "STL.h"
 
 class ClientDataNotAvailableExceptionType {
 public:

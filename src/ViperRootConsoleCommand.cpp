@@ -1,10 +1,6 @@
-#include "BoostPythonSM.h"
 #include "ViperRootConsoleCommand.h"
-#include "Macros.h"
 #include "CompatWrappers.h"
 #include "ViperExtension.h"
-
-namespace py = boost::python;
 
 void ViperRootConsoleCommand::OnRootConsoleCommand2(const char *commandName, const ICommandArgs *commandArgs) {
 	int argCount = commandArgs->ArgC();
@@ -39,9 +35,9 @@ void ViperRootConsoleCommand::OnRootConsoleCommand2(const char *commandName, con
 			std::string fullPathStr(fullPath);
 
 			try {
-				g_ViperExtension.GetPluginManager()->LoadPlugin(fullPathStr);
+				ViperPlugin *loadedPlugin = g_ViperExtension.GetPluginManager()->LoadPlugin(fullPathStr);
 
-				g_SMAPI->ConPrintf("Plugin \"%s\" loaded.\n", loadStr.c_str());
+				g_SMAPI->ConPrintf("Plugin \"%s\" loaded.\n", loadedPlugin->Name.c_str());
 			}
 			catch(const std::exception &e) {
 				g_SMAPI->ConPrintf("Error: %s\n", e.what());
@@ -60,15 +56,18 @@ void ViperRootConsoleCommand::OnRootConsoleCommand2(const char *commandName, con
 			if(unloadStr[0] == '#') {
 				int pluginID = atoi(unloadStr.substr(1).c_str());
 
-				try {
-					g_ViperExtension.GetPluginManager()->UnloadPluginByID(pluginID);
+				ViperPlugin *plugin = g_ViperExtension.GetPluginManager()->FindPluginByID(pluginID);
 
-					g_SMAPI->ConPrintf("Plugin #%d unloaded.\n", pluginID);
-				}
-				catch(const std::exception &e) {
-					g_SMAPI->ConPrintf("Error: %s\n", e.what());
+				if(NULL == plugin) {
+					g_SMAPI->ConPrintf("Plugin #%d is not loaded.\n", pluginID);
+					return;
 				}
 
+				std::string plName = plugin->Name;
+
+				g_ViperExtension.GetPluginManager()->UnloadPlugin(plugin);
+
+				g_SMAPI->ConPrintf("Plugin \"%s\" unloaded.\n", plName.c_str());
 				return;
 			}
 
@@ -78,24 +77,36 @@ void ViperRootConsoleCommand::OnRootConsoleCommand2(const char *commandName, con
 
 			std::string fullPathStr(fullPath);
 
-			try {
-				g_ViperExtension.GetPluginManager()->UnloadPluginByPath(fullPathStr);
+			ViperPlugin *plugin = g_ViperExtension.GetPluginManager()->FindPluginByInitPluginPath(fullPathStr);
 
-				g_SMAPI->ConPrintf("Plugin \"%s\" unloaded.\n", unloadStr.c_str());
-			}
-			catch(const std::exception &e) {
-				g_SMAPI->ConPrintf("Error: %s\n", e.what());
+			if(plugin == NULL) {
+				plugin = g_ViperExtension.GetPluginManager()->FindPluginByDirectory(fullPathStr);
 			}
 
+			if(plugin == NULL) {
+				g_SMAPI->ConPrintf("Unabled to find plugin \"%s\"\n", unloadStr.c_str());
+				return;
+			}
+
+			std::string plName = plugin->Name;
+
+			g_ViperExtension.GetPluginManager()->UnloadPlugin(plugin);
+
+			g_SMAPI->ConPrintf("Plugin \"%s\" unloaded.\n", plName.c_str());
 			return;
 		}
 		else if(subCommand == "list") {
 			int plCount = g_ViperExtension.GetPluginManager()->GetLoadedPluginCount();
 
+			if(plCount == 0) {
+				g_SMAPI->ConPrint("No plugins loaded.\n");
+				return;
+			}
+
 			for(int plIndex = 1; plIndex <= plCount; plIndex++) {
 				ViperPlugin *plugin = g_ViperExtension.GetPluginManager()->FindPluginByID(plIndex);
 
-				g_SMAPI->ConPrintf("%d. %s\n", plIndex, plugin->GetPluginDirectory().c_str());
+				g_SMAPI->ConPrintf("%d. %s (%s) by %s - %s\n", plIndex, plugin->Name.c_str(), plugin->Version.c_str(), plugin->Author.c_str(), plugin->Description.c_str());
 			}
 
 			return;

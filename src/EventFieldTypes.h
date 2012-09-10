@@ -1,10 +1,6 @@
 #ifndef __INCLUDE_EVENTFIELDTYPES_H__
 #define __INCLUDE_EVENTFIELDTYPES_H__
 
-#include "Macros.h"
-#include "ViperExtension.h"
-#include "HL2SDK.h"
-
 enum EventFieldTypes {
 	EventFieldType_Unknown = -1,
 	EventFieldType_String = 0,

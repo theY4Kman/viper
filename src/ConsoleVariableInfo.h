@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CONSOLEVARIABLEINFO_H__
 #define __INCLUDE_CONSOLEVARIABLEINFO_H__
 
-#include "Macros.h"
+#include "STL.h"
 #include "HL2SDK.h"
 
 class ConsoleVariableInfo {

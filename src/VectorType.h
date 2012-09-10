@@ -1,8 +1,6 @@
 #ifndef __INCLUDE_VECTORTYPE_H__
 #define __INCLUDE_VECTORTYPE_H__
 
-#include "Macros.h"
-
 class VectorType {
 public:
 	VectorType(const VectorType &v);

@@ -1,10 +1,10 @@
 #ifndef __INCLUDE_EVENTTYPE_H__
 #define __INCLUDE_EVENTTYPE_H__
 
-#include "BoostPythonSM.h"
-#include "Macros.h"
 #include "STL.h"
+#include "HL2SDK.h"
 #include "EventFieldType.h"
+#include "BoostPythonSM.h"
 
 class EventType {
 public:

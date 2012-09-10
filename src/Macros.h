@@ -1,9 +1,6 @@
 #ifndef __INCLUDE_MACROS_H__
 #define __INCLUDE_MACROS_H__
 
-#include "ViperExtension.h"
-#include "InterfaceContainer.h"
-
 // To define a custom exception type, you need to call the following!
 // Call either DEFINE_CUSTOM_EXCEPTION_INIT or DEFINE_CUSTOM_EXCEPTION_INIT_EX
 // right above the BOOST_PYTHON_MODULE(){} it in the CPP source
