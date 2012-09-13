@@ -249,6 +249,9 @@
     <ClCompile Include="..\SDKToolsModSupportNotAvailableExceptionType.cpp">
       <Filter>SDKTools</Filter>
     </ClCompile>
+    <ClCompile Include="..\MapMustBeRunningExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -479,6 +482,9 @@
       <Filter>SDKTools</Filter>
     </ClInclude>
     <ClInclude Include="..\SDKToolsModSupportNotAvailableExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MapMustBeRunningExceptionType.h">
       <Filter>SDKTools</Filter>
     </ClInclude>
   </ItemGroup>

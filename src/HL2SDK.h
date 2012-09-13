@@ -18,6 +18,10 @@
 #include <public/iserver.h>
 #include <game/shared/shareddefs.h>
 
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+#include <public/toolframework/itoolentity.h>
+#endif
+
 #if SOURCE_ENGINE >= SE_LEFT4DEAD
 #   include "convar_sm_l4d.h"
 #elif SOURCE_ENGINE >= SE_ORANGEBOX

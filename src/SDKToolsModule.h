@@ -17,5 +17,6 @@ extern unsigned char sdktools__VariantTInstance[SIZEOF_VARIANT_T];
 DEFINE_CUSTOM_EXCEPTION_DECL(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(MapMustBeRunningExceptionType, SDKTools)
 
 #endif

@@ -753,6 +753,7 @@
     <ClCompile Include="..\IServerNotFoundExceptionType.cpp" />
     <ClCompile Include="..\LightStyleOutOfRangeExceptionType.cpp" />
     <ClCompile Include="..\LoadExtensionException.cpp" />
+    <ClCompile Include="..\MapMustBeRunningExceptionType.cpp" />
     <ClCompile Include="..\ModEventsParser.cpp" />
     <ClCompile Include="..\NullReferenceExceptionType.cpp" />
     <ClCompile Include="..\SDKToolsModSupportNotAvailableExceptionType.cpp" />
@@ -836,6 +837,7 @@
     <ClInclude Include="..\LightStyleOutOfRangeExceptionType.h" />
     <ClInclude Include="..\LoadExtensionException.h" />
     <ClInclude Include="..\Macros.h" />
+    <ClInclude Include="..\MapMustBeRunningExceptionType.h" />
     <ClInclude Include="..\ModEventsParser.h" />
     <ClInclude Include="..\NullReferenceExceptionType.h" />
     <ClInclude Include="..\SDKToolsModSupportNotAvailableExceptionType.h" />

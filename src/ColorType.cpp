@@ -31,11 +31,6 @@ bool ColorType::CompareNotEqual(ColorType c) {
 	return !CompareEqual(c);
 }
 
-int ColorType::Compare(ColorType c) {
-	return CompareEqual(c) ? 0 :
-		(CompareLessThan(c) ? -1 : 1);
-}
-
 bool ColorType::CompareGreaterThan(ColorType c) {
 	return Red > c.Red &&
 		Green > c.Green &&
@@ -62,11 +57,4 @@ bool ColorType::CompareLessThanOrEqual(ColorType c) {
 		Green <= c.Green &&
 		Blue <= c.Blue &&
 		Alpha <= c.Alpha;
-}
-
-std::string ColorType::ReprMagic() {
-	char repr[256];
-	UTIL_Format(repr, sizeof(repr), "Color(%d, %d, %d, %d)", Red, Green, Blue, Alpha);
-    
-	return std::string(repr);
 }

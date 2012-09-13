@@ -77,7 +77,7 @@ void ViperExtension::InitializePython() {
 	PyImport_AppendInittab("Events", initEvents);
 	PyImport_AppendInittab("UserMessages", initUserMessages);
 	PyImport_AppendInittab("Console", initConsole);
-	PyImport_AppendInittab("Console", initSDKTools);
+	PyImport_AppendInittab("SDKTools", initSDKTools);
 
 	Py_Initialize();
 
@@ -191,6 +191,11 @@ bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen
 		IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 	GET_V_IFACE_ANY(GetServerFactory, g_Interfaces.ServerGameEntsInstance,
 		IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
+
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+	GET_V_IFACE_ANY(GetServerFactory, g_Interfaces.ServerToolsInstance,
+		IServerTools, VSERVERTOOLS_INTERFACE_VERSION);
+#endif
 
 	g_Interfaces.GlobalVarsInstance = ismm->GetCGlobals();
 	g_pCVar = icvar = g_Interfaces.CvarInstance;

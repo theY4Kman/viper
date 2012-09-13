@@ -26,6 +26,9 @@ public:
 	CSharedEdictChangeInfo *SharedEdictChangeInfoInstance;
 	IServerPluginCallbacks *ServerPluginCallbacksInstance;
 	ViperRootConsoleCommand *RootConsoleCommandInstance;
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+	IServerTools *ServerToolsInstance;
+#endif
 	ISDKTools *SDKToolsInstance;
 };
 

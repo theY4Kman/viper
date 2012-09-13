@@ -13,14 +13,12 @@ BOOST_PYTHON_MODULE(Datatypes) {
 		.def_readwrite("x", &VectorType::X)
 		.def_readwrite("y", &VectorType::Y)
 		.def_readwrite("z", &VectorType::Z)
-		.def("__cmp__", &VectorType::Compare)
 		.def("__eq__", &VectorType::CompareEqual)
 		.def("__ne__", &VectorType::CompareNotEqual)
 		.def("__lt__", &VectorType::CompareLessThan)
 		.def("__gt__", &VectorType::CompareGreaterThan)
 		.def("__le__", &VectorType::CompareLessThanOrEqual)
-		.def("__ge__", &VectorType::CompareGreaterThanOrEqual)
-		.def("__repr__", &VectorType::ReprMagic);
+		.def("__ge__", &VectorType::CompareGreaterThanOrEqual);
 
 	py::class_<ColorType>("Color", py::init<unsigned char, unsigned char, unsigned char, unsigned char>((py::arg("r") = 255, py::arg("g") = 255, py::arg("b") = 255, py::arg("a"))))
 		.def(py::init<ColorType>((py::arg("c"))))
@@ -28,14 +26,12 @@ BOOST_PYTHON_MODULE(Datatypes) {
 		.def_readwrite("g", &ColorType::Green)
 		.def_readwrite("b", &ColorType::Blue)
 		.def_readwrite("a", &ColorType::Alpha)
-		.def("__cmp__", &ColorType::Compare)
 		.def("__eq__", &ColorType::CompareEqual)
 		.def("__ne__", &ColorType::CompareNotEqual)
 		.def("__lt__", &ColorType::CompareLessThan)
 		.def("__gt__", &ColorType::CompareGreaterThan)
 		.def("__le__", &ColorType::CompareLessThanOrEqual)
-		.def("__ge__", &ColorType::CompareGreaterThanOrEqual)
-		.def("__repr__", &ColorType::ReprMagic);
+		.def("__ge__", &ColorType::CompareGreaterThanOrEqual);
 }
 
 void destroyDatatypes() {
