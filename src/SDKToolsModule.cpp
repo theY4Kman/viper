@@ -13,9 +13,12 @@
 #include "LightStyleOutOfRangeExceptionType.h"
 #include "SDKToolsModSupportNotAvailableExceptionType.h"
 #include "MapMustBeRunningExceptionType.h"
+#include "InvalidStringTableExceptionType.h"
+#include "InvalidStringTableStringIndexExceptionType.h"
 #include "ColorType.h"
 #include "VectorType.h"
 #include <public\iclient.h>
+#include <public\cdll_int.h>
 #include "Util.h"
 
 namespace py = boost::python;
@@ -30,6 +33,7 @@ SourceMod::ICallWrapper *sdktools__TeleportEntityCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__GetClientWeaponSlotCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__ActivateEntityCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__EquipPlayerWeaponCallWrapper = NULL;
+SourceMod::ICallWrapper *sdktools__SetEntityModelCallWrapper = NULL;
 
 #if SOURCE_ENGINE < SE_ORANGEBOX
 SourceMod::ICallWrapper *sdktools__CreateEntityByNameCallWrapper = NULL;
@@ -1228,10 +1232,244 @@ bool sdktools__dispatch_spawn(int entityIndex) {
 }
 #endif
 
+void sdktools__set_entity_model(int entityIndex, std::string model) {
+	if (NULL == sdktools__SetEntityModelCallWrapper) {
+		int offset;
+		void *addr;
+
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(const char *);
+		
+		if (g_Interfaces.GameConfigInstance->GetOffset("SetEntityModel", &offset)) {
+			sdktools__SetEntityModelCallWrapper = g_Interfaces.BinToolsInstance->CreateVCall(offset, 0, 0, NULL, pass, 1);
+		}
+		else if(g_Interfaces.GameConfigInstance->GetMemSig("SetEntityModel", &addr)) {
+			sdktools__SetEntityModelCallWrapper = g_Interfaces.BinToolsInstance->CreateCall(addr, CallConv_ThisCall, NULL, pass, 1);
+		}
+		else {
+			throw SDKToolsModSupportNotAvailableExceptionType("SetEntityModel");
+		}
+	}
+
+	edict_t *edict = PEntityOfEntIndex(entityIndex);
+
+	if(edict == NULL || edict->IsFree()) {
+		throw InvalidEdictExceptionType(entityIndex);
+	}
+
+	CBaseEntity *entity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(edict);
+
+	if(entity == NULL) {
+		throw InvalidEntityExceptionType(entityIndex);
+	}
+
+	unsigned char vstk[sizeof(CBaseEntity *) + sizeof(const char*)];
+	unsigned char *vptr = vstk;
+
+	*(CBaseEntity **)vptr = entity;
+	vptr += sizeof(CBaseEntity *);
+	*(const char **)vptr = model.c_str();
+
+	sdktools__SetEntityModelCallWrapper->Execute(vstk, NULL);
+}
+
+std::string sdktools__get_client_decal_file(int clientIndex) {
+	SourceMod::IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+
+	if(!player->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!player->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	player_info_t info;
+
+	#if SOURCE_ENGINE >= SE_ORANGEBOX
+	engine->GetPlayerInfo(clientIndex, &info);
+	#else
+	IServer *server = g_Interfaces.SDKToolsInstance->GetIServer();
+
+	if(NULL == server) {
+		throw IServerNotFoundExceptionType();
+	}
+	
+	server->GetPlayerInfo(clientIndex - 1, &info);
+	#endif
+
+	if(!info.customFiles[0]) {
+		throw ClientDataNotAvailableExceptionType(clientIndex, "decal");
+	}
+
+	char buf[1024];
+
+	Q_binarytohex((byte *)&info.customFiles[0], sizeof(info.customFiles[0]), buf, sizeof(buf));
+
+	return std::string(buf);
+}
+
+
+bool sdktools__lock_string_tables(bool lock) {
+	return engine->LockNetworkStringTables(lock);
+}
+
+int sdktools__find_string_table(std::string name) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->FindTable(name.c_str());
+
+	if (NULL == stringTable) {
+		return INVALID_STRING_TABLE;
+	}
+
+	return stringTable->GetTableId();
+}
+
+int sdktools__get_num_string_tables() {
+	return g_Interfaces.NetworkStringTableContainerInstance->GetNumTables();
+}
+
+int sdktools__get_string_table_num_strings(int tableIndex) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+
+	return stringTable->GetNumStrings();
+}
+
+int sdktools__get_string_table_max_strings(int tableIndex) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+
+	return stringTable->GetMaxStrings();
+}
+
+std::string sdktools__get_string_table_name(int tableIndex) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+
+	return std::string(stringTable->GetTableName());
+}
+
+int sdktools__find_string_index(int tableIndex, std::string needle) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+
+	return stringTable->FindStringIndex(needle.c_str());
+}
+
+std::string sdktools__read_string_table(int tableIndex, int stringIndex) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+	
+	const char *str = stringTable->GetString(stringIndex);
+
+	if(NULL == str) {
+		throw InvalidStringTableStringIndexExceptionType(tableIndex, stringIndex);
+	}
+
+	return std::string(str);
+}
+
+int sdktools__get_string_table_data_length(int tableIndex, int stringIndex) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+	
+	if(stringIndex < 0 || stringIndex >= stringTable->GetNumStrings()) {
+		throw InvalidStringTableStringIndexExceptionType(tableIndex, stringIndex);
+	}
+
+	const void *userdata;
+	int datalen;
+
+	userdata = stringTable->GetStringUserData(stringIndex, &datalen);
+
+	if(NULL == userdata) {
+		return 0;
+	}
+
+	return datalen;
+}
+
+std::string sdktools__get_string_table_data(int tableIndex, int stringIndex) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+	
+	if(stringIndex < 0 || stringIndex >= stringTable->GetNumStrings()) {
+		throw InvalidStringTableStringIndexExceptionType(tableIndex, stringIndex);
+	}
+
+	const char *userdata;
+	int datalen;
+
+	userdata = (const char*)stringTable->GetStringUserData(stringIndex, &datalen);
+
+	if(NULL == userdata) {
+		return std::string();
+	}
+
+	return std::string(userdata);
+}
+
+void sdktools__set_string_table_data(int tableIndex, int stringIndex, std::string value, int length = -1) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+	
+	if(stringIndex < 0 || stringIndex >= stringTable->GetNumStrings()) {
+		throw InvalidStringTableStringIndexExceptionType(tableIndex, stringIndex);
+	}
+
+	if(length == -1) {
+		length = value.length();
+	}
+
+	stringTable->SetStringUserData(stringIndex, length, value.c_str());
+}
+
+void sdktools__add_to_string_table(int tableIndex, std::string str, std::string userdata = std::string(), int length = -1) {
+	INetworkStringTable *stringTable = g_Interfaces.NetworkStringTableContainerInstance->GetTable(tableIndex);
+
+	if(NULL == stringTable) {
+		throw InvalidStringTableExceptionType(tableIndex);
+	}
+
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+	stringTable->AddString(true, str.c_str(), length, userdata.c_str());
+#else
+	stringTable->AddString(str.c_str(), length, userdata.c_str());
+#endif
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(MapMustBeRunningExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableStringIndexExceptionType, SDKTools)
 
 BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("InactivateClient", &sdktools__inactive_client, (py::arg("client_index")));
@@ -1262,6 +1500,20 @@ BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("DispatchKeyValueFloat", &sdktools__dispatch_key_value_float, (py::arg("entity_index"), py::arg("key"), py::arg("value")));
 	py::def("DispatchKeyValueVector", &sdktools__dispatch_key_value_vector, (py::arg("entity_index"), py::arg("key"), py::arg("value")));
 	py::def("DispatchSpawn", &sdktools__dispatch_spawn, (py::arg("entity_index")));
+	py::def("SetEntityModel", &sdktools__set_entity_model, (py::arg("entity_index"), py::arg("model")));
+	py::def("GetClientDecalFile", &sdktools__get_client_decal_file, (py::arg("client_index")));
+	py::def("FindStringTable", &sdktools__find_string_table, (py::arg("name")));
+	py::def("GetNumStringTables", &sdktools__get_num_string_tables);
+	py::def("GetStringTableNumStrings", &sdktools__get_string_table_num_strings, (py::arg("table_index")));
+	py::def("GetStringTableMaxStrings", &sdktools__get_string_table_max_strings, (py::arg("table_index")));
+	py::def("GetStringTableName", &sdktools__get_string_table_name, (py::arg("table_index")));
+	py::def("FindStringIndex", &sdktools__find_string_index, (py::arg("table_index"), py::arg("needle")));
+	py::def("ReadStringTable", &sdktools__read_string_table, (py::arg("table_index"), py::arg("string_index")));
+	py::def("GetStringTableDataLength", &sdktools__get_string_table_data_length, (py::arg("table_index"), py::arg("string_index")));
+	py::def("GetStringTableData", &sdktools__get_string_table_data, (py::arg("table_index"), py::arg("string_index")));
+	py::def("SetStringTableData", &sdktools__set_string_table_data, (py::arg("table_index"), py::arg("string_index"), py::arg("value"), py::arg("length") = -1));
+	py::def("AddToStringTable", &sdktools__add_to_string_table, (py::arg("table_index"), py::arg("str"), py::arg("userdata") = std::string(), py::arg("length") = -1));
+	py::def("LockStringTables", &sdktools__lock_string_tables, (py::arg("lock")));
 
 	/**
 HookEntityOutput
@@ -1275,8 +1527,6 @@ GetTeamName
 GetTeamScore
 SetTeamScore
 GetTeamClientCount
-SetEntityModel
-GetPlayerDecalFile
 GetServerNetStats
 SetClientInfo
 GameRules_GetProp
@@ -1303,18 +1553,6 @@ RemoveAmbientSoundHook
 RemoveNormalSoundHook
 EmitSoundToClient
 EmitSoundToAll
-FindStringTable
-GetNumStringTables
-GetStringTableNumStrings
-GetStringTableMaxStrings
-GetStringTableName
-FindStringIndex
-ReadStringTable
-GetStringTableDataLength
-GetStringTableData
-SetStringTableData
-AddToStringTable
-LockStringTables
 AddFileToDownloadsTable
 AddTempEntHook
 RemoveTempEntHook
@@ -1370,6 +1608,14 @@ IsClientMuted
 	DEFINE_CUSTOM_EXCEPTION(MapMustBeRunningExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.MapMustBeRunningException",
 		"MapMustBeRunningException")
+
+	DEFINE_CUSTOM_EXCEPTION(InvalidStringTableExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.InvalidStringTableException",
+		"InvalidStringTableException")
+
+	DEFINE_CUSTOM_EXCEPTION(InvalidStringTableStringIndexExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.InvalidStringTableStringIndexException",
+		"InvalidStringTableStringIndexException")
 }
 
 void destroySDKTools() {

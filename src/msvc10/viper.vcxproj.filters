@@ -252,6 +252,12 @@
     <ClCompile Include="..\MapMustBeRunningExceptionType.cpp">
       <Filter>SDKTools</Filter>
     </ClCompile>
+    <ClCompile Include="..\InvalidStringTableExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidStringTableStringIndexExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -485,6 +491,12 @@
       <Filter>SDKTools</Filter>
     </ClInclude>
     <ClInclude Include="..\MapMustBeRunningExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidStringTableExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidStringTableStringIndexExceptionType.h">
       <Filter>SDKTools</Filter>
     </ClInclude>
   </ItemGroup>

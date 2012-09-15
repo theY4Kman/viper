@@ -209,7 +209,7 @@
       <AdditionalOptions>/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3 /D SE_ORANGEBOXVALVE=4 /D SE_LEFT4DEAD=5 /D SE_LEFT4DEAD2=6 /D SOURCE_ENGINE=4 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public\extensions;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE);$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;$(SOURCEMOD)\public\extensions;$(SOURCEMOD)\public;$(SOURCEMOD)\public\sourcepawn;$(HL2SDKOBVALVE)\public\tier1;$(HL2SDKOBVALVE)\public\tier0;$(HL2SDKOBVALVE)\common;$(HL2SDKOBVALVE)\public;$(HL2SDKOBVALVE);$(MMSOURCE)\core;$(MMSOURCE)\core\sourcemm;$(MMSOURCE)\core\sourcehook;$(PYTHON27);$(BOOST);$(PYTHON27)\Include;$(PYTHON27)\PC;../../public;../systems;../sourcemod;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;BOOST_PYTHON_STATIC_LIB;DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -749,6 +749,8 @@
     <ClCompile Include="..\InvalidEntityExceptionType.cpp" />
     <ClCompile Include="..\InvalidEventExceptionType.cpp" />
     <ClCompile Include="..\InvalidSendPropertyExceptionType.cpp" />
+    <ClCompile Include="..\InvalidStringTableExceptionType.cpp" />
+    <ClCompile Include="..\InvalidStringTableStringIndexExceptionType.cpp" />
     <ClCompile Include="..\InvalidUserIdExceptionType.cpp" />
     <ClCompile Include="..\IServerNotFoundExceptionType.cpp" />
     <ClCompile Include="..\LightStyleOutOfRangeExceptionType.cpp" />
@@ -832,6 +834,8 @@
     <ClInclude Include="..\InvalidEntityExceptionType.h" />
     <ClInclude Include="..\InvalidEventExceptionType.h" />
     <ClInclude Include="..\InvalidSendPropertyExceptionType.h" />
+    <ClInclude Include="..\InvalidStringTableExceptionType.h" />
+    <ClInclude Include="..\InvalidStringTableStringIndexExceptionType.h" />
     <ClInclude Include="..\InvalidUserIdExceptionType.h" />
     <ClInclude Include="..\IServerNotFoundExceptionType.h" />
     <ClInclude Include="..\LightStyleOutOfRangeExceptionType.h" />

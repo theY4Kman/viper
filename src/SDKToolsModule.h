@@ -18,5 +18,7 @@ DEFINE_CUSTOM_EXCEPTION_DECL(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(MapMustBeRunningExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidStringTableExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidStringTableStringIndexExceptionType, SDKTools)
 
 #endif

@@ -4,6 +4,7 @@
 #include "HL2SDK.h"
 #include "ViperRootConsoleCommand.h"
 #include "ISDKTools.h"
+#include <public\networkstringtabledefs.h>
 
 class ViperRootConsoleCommand;
 
@@ -26,6 +27,7 @@ public:
 	CSharedEdictChangeInfo *SharedEdictChangeInfoInstance;
 	IServerPluginCallbacks *ServerPluginCallbacksInstance;
 	ViperRootConsoleCommand *RootConsoleCommandInstance;
+	INetworkStringTableContainer *NetworkStringTableContainerInstance;
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	IServerTools *ServerToolsInstance;
 #endif

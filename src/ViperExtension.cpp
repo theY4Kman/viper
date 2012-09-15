@@ -191,6 +191,8 @@ bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen
 		IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 	GET_V_IFACE_ANY(GetServerFactory, g_Interfaces.ServerGameEntsInstance,
 		IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
+	GET_V_IFACE_ANY(GetEngineFactory, g_Interfaces.NetworkStringTableContainerInstance,
+		INetworkStringTableContainer, INTERFACENAME_NETWORKSTRINGTABLESERVER);
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	GET_V_IFACE_ANY(GetServerFactory, g_Interfaces.ServerToolsInstance,
