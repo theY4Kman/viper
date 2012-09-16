@@ -25,6 +25,8 @@ extern std::list<ConsoleVariableChangedHookInfo> console__VariableChangedHooks;
 extern std::list<ConsoleClientVariableQueryInfo> console__PendingClientVariableQueries;
 
 extern void console__GameFrame(bool simulating);
+extern void console__OnClientCommand(edict_t *edict, const CCommand &command);
+
 extern bool console__VSPQueryHooked;
 extern bool console__DLLQueryHooked;
 

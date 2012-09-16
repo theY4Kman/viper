@@ -258,6 +258,16 @@
     <ClCompile Include="..\InvalidStringTableStringIndexExceptionType.cpp">
       <Filter>SDKTools</Filter>
     </ClCompile>
+    <ClCompile Include="..\PointContentsType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TraceResultsType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ViperTraceFilter.cpp" />
+    <ClCompile Include="..\SDKToolsClientListener.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -497,6 +507,16 @@
       <Filter>SDKTools</Filter>
     </ClInclude>
     <ClInclude Include="..\InvalidStringTableStringIndexExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PointContentsType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TraceResultsType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ViperTraceFilter.h" />
+    <ClInclude Include="..\SDKToolsClientListener.h">
       <Filter>SDKTools</Filter>
     </ClInclude>
   </ItemGroup>

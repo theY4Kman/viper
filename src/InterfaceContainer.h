@@ -28,6 +28,9 @@ public:
 	IServerPluginCallbacks *ServerPluginCallbacksInstance;
 	ViperRootConsoleCommand *RootConsoleCommandInstance;
 	INetworkStringTableContainer *NetworkStringTableContainerInstance;
+	IEngineTrace *EngineTraceInstance;
+	IVoiceServer *VoiceServerInstance;
+
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	IServerTools *ServerToolsInstance;
 #endif

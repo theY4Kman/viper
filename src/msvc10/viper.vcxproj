@@ -758,12 +758,15 @@
     <ClCompile Include="..\MapMustBeRunningExceptionType.cpp" />
     <ClCompile Include="..\ModEventsParser.cpp" />
     <ClCompile Include="..\NullReferenceExceptionType.cpp" />
+    <ClCompile Include="..\PointContentsType.cpp" />
+    <ClCompile Include="..\SDKToolsClientListener.cpp" />
     <ClCompile Include="..\SDKToolsModSupportNotAvailableExceptionType.cpp" />
     <ClCompile Include="..\SDKToolsModule.cpp" />
     <ClCompile Include="..\sdk\smsdk_ext.cpp" />
     <ClCompile Include="..\SourcemodModule.cpp" />
     <ClCompile Include="..\StdIoRedirect.cpp" />
     <ClCompile Include="..\SysHooks.cpp" />
+    <ClCompile Include="..\TraceResultsType.cpp" />
     <ClCompile Include="..\UserMessageAlreadyStartedExceptionType.cpp" />
     <ClCompile Include="..\UserMessageIDDoesNotExistExceptionType.cpp" />
     <ClCompile Include="..\UserMessageNameDoesNotExistExceptionType.cpp" />
@@ -777,6 +780,7 @@
     <ClCompile Include="..\ViperPluginManager.cpp" />
     <ClCompile Include="..\ViperRecipientFilter.cpp" />
     <ClCompile Include="..\ViperRootConsoleCommand.cpp" />
+    <ClCompile Include="..\ViperTraceFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\BitBufModule.h" />
@@ -844,6 +848,8 @@
     <ClInclude Include="..\MapMustBeRunningExceptionType.h" />
     <ClInclude Include="..\ModEventsParser.h" />
     <ClInclude Include="..\NullReferenceExceptionType.h" />
+    <ClInclude Include="..\PointContentsType.h" />
+    <ClInclude Include="..\SDKToolsClientListener.h" />
     <ClInclude Include="..\SDKToolsModSupportNotAvailableExceptionType.h" />
     <ClInclude Include="..\SourcemodModule.h" />
     <ClInclude Include="..\StdIoRedirect.h" />
@@ -855,6 +861,7 @@
     <ClInclude Include="..\sdk\smsdk_config.h" />
     <ClInclude Include="..\sdk\smsdk_ext.h" />
     <ClInclude Include="..\SysHooks.h" />
+    <ClInclude Include="..\TraceResultsType.h" />
     <ClInclude Include="..\UserMessageAlreadyStartedExceptionType.h" />
     <ClInclude Include="..\UserMessageIDDoesNotExistExceptionType.h" />
     <ClInclude Include="..\UserMessageNameDoesNotExistExceptionType.h" />
@@ -868,6 +875,7 @@
     <ClInclude Include="..\ViperPluginManager.h" />
     <ClInclude Include="..\ViperRecipientFilter.h" />
     <ClInclude Include="..\ViperRootConsoleCommand.h" />
+    <ClInclude Include="..\ViperTraceFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\SDKToolsModule.h" />

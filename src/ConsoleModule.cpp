@@ -45,12 +45,6 @@ SH_DECL_HOOK5_void(IServerGameDLL, OnQueryCvarValueFinished, SH_NOATTRIB, 0, Que
 SH_DECL_HOOK5_void(IServerPluginCallbacks, OnQueryCvarValueFinished, SH_NOATTRIB, 0, QueryCvarCookie_t, edict_t *, EQueryCvarValueStatus, const char *, const char *);
 #endif
 
-#if SOURCE_ENGINE >= SE_ORANGEBOX
-SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
-#else
-SH_DECL_HOOK1_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *);
-#endif
-
 void console__server_command(std::string command) {
 	translator->SetGlobalTarget(SOURCEMOD_SERVER_LANGUAGE);
 
@@ -245,13 +239,7 @@ void console__OnConCommandDispatch() {
 	console__CommandHandler(0, command);
 }
 
-#if SOURCE_ENGINE >= SE_ORANGEBOX
-void console__OnClientCommand(edict_t *edict, const CCommand &command) {
-#else
-void console__OnClientCommand(edict_t *edict) {
-	CCommand args;
-#endif
-	
+void console__OnClientCommand(edict_t *edict, const CCommand &command) {	
 	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(edict);
 
 	if(!gamePlayer->IsConnected()) {
@@ -626,9 +614,6 @@ BOOST_PYTHON_MODULE(Console) {
 		console__DLLQueryHooked = true;
 	}
 	#endif
-
-	SH_ADD_HOOK(IServerGameClients, ClientCommand, g_Interfaces.ServerGameClientsInstance,
-		SH_STATIC(&console__OnClientCommand), false);
 
 	SH_ADD_HOOK(ICvar, CallGlobalChangeCallbacks, icvar,
 		SH_STATIC(&console__OnConVarChanged), false);

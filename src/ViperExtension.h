@@ -48,6 +48,12 @@ public:
 public:
 	void OnGameFrame(bool simulating);
 
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+	void OnClientCommand(edict_t *edict, const CCommand &command);
+#else
+	void OnClientCommand(edict_t *edict);
+#endif
+
 	ViperPluginManager *GetPluginManager();
 
 private:

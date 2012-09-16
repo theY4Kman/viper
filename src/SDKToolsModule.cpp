@@ -17,8 +17,14 @@
 #include "InvalidStringTableStringIndexExceptionType.h"
 #include "ColorType.h"
 #include "VectorType.h"
+#include "PointContentsType.h"
+#include "TraceResultsType.h"
+#include "game/server/iplayerinfo.h"
+#include "ViperTraceFilter.h"
+#include "SDKToolsClientListener.h"
 #include <public\iclient.h>
 #include <public\cdll_int.h>
+#include <public\worldsize.h>
 #include "Util.h"
 
 namespace py = boost::python;
@@ -34,6 +40,7 @@ SourceMod::ICallWrapper *sdktools__GetClientWeaponSlotCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__ActivateEntityCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__EquipPlayerWeaponCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__SetEntityModelCallWrapper = NULL;
+SourceMod::ICallWrapper *sdktools__GetClientEyeAnglesCallWrapper = NULL;
 
 #if SOURCE_ENGINE < SE_ORANGEBOX
 SourceMod::ICallWrapper *sdktools__CreateEntityByNameCallWrapper = NULL;
@@ -43,6 +50,13 @@ SourceMod::ICallWrapper *sdktools__DispatchKeyValueVectorCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__DispatchKeyValueVectorCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__DispatchSpawnCallWrapper = NULL;
 #endif
+
+size_t sdktools__VoiceFlags[65];
+size_t sdktools__VoiceHookCount = 0;
+ListenOverride sdktools__VoiceMap[65][65];
+bool sdktools__ClientMutes[65][65];
+
+SH_DECL_HOOK3(IVoiceServer, SetClientListening, SH_NOATTRIB, 0, bool, int, int, bool);
 
 unsigned char sdktools__VariantTInstance[SIZEOF_VARIANT_T] = {0};
 
@@ -1464,6 +1478,364 @@ void sdktools__add_to_string_table(int tableIndex, std::string str, std::string 
 #endif
 }
 
+PointContentsType sdktools__get_point_contents(VectorType position) {
+	IHandleEntity *handleEntity;
+	Vector positionVec(position.X, position.Y, position.Z);
+	
+#if SOURCE_ENGINE >= SE_LEFT4DEAD
+	int mask = g_Interfaces.EngineTraceInstance->GetPointContents(positionVec, MASK_ALL, &handleEntity);
+#else
+	int mask = g_Interfaces.EngineTraceInstance->GetPointContents(positionVec, &handleEntity);
+#endif
+	
+	CBaseEntity *entity = reinterpret_cast<CBaseEntity *>(handleEntity);
+
+	int entityIndex = 0;
+
+	if(entity != NULL) {
+		edict_t *edict = g_Interfaces.ServerGameEntsInstance->BaseEntityToEdict(entity);
+
+		if(edict != NULL && !edict->IsFree()) {
+			entityIndex = IndexOfEdict(edict);
+		}
+	}
+
+	return PointContentsType(entityIndex, mask);
+}
+
+PointContentsType sdktools__get_point_contents_entity(int entityIndex, VectorType position) {
+	edict_t *edict = PEntityOfEntIndex(entityIndex);
+	
+	if(edict == NULL || edict->IsFree()) {
+		throw InvalidEdictExceptionType(entityIndex);
+	}
+
+	CBaseEntity *entity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(edict);
+
+	if(entity == NULL) {
+		throw InvalidEntityExceptionType(entityIndex);
+	}
+
+	Vector positionVec(position.X, position.Y, position.Z);
+
+	return PointContentsType(entityIndex, g_Interfaces.EngineTraceInstance->GetPointContents_Collideable(edict->GetCollideable(), positionVec));
+}
+
+TraceResultsType sdktools__trace_ray(VectorType startPosition, VectorType endPosition, unsigned int flags, py::object filter = BOOST_PY_NONE) {
+	Ray_t ray;
+
+	ray.Init(Vector(startPosition.X, startPosition.Y, startPosition.Z),
+		Vector(endPosition.X, endPosition.Y, endPosition.Z));
+
+	trace_t trace;
+
+	PyThreadState *threadState = PyThreadState_Get();
+
+	ViperTraceFilter traceFilter(threadState, filter);
+
+	g_Interfaces.EngineTraceInstance->TraceRay(ray, flags, &traceFilter, &trace);
+
+	int entityIndex = 0;
+
+	CBaseEntity *entity = trace.m_pEnt;
+
+	if(entity != NULL) {
+		edict_t *edict = g_Interfaces.ServerGameEntsInstance->BaseEntityToEdict(entity);
+
+		if(edict != NULL && !edict->IsFree()) {
+			entityIndex = IndexOfEdict(edict);
+		}
+	}
+
+	return TraceResultsType(trace.fraction, VectorType(trace.endpos.x, trace.endpos.y, trace.endpos.z), entityIndex, trace.DidHit(), trace.hitgroup,
+		VectorType(trace.plane.normal.x, trace.plane.normal.y, trace.plane.normal.z));
+}
+
+TraceResultsType sdktools__trace_hull(VectorType startPosition, VectorType endPosition, VectorType mins, VectorType maxs, unsigned int flags, py::object filter = BOOST_PY_NONE) {
+	Ray_t ray;
+
+	ray.Init(Vector(startPosition.X, startPosition.Y, startPosition.Z),
+		Vector(endPosition.X, endPosition.Y, endPosition.Z),
+		Vector(mins.X, mins.Y, mins.Z),
+		Vector(maxs.X, maxs.Y, maxs.Z));
+
+	trace_t trace;
+
+	PyThreadState *threadState = PyThreadState_Get();
+
+	ViperTraceFilter traceFilter(threadState, filter);
+
+	g_Interfaces.EngineTraceInstance->TraceRay(ray, flags, &traceFilter, &trace);
+
+	int entityIndex = 0;
+
+	CBaseEntity *entity = trace.m_pEnt;
+
+	if(entity != NULL) {
+		edict_t *edict = g_Interfaces.ServerGameEntsInstance->BaseEntityToEdict(entity);
+
+		if(edict != NULL && !edict->IsFree()) {
+			entityIndex = IndexOfEdict(edict);
+		}
+	}
+
+	return TraceResultsType(trace.fraction, VectorType(trace.endpos.x, trace.endpos.y, trace.endpos.z), entityIndex, trace.DidHit(), trace.hitgroup,
+		VectorType(trace.plane.normal.x, trace.plane.normal.y, trace.plane.normal.z));
+}
+
+VectorType sdktools__get_max_trace_point(VectorType position, VectorType angle) {
+	Vector positionVec(position.X, position.Y, position.Z);
+	Vector endVec;
+
+	QAngle dirAngles(angle.X, angle.Y, angle.Z);
+	
+	AngleVectors(dirAngles, &endVec);
+
+	endVec.NormalizeInPlace();
+	endVec = positionVec + endVec * MAX_TRACE_LENGTH;
+
+	return VectorType(endVec.x, endVec.y, endVec.z);
+}
+
+VectorType sdktools__get_client_eye_angles(int clientIndex) {
+	if (NULL == sdktools__GetClientEyeAnglesCallWrapper) {
+		int offset;
+		void *addr;
+
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(QAngle *);
+		
+		if (g_Interfaces.GameConfigInstance->GetOffset("EyeAngles", &offset)) {
+			sdktools__GetClientEyeAnglesCallWrapper = g_Interfaces.BinToolsInstance->CreateVCall(offset, 0, 0, &pass[0], NULL, 0);
+		}
+		else if(g_Interfaces.GameConfigInstance->GetMemSig("EyeAngles", &addr)) {
+			sdktools__GetClientEyeAnglesCallWrapper = g_Interfaces.BinToolsInstance->CreateCall(addr, CallConv_ThisCall, &pass[0], NULL, 0);
+		}
+		else {
+			throw SDKToolsModSupportNotAvailableExceptionType("EyeAngles");
+		}
+	}
+
+	SourceMod::IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+
+	if(!player->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if(!player->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+	
+	CBaseEntity *entity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(player->GetEdict());
+
+	unsigned char vstk[sizeof(CBaseEntity *)];
+	unsigned char *vptr = vstk;
+
+	*(CBaseEntity **)vptr = entity;
+
+	QAngle *ret;
+
+	sdktools__GetClientEyeAnglesCallWrapper->Execute(vstk, &ret);
+
+	return VectorType(ret->x, ret->y, ret->z);
+}
+
+bool sdktools__is_point_outside_world(VectorType position) {
+	return g_Interfaces.EngineTraceInstance->PointOutsideWorld(Vector(position.X, position.Y, position.Z));
+}
+
+
+bool sdktools__VoiceDecHookCount() {
+	if (sdktools__VoiceHookCount == 0) {
+		SH_REMOVE_HOOK(IVoiceServer, SetClientListening, g_Interfaces.VoiceServerInstance, SH_STATIC(&sdktools__OnSetClientListening), false);
+		return true;
+	}
+
+	return false;
+}
+
+void sdktools__VoiceIncHookCount() {
+	if (!sdktools__VoiceHookCount++) {
+		SH_ADD_HOOK(IVoiceServer, SetClientListening, g_Interfaces.VoiceServerInstance, SH_STATIC(&sdktools__OnSetClientListening), false);
+	}
+}
+
+void sdktools__OnClientCommand(edict_t *pEntity, const CCommand &args) {
+	int client = IndexOfEdict(pEntity);
+
+	if ((args.ArgC() > 1) && (stricmp(args.Arg(0), "vban") == 0))
+	{
+		for (int i = 1; (i < args.ArgC()) && (i < 3); i++)
+		{
+			unsigned long mask = 0;
+			sscanf(args.Arg(i), "%p", (void**)&mask);
+			
+			for (int j = 0; j < 32; j++)
+			{
+				sdktools__ClientMutes[client][1 + j + 32 * (i - 1)] = !!(mask & 1 << j);
+			}
+		}
+	}
+
+	RETURN_META(MRES_IGNORED);
+}
+
+bool sdktools__OnSetClientListening(int iReceiver, int iSender, bool bListen)
+{
+	if (sdktools__ClientMutes[iReceiver][iSender])
+	{
+		RETURN_META_VALUE_NEWPARAMS(MRES_IGNORED, bListen, &IVoiceServer::SetClientListening, (iReceiver, iSender, false));
+	}
+
+	if (sdktools__VoiceFlags[iSender] & SPEAK_MUTED)
+	{
+		RETURN_META_VALUE_NEWPARAMS(MRES_IGNORED, bListen, &IVoiceServer::SetClientListening, (iReceiver, iSender, false));
+	}
+
+	if (sdktools__VoiceMap[iReceiver][iSender] == Listen_No)
+	{
+		RETURN_META_VALUE_NEWPARAMS(MRES_IGNORED, bListen, &IVoiceServer::SetClientListening, (iReceiver, iSender, false));
+	}
+	else if (sdktools__VoiceMap[iReceiver][iSender] == Listen_Yes)
+	{
+		RETURN_META_VALUE_NEWPARAMS(MRES_IGNORED, bListen, &IVoiceServer::SetClientListening, (iReceiver, iSender, true));
+	}
+
+	if ((sdktools__VoiceFlags[iSender] & SPEAK_ALL) || (sdktools__VoiceFlags[iReceiver] & SPEAK_LISTENALL))
+	{
+		RETURN_META_VALUE_NEWPARAMS(MRES_IGNORED, bListen, &IVoiceServer::SetClientListening, (iReceiver, iSender, true));
+	}
+
+	if ((sdktools__VoiceFlags[iSender] & SPEAK_TEAM) || (sdktools__VoiceFlags[iReceiver] & SPEAK_LISTENTEAM))
+	{
+		IGamePlayer *pReceiver = playerhelpers->GetGamePlayer(iReceiver);
+		IGamePlayer *pSender = playerhelpers->GetGamePlayer(iSender);
+
+		if (pReceiver && pSender && pReceiver->IsInGame() && pSender->IsInGame())
+		{
+			IPlayerInfo *pRInfo = pReceiver->GetPlayerInfo();
+			IPlayerInfo *pSInfo = pSender->GetPlayerInfo();
+
+			if (pRInfo && pSInfo && pRInfo->GetTeamIndex() == pSInfo->GetTeamIndex())
+			{
+				RETURN_META_VALUE_NEWPARAMS(MRES_IGNORED, bListen, &IVoiceServer::SetClientListening, (iReceiver, iSender, true));
+			}
+		}
+	}
+
+	RETURN_META_VALUE(MRES_IGNORED, bListen);
+}
+
+void sdktools__set_client_listening_flags(int clientIndex, size_t flags) {
+	IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+	
+	if(!player->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if (!flags && sdktools__VoiceFlags[clientIndex])
+	{
+		sdktools__VoiceDecHookCount();
+	}
+	else if (!sdktools__VoiceFlags[clientIndex] && flags)
+	{
+		sdktools__VoiceIncHookCount();
+	}
+
+	sdktools__VoiceFlags[clientIndex] = flags;
+}
+
+size_t sdktools__get_client_listening_flags(int clientIndex) {
+	IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+	
+	if(!player->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	return sdktools__VoiceFlags[clientIndex];
+}
+
+void sdktools__set_listen_override(int listenerClientIndex, int senderClientIndex, ListenOverride overrideValue)
+{
+	int r, s;
+	IGamePlayer *player;
+	
+	player = playerhelpers->GetGamePlayer(listenerClientIndex);
+	
+	if (!player->IsConnected())
+	{
+		throw ClientNotConnectedExceptionType(listenerClientIndex);
+	}
+
+	player = playerhelpers->GetGamePlayer(senderClientIndex);
+	
+	if (!player->IsConnected())
+	{
+		throw ClientNotConnectedExceptionType(senderClientIndex);
+	}
+
+	r = listenerClientIndex;
+	s = senderClientIndex;
+	
+	if (sdktools__VoiceMap[r][s] == Listen_Default && overrideValue != Listen_Default)
+	{
+		sdktools__VoiceMap[r][s] = overrideValue;
+		sdktools__VoiceIncHookCount();
+	}
+	else if (sdktools__VoiceMap[r][s] != Listen_Default && overrideValue == Listen_Default)
+	{
+		sdktools__VoiceMap[r][s] = overrideValue;
+		sdktools__VoiceDecHookCount();
+	}
+	else
+	{
+		sdktools__VoiceMap[r][s] = overrideValue;
+	}
+}
+
+ListenOverride sdktools__get_listen_override(int listenerClientIndex, int senderClientIndex)
+{
+	IGamePlayer *player;
+	
+	player = playerhelpers->GetGamePlayer(listenerClientIndex);
+	
+	if (!player->IsConnected())
+	{
+		throw ClientNotConnectedExceptionType(listenerClientIndex);
+	}
+
+	player = playerhelpers->GetGamePlayer(senderClientIndex);
+	
+	if (!player->IsConnected())
+	{
+		throw ClientNotConnectedExceptionType(senderClientIndex);
+	}
+
+	return sdktools__VoiceMap[listenerClientIndex][senderClientIndex];
+}
+
+bool sdktools__is_client_muted(int muterClientIndex, int muteeClientIndex) {
+	IGamePlayer *player;
+	
+	player = playerhelpers->GetGamePlayer(muterClientIndex);
+	
+	if (!player->IsConnected())
+	{
+		throw ClientNotConnectedExceptionType(muterClientIndex);
+	}
+
+	player = playerhelpers->GetGamePlayer(muteeClientIndex);
+	
+	if (!player->IsConnected())
+	{
+		throw ClientNotConnectedExceptionType(muteeClientIndex);
+	}
+
+	return sdktools__ClientMutes[muterClientIndex][muteeClientIndex];
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
@@ -1472,6 +1844,23 @@ DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableStringIndexExceptionType, SDKTools)
 
 BOOST_PYTHON_MODULE(SDKTools) {
+	py::enum_<ListenOverride>("ListenOverride")
+		.value("Default", Listen_Default)
+		.value("No", Listen_No)
+		.value("Yes", Listen_Yes);
+	
+	py::class_<TraceResultsType>("TraceResults", py::no_init)
+		.def_readonly("Fraction", &TraceResultsType::Fraction)
+		.def_readonly("EndPosition", &TraceResultsType::EndPosition)
+		.def_readonly("EntityIndex", &TraceResultsType::EntityIndex)
+		.def_readonly("DidHit", &TraceResultsType::DidHit)
+		.def_readonly("HitGroup", &TraceResultsType::HitGroup)
+		.def_readonly("PlaneNormal", &TraceResultsType::PlaneNormal);
+
+	py::class_<PointContentsType>("PointContents", py::no_init)
+		.def_readonly("EntityIndex", &PointContentsType::EntityIndex)
+		.def_readonly("ContentsMask", &PointContentsType::ContentsMask);
+		
 	py::def("InactivateClient", &sdktools__inactive_client, (py::arg("client_index")));
 	py::def("ReconnectClient", &sdktools__reconnect_client, (py::arg("client_index")));
 	py::def("SetClientViewEntity", &sdktools__set_client_view_entity, (py::arg("client_index"), py::arg("entity_index")));
@@ -1514,6 +1903,18 @@ BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("SetStringTableData", &sdktools__set_string_table_data, (py::arg("table_index"), py::arg("string_index"), py::arg("value"), py::arg("length") = -1));
 	py::def("AddToStringTable", &sdktools__add_to_string_table, (py::arg("table_index"), py::arg("str"), py::arg("userdata") = std::string(), py::arg("length") = -1));
 	py::def("LockStringTables", &sdktools__lock_string_tables, (py::arg("lock")));
+	py::def("GetPointContents", &sdktools__get_point_contents, (py::arg("position")));
+	py::def("GetPointContentsEntity", &sdktools__get_point_contents_entity, (py::arg("entity_index"), py::arg("position")));
+	py::def("GetMaxTracePoint", &sdktools__get_max_trace_point, (py::arg("position"), py::arg("angle")));
+	py::def("TraceRay", &sdktools__trace_ray, (py::arg("start_position"), py::arg("end_position"), py::arg("flags"), py::arg("filter") = BOOST_PY_NONE));
+	py::def("TraceHull", &sdktools__trace_hull, (py::arg("start_position"), py::arg("end_position"), py::arg("mins"), py::arg("maxs"), py::arg("flags"), py::arg("filter") = BOOST_PY_NONE));
+	py::def("GetClientEyeAngles", &sdktools__get_client_eye_angles, (py::arg("client_index")));
+	py::def("IsPointOutsideWorld", &sdktools__is_point_outside_world, (py::arg("position")));
+	py::def("SetClientListeningFlags", &sdktools__set_client_listening_flags, (py::arg("client_index"), py::arg("flags")));
+	py::def("GetClientListeningFlags", &sdktools__get_client_listening_flags, (py::arg("client_index")));
+	py::def("SetListenOverride", &sdktools__set_listen_override, (py::arg("listener_client_index"), py::arg("sender_client_index"), py::arg("override")));
+	py::def("GetListenOverride", &sdktools__get_listen_override, (py::arg("listener_client_index"), py::arg("sender_client_index")));
+	py::def("IsClientMuted", &sdktools__is_client_muted, (py::arg("muter_client_index"), py::arg("mutee_client_index")));
 
 	/**
 HookEntityOutput
@@ -1553,7 +1954,6 @@ RemoveAmbientSoundHook
 RemoveNormalSoundHook
 EmitSoundToClient
 EmitSoundToAll
-AddFileToDownloadsTable
 AddTempEntHook
 RemoveTempEntHook
 TE_Start
@@ -1570,28 +1970,6 @@ TE_Send
 TE_WriteEncodedEnt
 TE_SendToAll
 TE_SendToClient
-TR_GetPointContents
-TR_GetPointContentsEnt
-TR_TraceRay
-TR_TraceHull
-TR_TraceRayFilter
-TR_TraceHullFilter
-TR_TraceRayEx
-TR_TraceHullEx
-TR_TraceRayFilterEx
-TR_TraceHullFilterEx
-TR_GetFraction
-TR_GetEndPosition
-TR_GetEntityIndex
-TR_DidHit
-TR_GetHitGroup
-TR_GetPlaneNormal
-TR_PointOutsideWorld
-SetClientListeningFlags
-GetClientListeningFlags
-SetListenOverride
-GetListenOverride
-IsClientMuted
 	*/
 	DEFINE_CUSTOM_EXCEPTION(IServerNotFoundExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.IServerNotFoundException",
@@ -1616,10 +1994,15 @@ IsClientMuted
 	DEFINE_CUSTOM_EXCEPTION(InvalidStringTableStringIndexExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.InvalidStringTableStringIndexException",
 		"InvalidStringTableStringIndexException")
+
+	memset(sdktools__VoiceMap, 0, sizeof(sdktools__VoiceMap));
+	memset(sdktools__ClientMutes, 0, sizeof(sdktools__ClientMutes));
+
+	playerhelpers->AddClientListener(&sdktools__ClientListener);
 }
 
 void destroySDKTools() {
-
+	playerhelpers->RemoveClientListener(&sdktools__ClientListener);
 }
 
 void unloadThreadStateSDKTools(PyThreadState *threadState) {

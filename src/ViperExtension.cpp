@@ -50,6 +50,12 @@ SMEXT_LINK(&g_ViperExtension);
 
 SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
 
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
+#else
+SH_DECL_HOOK1_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *);
+#endif
+
 ViperExtension::ViperExtension() {
 }
 
@@ -144,6 +150,17 @@ void ViperExtension::OnGameFrame(bool simulating) {
 	clients__GameFrame(simulating);
 }
 
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+void ViperExtension::OnClientCommand(edict_t *edict, const CCommand &command) {
+#else
+void ViperExtension::OnClientCommand(edict_t *edict) {
+	CCommand args;
+#endif
+	console__OnClientCommand(edict, command);
+	sdktools__OnClientCommand(edict, command);
+}
+
+
 void ViperExtension::SDK_OnAllLoaded() {
 	g_Interfaces.ServerGameDLLCallClass = SH_GET_CALLCLASS(gamedll);
 
@@ -155,6 +172,7 @@ void ViperExtension::SDK_OnAllLoaded() {
 	}
 
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
+	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, g_Interfaces.ServerGameClientsInstance, this, &ViperExtension::OnClientCommand, false);
 
 	g_Interfaces.ServerPluginCallbacksInstance = g_SMAPI->GetVSPInfo(NULL);
 
@@ -193,7 +211,11 @@ bool ViperExtension::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen
 		IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
 	GET_V_IFACE_ANY(GetEngineFactory, g_Interfaces.NetworkStringTableContainerInstance,
 		INetworkStringTableContainer, INTERFACENAME_NETWORKSTRINGTABLESERVER);
-
+	GET_V_IFACE_ANY(GetEngineFactory, g_Interfaces.EngineTraceInstance,
+		IEngineTrace, INTERFACEVERSION_ENGINETRACE_SERVER);
+	GET_V_IFACE_ANY(GetEngineFactory, g_Interfaces.VoiceServerInstance,
+		IVoiceServer, INTERFACEVERSION_VOICESERVER);
+	
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	GET_V_IFACE_ANY(GetServerFactory, g_Interfaces.ServerToolsInstance,
 		IServerTools, VSERVERTOOLS_INTERFACE_VERSION);

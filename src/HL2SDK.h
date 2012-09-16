@@ -30,4 +30,7 @@
 #   include "convar_sm.h"
 #endif
 
+#include <public\engine\IEngineTrace.h>
+#include <public\ivoiceserver.h>
+
 #endif // !__INCLUDE_HL2SDK_H__

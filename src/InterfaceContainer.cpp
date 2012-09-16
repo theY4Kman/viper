@@ -10,6 +10,7 @@ InterfaceContainer::InterfaceContainer() {
 	EngineSoundInstance = NULL;
 	BaseFileSystemInstance = NULL;
 	ServerGameClientsInstance = NULL;
+	ServerGameEntsInstance = NULL;
 	ServerGameDLLCallClass = NULL;
 	GlobalVarsInstance = NULL;
 	GameConfigInstance = NULL;
@@ -17,4 +18,12 @@ InterfaceContainer::InterfaceContainer() {
 	SharedEdictChangeInfoInstance = NULL;
 	ServerPluginCallbacksInstance = NULL;
 	RootConsoleCommandInstance = NULL;
+	NetworkStringTableContainerInstance = NULL;
+	EngineTraceInstance = NULL;
+	VoiceServerInstance = NULL;
+
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+	ServerToolsInstance = NULL;
+#endif
+	SDKToolsInstance = NULL;
 }
