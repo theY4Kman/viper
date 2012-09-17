@@ -61,11 +61,15 @@ extern size_t sdktools__VoiceHookCount;
 extern ListenOverride sdktools__VoiceMap[65][65];
 extern bool sdktools__ClientMutes[65][65];
 
+extern void *sdktools__TECurrentEffect;
+
 extern bool sdktools__OnSetClientListening(int iReceiver, int iSender, bool bListen);
 extern void sdktools__OnClientCommand(edict_t *pEntity, const CCommand &args);
 
 extern bool sdktools__VoiceDecHookCount();
 extern void sdktools__VoiceIncHookCount();
+
+extern void sdktools__LoadTempEnts();
 
 DEFINE_CUSTOM_EXCEPTION_DECL(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(LightStyleOutOfRangeExceptionType, SDKTools)
@@ -73,5 +77,8 @@ DEFINE_CUSTOM_EXCEPTION_DECL(SDKToolsModSupportNotAvailableExceptionType, SDKToo
 DEFINE_CUSTOM_EXCEPTION_DECL(MapMustBeRunningExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidStringTableExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidStringTableStringIndexExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidTempEntExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(NoTempEntCallInProgressExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidTempEntPropertyExceptionType, SDKTools)
 
 #endif

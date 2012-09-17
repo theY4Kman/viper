@@ -15,16 +15,22 @@
 #include "MapMustBeRunningExceptionType.h"
 #include "InvalidStringTableExceptionType.h"
 #include "InvalidStringTableStringIndexExceptionType.h"
+#include "InvalidTempEntExceptionType.h"
+#include "NoTempEntCallInProgressExceptionType.h"
+#include "InvalidTempEntPropertyExceptionType.h"
 #include "ColorType.h"
 #include "VectorType.h"
 #include "PointContentsType.h"
 #include "TraceResultsType.h"
+#include "ViperRecipientFilter.h"
 #include "game/server/iplayerinfo.h"
 #include "ViperTraceFilter.h"
 #include "SDKToolsClientListener.h"
 #include <public\iclient.h>
 #include <public\cdll_int.h>
 #include <public\worldsize.h>
+#include "server_class.h"
+#include "dt_common.h"
 #include "Util.h"
 
 namespace py = boost::python;
@@ -55,6 +61,18 @@ size_t sdktools__VoiceFlags[65];
 size_t sdktools__VoiceHookCount = 0;
 ListenOverride sdktools__VoiceMap[65][65];
 bool sdktools__ClientMutes[65][65];
+
+void *sdktools__TEListHead = NULL;
+int sdktools__TENameOffs = 0;
+int sdktools__TENextOffs = 0;
+int sdktools__TEGetClassNameOffs = 0;
+
+void *sdktools__TECurrentEffect = NULL;
+ServerClass *sdktools__TECurrentServerClass = NULL;
+
+SourceMod::ICallWrapper *sdktools__TEGetServerClassCallWrapper = NULL;
+
+bool sdktools__TELoaded = false;
 
 SH_DECL_HOOK3(IVoiceServer, SetClientListening, SH_NOATTRIB, 0, bool, int, int, bool);
 
@@ -1836,12 +1854,225 @@ bool sdktools__is_client_muted(int muterClientIndex, int muteeClientIndex) {
 	return sdktools__ClientMutes[muterClientIndex][muteeClientIndex];
 }
 
+void *sdktools__FindTempEntByName(std::string name) {
+	if(!sdktools__TELoaded) {
+		sdktools__LoadTempEnts();
+	}
+
+	void *iter = sdktools__TEListHead;
+	
+	while (iter) {
+		const char *actualName = *(const char **)((unsigned char *)iter + sdktools__TENameOffs);
+			
+		if (!actualName) {
+			continue;
+		}
+			
+		if (name == actualName) {
+			return iter;
+		}
+
+		iter = *(void **)((unsigned char *)iter + sdktools__TENextOffs);
+	}
+	
+	return NULL;
+}
+
+void sdktools__LoadTempEnts() {
+	if(sdktools__TELoaded) {
+		return;
+	}
+
+	void *addr = NULL;
+	int offset;
+
+	/* Read our sigs and offsets from the config file */
+	if (g_Interfaces.GameConfigInstance->GetMemSig("s_pTempEntities", &addr) && addr) {
+		sdktools__TEListHead = *(void **)addr;
+	}
+	else if (g_Interfaces.GameConfigInstance->GetMemSig("CBaseTempEntity", &addr) && addr) {
+		if (!g_Interfaces.GameConfigInstance->GetOffset("s_pTempEntities", &offset)) {
+			throw SDKToolsModSupportNotAvailableExceptionType("TempEnts");
+		}
+
+		sdktools__TEListHead = **(void ***)((unsigned char *)addr + offset);
+	}
+	else {
+		throw SDKToolsModSupportNotAvailableExceptionType("TempEnts");
+	}
+
+	if (!g_Interfaces.GameConfigInstance->GetOffset("GetTEName", &sdktools__TENameOffs)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("TempEnts");
+	}
+	if (!g_Interfaces.GameConfigInstance->GetOffset("GetTENext", &sdktools__TENextOffs)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("TempEnts");
+	}
+	if (!g_Interfaces.GameConfigInstance->GetOffset("TE_GetServerClass", &sdktools__TEGetClassNameOffs)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("TempEnts");
+	}
+
+	/* Create the GetServerClass call */
+	PassInfo retinfo;
+	retinfo.flags = PASSFLAG_BYVAL;
+	retinfo.type = PassType_Basic;
+	retinfo.size = sizeof(ServerClass *);
+
+	sdktools__TEGetServerClassCallWrapper = g_Interfaces.BinToolsInstance->CreateVCall(sdktools__TEGetClassNameOffs, 0, 0, &retinfo, NULL, 0);
+
+	sdktools__TELoaded = true;
+}
+
+void sdktools__te_start(std::string name) {
+	void *effect = sdktools__FindTempEntByName(name);
+
+	if(effect == NULL) {
+		throw InvalidTempEntExceptionType(name);
+	}
+
+	sdktools__TECurrentEffect = effect;
+
+	sdktools__TEGetServerClassCallWrapper->Execute(&sdktools__TECurrentEffect, &sdktools__TECurrentServerClass);
+}
+
+int sdktools__FindPropOffset(std::string prop, int *size) {
+	SendProp *sendPropInstance = gamehelpers->FindInSendTable(sdktools__TECurrentServerClass->GetName(), prop.c_str());
+
+	if(sendPropInstance == NULL) {
+		throw InvalidTempEntPropertyExceptionType(prop);
+	}
+
+	if(size) {
+		*size = sendPropInstance->m_nBits;
+	}
+
+	return sendPropInstance->GetOffset();
+}
+
+bool sdktools__te_is_valid(std::string name) {
+	return sdktools__FindTempEntByName(name) != NULL;
+}
+
+bool sdktools__te_is_valid_prop(std::string prop) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	return gamehelpers->FindInSendTable(sdktools__TECurrentServerClass->GetName(), prop.c_str());
+}
+
+void sdktools__te_write_num(std::string prop, int num) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	int size;
+	int offset = sdktools__FindPropOffset(prop, &size);
+
+	if (size <= 8) {
+		*((uint8_t *)sdktools__TECurrentEffect + offset) = num;
+	} else if (size <= 16) {
+		*(short *)((uint8_t *)sdktools__TECurrentEffect + offset) = num;
+	} else {
+		*(int *)((uint8_t *)sdktools__TECurrentEffect + offset) = num;
+	}
+}
+
+int sdktools__te_read_num(std::string prop) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	int size;
+	int offset = sdktools__FindPropOffset(prop, &size);
+
+	if (size <= 8) {
+		return *((uint8_t *)sdktools__TECurrentEffect + offset);
+	} else if (size <= 16) {
+		return *(short *)((uint8_t *)sdktools__TECurrentEffect + offset);
+	} else {
+		return *(int *)((uint8_t *)sdktools__TECurrentEffect + offset);
+	}
+}
+
+void sdktools__te_write_float(std::string prop, float value) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	int size;
+	int offset = sdktools__FindPropOffset(prop, &size);
+
+	*(float *)((uint8_t *)sdktools__TECurrentEffect + offset) = value;
+}
+
+float sdktools__te_read_float(std::string prop) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	int size;
+	int offset = sdktools__FindPropOffset(prop, &size);
+
+	return *(float *)((uint8_t *)sdktools__TECurrentEffect + offset);
+}
+
+void sdktools__te_write_vector(std::string prop, VectorType vec) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	int size;
+	int offset = sdktools__FindPropOffset(prop, &size);
+
+	Vector *v = (Vector*)((uint8_t *)sdktools__TECurrentEffect + offset);
+
+	v->x = vec.X;
+	v->y = vec.Y;
+	v->z = vec.Z;
+}
+
+VectorType sdktools__te_read_vector(std::string prop) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	int size;
+	int offset = sdktools__FindPropOffset(prop, &size);
+
+	Vector *v = (Vector*)((uint8_t *)sdktools__TECurrentEffect + offset);
+
+	return VectorType(v->x, v->y, v->z);
+}
+
+void sdktools__te_send(py::list clientsList, float delay = 0.0f) {
+	if(NULL == sdktools__TECurrentEffect) {
+		throw NoTempEntCallInProgressExceptionType();
+	}
+
+	std::vector<int> clientsVec;
+
+	int clientsListSize = py::len(clientsList);
+
+	for(int clientIndex = 0; clientIndex < clientsListSize; clientIndex++) {
+		clientsVec.push_back(py::extract<int>(clientsList[clientIndex]));
+	}
+
+	ViperRecipientFilter filter(clientsVec, false, false);
+
+	engine->PlaybackTempEntity(filter, delay, sdktools__TECurrentEffect, sdktools__TECurrentServerClass->m_pTable, sdktools__TECurrentServerClass->m_ClassID);
+
+	sdktools__TECurrentEffect = NULL;
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(MapMustBeRunningExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableStringIndexExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidTempEntExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(NoTempEntCallInProgressExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidTempEntPropertyExceptionType, SDKTools)
 
 BOOST_PYTHON_MODULE(SDKTools) {
 	py::enum_<ListenOverride>("ListenOverride")
@@ -1915,8 +2146,20 @@ BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("SetListenOverride", &sdktools__set_listen_override, (py::arg("listener_client_index"), py::arg("sender_client_index"), py::arg("override")));
 	py::def("GetListenOverride", &sdktools__get_listen_override, (py::arg("listener_client_index"), py::arg("sender_client_index")));
 	py::def("IsClientMuted", &sdktools__is_client_muted, (py::arg("muter_client_index"), py::arg("mutee_client_index")));
+	py::def("TEIsValid", &sdktools__te_is_valid, (py::arg("name")));
+	py::def("TEStart", &sdktools__te_start, (py::arg("name")));
+	py::def("TEIsValidProp", &sdktools__te_is_valid_prop, (py::arg("prop")));
+	py::def("TEWriteNum", &sdktools__te_write_num, (py::arg("prop"), py::arg("num")));
+	py::def("TEReadNum", &sdktools__te_read_num, (py::arg("prop")));
+	py::def("TEWriteFloat", &sdktools__te_write_float, (py::arg("prop"), py::arg("float")));
+	py::def("TEReadFloat", &sdktools__te_read_float, (py::arg("prop")));
+	py::def("TEWriteVector", &sdktools__te_write_vector, (py::arg("prop"), py::arg("vec")));
+	py::def("TEReadVector", &sdktools__te_read_vector, (py::arg("prop")));
+	py::def("TESend", &sdktools__te_send, (py::arg("clients"), py::arg("delay") = 0.0f));
 
 	/**
+AddTempEntHook
+RemoveTempEntHook
 HookEntityOutput
 UnhookEntityOutput
 HookSingleEntityOutput
@@ -1952,24 +2195,6 @@ AddAmbientSoundHook
 AddNormalSoundHook
 RemoveAmbientSoundHook
 RemoveNormalSoundHook
-EmitSoundToClient
-EmitSoundToAll
-AddTempEntHook
-RemoveTempEntHook
-TE_Start
-TE_IsValidProp
-TE_WriteNum
-TE_ReadNum
-TE_WriteFloat
-TE_ReadFloat
-TE_WriteVector
-TE_ReadVector
-TE_WriteAngles
-TE_WriteFloatArray
-TE_Send
-TE_WriteEncodedEnt
-TE_SendToAll
-TE_SendToClient
 	*/
 	DEFINE_CUSTOM_EXCEPTION(IServerNotFoundExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.IServerNotFoundException",
@@ -1994,6 +2219,18 @@ TE_SendToClient
 	DEFINE_CUSTOM_EXCEPTION(InvalidStringTableStringIndexExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.InvalidStringTableStringIndexException",
 		"InvalidStringTableStringIndexException")
+
+	DEFINE_CUSTOM_EXCEPTION(InvalidTempEntExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.InvalidTempEntException",
+		"InvalidTempEntException")
+
+	DEFINE_CUSTOM_EXCEPTION(NoTempEntCallInProgressExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.NoTempEntCallInProgressException",
+		"NoTempEntCallInProgressException")
+
+	DEFINE_CUSTOM_EXCEPTION(InvalidTempEntPropertyExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.InvalidTempEntPropertyException",
+		"InvalidTempEntPropertyException")
 
 	memset(sdktools__VoiceMap, 0, sizeof(sdktools__VoiceMap));
 	memset(sdktools__ClientMutes, 0, sizeof(sdktools__ClientMutes));

@@ -268,6 +268,15 @@
     <ClCompile Include="..\SDKToolsClientListener.cpp">
       <Filter>SDKTools</Filter>
     </ClCompile>
+    <ClCompile Include="..\InvalidTempEntExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NoTempEntCallInProgressExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidTempEntPropertyExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -517,6 +526,15 @@
     </ClInclude>
     <ClInclude Include="..\ViperTraceFilter.h" />
     <ClInclude Include="..\SDKToolsClientListener.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidTempEntExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NoTempEntCallInProgressExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidTempEntPropertyExceptionType.h">
       <Filter>SDKTools</Filter>
     </ClInclude>
   </ItemGroup>
