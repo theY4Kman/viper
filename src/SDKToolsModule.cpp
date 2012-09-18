@@ -25,12 +25,14 @@
 #include "EntityOutputClassNameHook.h"
 #include "EntityDataMapInfoType.h"
 #include "EntityOutputClassNameHookDoesNotExistExceptionType.h"
+#include "InvalidTeamExceptionType.h"
 #include "ColorType.h"
 #include "VectorType.h"
 #include "EntityPropertyFieldTypes.h"
 #include "PointContentsType.h"
 #include "TraceResultsType.h"
 #include "ViperRecipientFilter.h"
+#include "NetStatsType.h"
 #include "game/server/iplayerinfo.h"
 #include "ViperTraceFilter.h"
 #include "SDKToolsClientListener.h"
@@ -56,6 +58,8 @@ SourceMod::ICallWrapper *sdktools__ActivateEntityCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__EquipPlayerWeaponCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__SetEntityModelCallWrapper = NULL;
 SourceMod::ICallWrapper *sdktools__GetClientEyeAnglesCallWrapper = NULL;
+SourceMod::ICallWrapper *sdktools__SetUserCvarCallWrapper = NULL;
+SourceMod::ICallWrapper *sdktools__UpdateUserSettingsCallWrapper = NULL;
 
 #if SOURCE_ENGINE < SE_ORANGEBOX
 SourceMod::ICallWrapper *sdktools__CreateEntityByNameCallWrapper = NULL;
@@ -114,6 +118,14 @@ DETOUR_DECL_MEMBER4(FireOutput, void, void *, variant_t, CBaseEntity *, pActivat
 	DETOUR_MEMBER_CALL(FireOutput)(variant_t, pActivator, pCaller, fDelay);
 }
 #endif
+
+struct TeamInfo
+{
+	const char *ClassName;
+	CBaseEntity *pEnt;
+};
+
+std::vector<TeamInfo> sdktools__Teams;
 
 void sdktools__inactive_client(int clientIndex) {
 	SourceMod::IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
@@ -3045,6 +3057,269 @@ float sdktools__get_dist_gain_from_sound_level(int decibel, float distance) {
 	return g_Interfaces.EngineSoundInstance->GetDistGainFromSoundLevel((soundlevel_t)decibel, distance);
 }
 
+py::list sdktools__find_entities_by_class_name(std::string className) {
+	py::list returnList;
+
+	if(className == "world") {
+		returnList.append<int>(0);
+		return returnList;
+	}
+
+	for(int entityIndex = 1; entityIndex <= 4096; entityIndex++) {
+		edict_t *edict = PEntityOfEntIndex(entityIndex);
+
+		if(!edict || edict->IsFree()) {
+			continue;
+		}
+
+		CBaseEntity *entity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(edict);
+
+		if(!entity) {
+			continue;
+		}
+
+		if(className != GetEntityClassname(entity)) {
+			continue;
+		}
+
+		returnList.append<int>(entityIndex);
+	}
+
+	return returnList;
+}
+
+bool FindTeamEntities(SendTable *pTable, const char *name)
+{
+	if (strcmp(pTable->GetName(), name) == 0)
+	{
+		return true;
+	}
+
+	int props = pTable->GetNumProps();
+	SendProp *prop;
+
+	for (int i=0; i<props; i++)
+	{
+		prop = pTable->GetProp(i);
+		if (prop->GetDataTable())
+		{
+			if (FindTeamEntities(prop->GetDataTable(), name))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void sdktools__OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax) {
+	sdktools__Teams.clear();
+	sdktools__Teams.resize(1);
+
+	for (int i=0; i<edictCount; i++)
+	{
+		edict_t *pEdict = PEntityOfEntIndex(i);
+		if (!pEdict || pEdict->IsFree())
+		{
+			continue;
+		}
+		if (!pEdict->GetNetworkable())
+		{
+			continue;
+		}
+
+		ServerClass *pClass = pEdict->GetNetworkable()->GetServerClass();
+		if (FindTeamEntities(pClass->m_pTable, "DT_Team"))
+		{
+			SendProp *pTeamNumProp = gamehelpers->FindInSendTable(pClass->GetName(), "m_iTeamNum");
+
+			if (pTeamNumProp != NULL)
+			{
+				int offset = pTeamNumProp->GetOffset();
+				CBaseEntity *pEnt = pEdict->GetUnknown()->GetBaseEntity();
+				int TeamIndex = *(int *)((unsigned char *)pEnt + offset);
+
+				if (TeamIndex >= (int)sdktools__Teams.size())
+				{
+					sdktools__Teams.resize(TeamIndex+1);
+				}
+				sdktools__Teams[TeamIndex].ClassName = pClass->GetName();
+				sdktools__Teams[TeamIndex].pEnt = pEnt;
+			}
+		}
+	}
+}
+
+
+int sdktools__get_team_count() {
+	return sdktools__Teams.size();
+}
+
+static int sdktools__TeamNameOffset = -1;
+
+std::string sdktools__get_team_name(int team)
+{
+	if (size_t(team) >= sdktools__Teams.size()) {
+		throw InvalidTeamExceptionType(team);
+	}
+
+	if (sdktools__TeamNameOffset == -1)
+	{
+		SendProp *prop = gamehelpers->FindInSendTable(sdktools__Teams[team].ClassName, "m_szTeamname");
+		if (!prop) {
+			throw SDKToolsModSupportNotAvailableExceptionType("TeamName");
+		}
+
+		sdktools__TeamNameOffset = prop->GetOffset();
+	}
+
+	const char *pName = (const char *)((unsigned char *)sdktools__Teams[team].pEnt + sdktools__TeamNameOffset);
+
+	if(!pName) {
+		throw InvalidTeamExceptionType(team); 
+	}
+
+	return std::string(pName);
+}
+
+int sdktools__get_team_score(int teamindex) {
+	if (teamindex >= (int)sdktools__Teams.size() || !sdktools__Teams[teamindex].ClassName) {
+		throw InvalidTeamExceptionType(teamindex);
+	}
+
+	static int offset = gamehelpers->FindInSendTable(sdktools__Teams[teamindex].ClassName, "m_iScore")->GetOffset();
+
+	return *(int *)((unsigned char *)sdktools__Teams[teamindex].pEnt + offset);
+}
+
+void sdktools__set_team_score(int teamindex, int newScore) {
+	if (teamindex >= (int)sdktools__Teams.size() || !sdktools__Teams[teamindex].ClassName) {
+		throw InvalidTeamExceptionType(teamindex);
+	}
+
+	static int offset = gamehelpers->FindInSendTable(sdktools__Teams[teamindex].ClassName, "m_iScore")->GetOffset();
+
+	CBaseEntity *pTeam = sdktools__Teams[teamindex].pEnt;
+	*(int *)((unsigned char *)pTeam + offset) = newScore;
+
+	edict_t *pEdict = g_Interfaces.ServerGameEntsInstance->BaseEntityToEdict(pTeam);
+	gamehelpers->SetEdictStateChanged(pEdict, offset);
+}
+
+int sdktools__get_team_client_count(int teamindex) {
+	if (teamindex >= (int)sdktools__Teams.size() || !sdktools__Teams[teamindex].ClassName) {
+		throw InvalidTeamExceptionType(teamindex);
+	}
+
+	SendProp *pProp = gamehelpers->FindInSendTable(sdktools__Teams[teamindex].ClassName, "\"player_array\"");
+	ArrayLengthSendProxyFn fn = pProp->GetArrayLengthProxy();
+
+	return fn(sdktools__Teams[teamindex].pEnt, 0);
+}
+
+NetStatsType sdktools__get_server_net_stats() {
+	IServer *server = g_Interfaces.SDKToolsInstance->GetIServer();
+
+	if (NULL == server) {
+		throw IServerNotFoundExceptionType();
+	}
+
+	float in, out;
+
+	server->GetNetStats(in, out);
+
+	return NetStatsType(in, out);
+}
+
+void sdktools__set_client_info(int clientIndex, std::string key, std::string value) {
+	IServer *server = g_Interfaces.SDKToolsInstance->GetIServer();
+
+	if (NULL == server) {
+		throw IServerNotFoundExceptionType();
+	}
+
+	if (NULL == sdktools__SetUserCvarCallWrapper) {
+		int offset;
+		void *addr;
+
+		PassInfo pass[2];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(const char *);
+		pass[1].type = PassType_Basic;
+		pass[1].flags = PASSFLAG_BYVAL;
+		pass[1].size = sizeof(const char *);
+		
+		if (g_Interfaces.GameConfigInstance->GetOffset("SetUserCvar", &offset)) {
+			sdktools__SetUserCvarCallWrapper = g_Interfaces.BinToolsInstance->CreateVCall(offset, 0, 0, NULL, pass, 2);
+		}
+		else if(g_Interfaces.GameConfigInstance->GetMemSig("SetUserCvar", &addr)) {
+			sdktools__SetUserCvarCallWrapper = g_Interfaces.BinToolsInstance->CreateCall(addr, CallConv_ThisCall, NULL, pass, 2);
+		}
+		else {
+			throw SDKToolsModSupportNotAvailableExceptionType("SetUserCvar");
+		}
+	}
+
+#if SOURCE_ENGINE == SE_DARKMESSIAH
+	if (NULL == sdktools__UpdateUserSettingsCallWrapper) {
+		int offset;
+		void *addr;
+		
+		if (g_Interfaces.GameConfigInstance->GetOffset("UpdateUserSettings", &offset)) {
+			sdktools__UpdateUserSettingsCallWrapper = g_Interfaces.BinToolsInstance->CreateVCall(offset, 0, 0, NULL, NULL, 0);
+		}
+		else if(g_Interfaces.GameConfigInstance->GetMemSig("UpdateUserSettings", &addr)) {
+			sdktools__UpdateUserSettingsCallWrapper = g_Interfaces.BinToolsInstance->CreateCall(addr, CallConv_ThisCall, NULL, NULL, 0);
+		}
+		else {
+			throw SDKToolsModSupportNotAvailableExceptionType("UpdateUserSettings");
+		}
+	}
+#else
+	static int changedOffset = -1;
+
+	if (changedOffset == -1) {	
+		if (!g_Interfaces.GameConfigInstance->GetOffset("InfoChanged", &changedOffset)) {
+			throw SDKToolsModSupportNotAvailableExceptionType("InfoChanged");
+		}
+	}
+#endif
+
+	SourceMod::IGamePlayer *gamePlayer = playerhelpers->GetGamePlayer(clientIndex);
+
+	IClient *pClient = server->GetClient(clientIndex - 1);
+
+	if(!gamePlayer->IsConnected() || !pClient) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	unsigned char *CGameClient = (unsigned char *)pClient - 4;
+
+	unsigned char vstk[sizeof(CBaseEntity *) + sizeof(const char *) + sizeof(const char *)];
+	unsigned char *vptr = vstk;
+
+	*(CBaseEntity **)vptr = (CBaseEntity*)CGameClient;
+	vptr += sizeof(CBaseEntity *);
+	*(const char **)vptr = key.c_str();
+	vptr += sizeof(const char *);
+	*(const char **)vptr = value.c_str();
+
+	sdktools__SetUserCvarCallWrapper->Execute(vstk, NULL);
+
+#if SOURCE_ENGINE == SE_DARKMESSIAH
+	unsigned char vstk2[sizeof(void *)];
+	unsigned char *vptr2 = vstk2;
+
+	*(void **)vptr2 = CGameClient;
+	sdktools__UpdateUserSettingsCallWrapper->Execute(vstk2, NULL);
+#else
+	uint8_t* changed = (uint8_t *)(CGameClient + changedOffset);
+	*changed = 1;
+#endif
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
@@ -3056,6 +3331,7 @@ DEFINE_CUSTOM_EXCEPTION_INIT(NoTempEntCallInProgressExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidTempEntPropertyExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(TempEntHookDoesNotExistExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(EntityOutputClassNameHookDoesNotExistExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(InvalidTeamExceptionType, SDKTools)
 
 CDetour *sdktools__FireOutputDetour = NULL;
 
@@ -3072,6 +3348,10 @@ BOOST_PYTHON_MODULE(SDKTools) {
 		.def_readonly("DidHit", &TraceResultsType::DidHit)
 		.def_readonly("HitGroup", &TraceResultsType::HitGroup)
 		.def_readonly("PlaneNormal", &TraceResultsType::PlaneNormal);
+
+	py::class_<NetStatsType>("NetStats", py::no_init)
+		.def_readonly("In", &NetStatsType::In)
+		.def_readonly("Out", &NetStatsType::Out);
 
 	py::class_<PointContentsType>("PointContents", py::no_init)
 		.def_readonly("EntityIndex", &PointContentsType::EntityIndex)
@@ -3172,18 +3452,15 @@ BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("EmitSound", &sdktools__emit_sound, (py::arg("clients"), py::arg("sample"), py::arg("entity_index") = 0, py::arg("channel") = 0, py::arg("level") = 75, py::arg("flags") = 0, py::arg("volume") = 1.0f, py::arg("pitch") = 100, py::arg("speakerEntityIndex") = -1, py::arg("origin") = BOOST_PY_NONE, py::arg("direction") = BOOST_PY_NONE, py::arg("update_position") = true, py::arg("sound_time") = 0.0f, py::arg("additional_origins") = py::list()));
 	py::def("EmitSentence", &sdktools__emit_sentence, (py::arg("clients"), py::arg("sentence"), py::arg("entity_index"), py::arg("channel") = 0, py::arg("level") = 75, py::arg("flags") = 0, py::arg("volume") = 1.0f, py::arg("pitch") = 100, py::arg("speakerEntityIndex") = -1, py::arg("origin") = BOOST_PY_NONE, py::arg("direction") = BOOST_PY_NONE, py::arg("update_position") = true, py::arg("sound_time") = 0.0f, py::arg("additional_origins") = py::list()));
 	py::def("GetDistGainFromSoundLevel", &sdktools__get_dist_gain_from_sound_level, (py::arg("level"), py::arg("distance")));
+	py::def("FindEntitiesByClassName", &sdktools__find_entities_by_class_name, (py::arg("class_name")));
+	py::def("GetTeamCount", &sdktools__get_team_count);
+	py::def("GetTeamName", &sdktools__get_team_name, (py::arg("team_index")));
+	py::def("GetTeamScore", &sdktools__get_team_score, (py::arg("team_index")));
+	py::def("SetTeamScore", &sdktools__set_team_score, (py::arg("team_index"), py::arg("new_score")));
+	py::def("GetTeamClientCount", &sdktools__get_team_client_count, (py::arg("team_index")));
+	py::def("GetServerNetStats", &sdktools__get_server_net_stats);
+	py::def("SetClientInfo", &sdktools__set_client_info, (py::arg("client_index"), py::arg("key"), py::arg("value")));
 
-	/**
-FindEntityByClassname
-GetClientEyeAngles
-GetTeamCount
-GetTeamName
-GetTeamScore
-SetTeamScore
-GetTeamClientCount
-GetServerNetStats
-SetClientInfo
-	*/
 	DEFINE_CUSTOM_EXCEPTION(IServerNotFoundExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.IServerNotFoundException",
 		"IServerNotFoundException")
@@ -3227,6 +3504,10 @@ SetClientInfo
 	DEFINE_CUSTOM_EXCEPTION(EntityOutputClassNameHookDoesNotExistExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.EntityOutputClassNameHookDoesNotExistException",
 		"EntityOutputClassNameHookDoesNotExistException")
+
+	DEFINE_CUSTOM_EXCEPTION(InvalidTeamExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.InvalidTeamException",
+		"InvalidTeamException")
 
 	memset(sdktools__VoiceMap, 0, sizeof(sdktools__VoiceMap));
 	memset(sdktools__ClientMutes, 0, sizeof(sdktools__ClientMutes));

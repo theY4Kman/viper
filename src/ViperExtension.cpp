@@ -161,6 +161,9 @@ void ViperExtension::OnClientCommand(edict_t *edict) {
 	sdktools__OnClientCommand(edict, command);
 }
 
+void ViperExtension::OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax) {
+	sdktools__OnCoreMapStart(pEdictList, edictCount, clientMax);
+}
 
 void ViperExtension::SDK_OnAllLoaded() {
 	g_Interfaces.ServerGameDLLCallClass = SH_GET_CALLCLASS(gamedll);

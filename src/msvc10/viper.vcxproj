@@ -755,6 +755,7 @@
     <ClCompile Include="..\InvalidSendPropertyExceptionType.cpp" />
     <ClCompile Include="..\InvalidStringTableExceptionType.cpp" />
     <ClCompile Include="..\InvalidStringTableStringIndexExceptionType.cpp" />
+    <ClCompile Include="..\InvalidTeamExceptionType.cpp" />
     <ClCompile Include="..\InvalidTempEntExceptionType.cpp" />
     <ClCompile Include="..\InvalidTempEntPropertyExceptionType.cpp" />
     <ClCompile Include="..\InvalidUserIdExceptionType.cpp" />
@@ -763,6 +764,7 @@
     <ClCompile Include="..\LoadExtensionException.cpp" />
     <ClCompile Include="..\MapMustBeRunningExceptionType.cpp" />
     <ClCompile Include="..\ModEventsParser.cpp" />
+    <ClCompile Include="..\NetStatsType.cpp" />
     <ClCompile Include="..\NoTempEntCallInProgressExceptionType.cpp" />
     <ClCompile Include="..\NullReferenceExceptionType.cpp" />
     <ClCompile Include="..\PointContentsType.cpp" />
@@ -854,6 +856,7 @@
     <ClInclude Include="..\InvalidSendPropertyExceptionType.h" />
     <ClInclude Include="..\InvalidStringTableExceptionType.h" />
     <ClInclude Include="..\InvalidStringTableStringIndexExceptionType.h" />
+    <ClInclude Include="..\InvalidTeamExceptionType.h" />
     <ClInclude Include="..\InvalidTempEntExceptionType.h" />
     <ClInclude Include="..\InvalidTempEntPropertyExceptionType.h" />
     <ClInclude Include="..\InvalidUserIdExceptionType.h" />
@@ -863,6 +866,7 @@
     <ClInclude Include="..\Macros.h" />
     <ClInclude Include="..\MapMustBeRunningExceptionType.h" />
     <ClInclude Include="..\ModEventsParser.h" />
+    <ClInclude Include="..\NetStatsType.h" />
     <ClInclude Include="..\NoTempEntCallInProgressExceptionType.h" />
     <ClInclude Include="..\NullReferenceExceptionType.h" />
     <ClInclude Include="..\PointContentsType.h" />

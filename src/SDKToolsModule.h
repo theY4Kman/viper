@@ -74,6 +74,7 @@ extern void sdktools__VoiceIncHookCount();
 
 extern void sdktools__LoadTempEnts();
 extern void sdktools__OnFireOutput(void *pOutput, CBaseEntity *pActivator, CBaseEntity *pCaller, float fDelay);
+extern void sdktools__OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax);
 
 DEFINE_CUSTOM_EXCEPTION_DECL(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(LightStyleOutOfRangeExceptionType, SDKTools)
@@ -86,5 +87,6 @@ DEFINE_CUSTOM_EXCEPTION_DECL(NoTempEntCallInProgressExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidTempEntPropertyExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(TempEntHookDoesNotExistExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(EntityOutputClassNameHookDoesNotExistExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(InvalidTeamExceptionType, SDKTools)
 
 #endif

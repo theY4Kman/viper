@@ -301,6 +301,12 @@
     <ClCompile Include="..\EntityOutputClassNameHookDoesNotExistExceptionType.cpp">
       <Filter>SDKTools</Filter>
     </ClCompile>
+    <ClCompile Include="..\InvalidTeamExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NetStatsType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\smsdk_config.h">
@@ -580,6 +586,12 @@
       <Filter>SDKTools</Filter>
     </ClInclude>
     <ClInclude Include="..\EntityOutputClassNameHookDoesNotExistExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidTeamExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NetStatsType.h">
       <Filter>SDKTools</Filter>
     </ClInclude>
   </ItemGroup>

@@ -44,6 +44,7 @@ public:
 
 public:
 	virtual bool SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlength, bool late);
+	virtual void OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax);
 
 public:
 	void OnGameFrame(bool simulating);
