@@ -18,8 +18,13 @@
 #include "InvalidTempEntExceptionType.h"
 #include "NoTempEntCallInProgressExceptionType.h"
 #include "InvalidTempEntPropertyExceptionType.h"
+#include "InvalidSendPropertyExceptionType.h"
+#include "NullReferenceExceptionType.h"
+#include "EntityOffsetOutOfRangeExceptionType.h"
+#include "EntityDataMapInfoType.h"
 #include "ColorType.h"
 #include "VectorType.h"
+#include "EntityPropertyFieldTypes.h"
 #include "PointContentsType.h"
 #include "TraceResultsType.h"
 #include "ViperRecipientFilter.h"
@@ -77,6 +82,8 @@ bool sdktools__TELoaded = false;
 SH_DECL_HOOK3(IVoiceServer, SetClientListening, SH_NOATTRIB, 0, bool, int, int, bool);
 
 unsigned char sdktools__VariantTInstance[SIZEOF_VARIANT_T] = {0};
+
+std::string sdktools__GameRulesProxyClassName;
 
 void sdktools__init_variant_t() {
 	unsigned char *vptr = sdktools__VariantTInstance;
@@ -2064,6 +2071,566 @@ void sdktools__te_send(py::list clientsList, float delay = 0.0f) {
 	sdktools__TECurrentEffect = NULL;
 }
 
+int sdktools__get_game_rules_int(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(int *)((uint8_t *)gameRules + offset);
+}
+
+unsigned int sdktools__get_game_rules_unsigned_int(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(unsigned int *)((uint8_t *)gameRules + offset);
+}
+
+short sdktools__get_game_rules_short(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(short *)((uint8_t *)gameRules + offset);
+}
+
+unsigned short sdktools__get_game_rules_unsigned_short(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(unsigned short *)((uint8_t *)gameRules + offset);
+}
+
+char sdktools__get_game_rules_char(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(char *)((uint8_t *)gameRules + offset);
+}
+
+unsigned char sdktools__get_game_rules_unsigned_char(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(unsigned char *)((uint8_t *)gameRules + offset);
+}
+
+float sdktools__get_game_rules_float(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	return *(float *)((uint8_t *)gameRules + offset);
+}
+
+int sdktools__get_game_rules_entity(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseHandle &baseHandle = *(CBaseHandle *)((uint8_t *)gameRules + offset);
+
+	return baseHandle.GetEntryIndex();
+}
+
+VectorType sdktools__get_game_rules_vector(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	Vector *v = (Vector *)((uint8_t *)gameRules + offset);
+
+	return VectorType(v->x, v->y, v->z);
+}
+
+std::string sdktools__get_game_rules_string(int offset) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	char *str = (char *)((uint8_t *)gameRules + offset);
+
+	return std::string(str);
+}
+
+static CBaseEntity *FindEntityByNetClass(int start, const char *classname)
+{
+	int maxEntities = g_Interfaces.GlobalVarsInstance->maxEntities;
+
+	for (int i = start; i < maxEntities; i++)
+	{
+		edict_t *current = gamehelpers->EdictOfIndex(i);
+		if (current == NULL)
+			continue;
+
+		IServerNetworkable *network = current->GetNetworkable();
+		if (network == NULL)
+			continue;
+
+		ServerClass *sClass = network->GetServerClass();
+		const char *name = sClass->GetName();
+
+		if (!strcmp(name, classname))
+			return gamehelpers->ReferenceToEntity(gamehelpers->IndexOfEdict(current));		
+	}
+
+	return NULL;
+}
+
+static CBaseEntity* GetGameRulesProxyEnt()
+{
+	static cell_t proxyEntRef = -1;
+	CBaseEntity *pProxy;
+	if (proxyEntRef == -1 || (pProxy = gamehelpers->ReferenceToEntity(proxyEntRef)) == NULL)
+	{
+		pProxy = FindEntityByNetClass(playerhelpers->GetMaxClients(), sdktools__GameRulesProxyClassName.c_str());
+		proxyEntRef = gamehelpers->EntityToReference(pProxy);
+	}
+	
+	return pProxy;
+}
+
+void sdktools__set_game_rules_int(int offset, int newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(int *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(int *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_unsigned_int(int offset, unsigned int newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(unsigned int *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(unsigned int *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_short(int offset, short newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(short *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(short *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_unsigned_short(int offset, unsigned short newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(unsigned short *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(unsigned short *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_char(int offset, char newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(char *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(char *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_unsigned_char(int offset, unsigned char newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(unsigned char *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(unsigned char *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_float(int offset, float newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	*(float *)((uint8_t *)gameRules + offset) = newValue;
+	
+	if (changeState) {
+		*(float *)((uint8_t *)gameRulesProxy + offset) = newValue;
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_entity(int offset, int newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+
+	CBaseHandle &baseHandle = *(CBaseHandle *)((uint8_t *)gameRules + offset);
+
+	if(newValue == INVALID_EHANDLE_INDEX) {
+		baseHandle.Set(NULL);
+	}
+	else {
+		edict_t *otherEdict = PEntityOfEntIndex(newValue);
+
+		if(otherEdict == NULL || otherEdict->IsFree()) {
+			throw InvalidEdictExceptionType(newValue);
+		}
+	
+		CBaseEntity *otherBaseEntity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(otherEdict);
+
+		if(NULL == otherBaseEntity) {
+			throw InvalidEntityExceptionType(newValue);
+		}
+
+		IHandleEntity *handleEntity = (IHandleEntity *)otherBaseEntity;
+
+		baseHandle.Set(handleEntity);
+	}
+	
+	if (changeState) {
+		CBaseHandle &baseHandleProxy = *(CBaseHandle *)((uint8_t *)gameRulesProxy + offset);
+
+		if(newValue == INVALID_EHANDLE_INDEX) {
+			baseHandleProxy.Set(NULL);
+		}
+		else {
+			edict_t *otherEdict = PEntityOfEntIndex(newValue);
+
+			if(otherEdict == NULL || otherEdict->IsFree()) {
+				throw InvalidEdictExceptionType(newValue);
+			}
+	
+			CBaseEntity *otherBaseEntity = g_Interfaces.ServerGameEntsInstance->EdictToBaseEntity(otherEdict);
+
+			if(NULL == otherBaseEntity) {
+				throw InvalidEntityExceptionType(newValue);
+			}
+
+			IHandleEntity *handleEntity = (IHandleEntity *)otherBaseEntity;
+
+			baseHandleProxy.Set(handleEntity);
+
+			gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+		}
+	}
+}
+
+void sdktools__set_game_rules_vector(int offset, VectorType newValue, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	Vector *v = (Vector *)((uint8_t *)gameRules + offset);
+
+	v->x = newValue.X;
+	v->y = newValue.Y;
+	v->z = newValue.Z;
+	
+	if (changeState) {
+		Vector *vProxy = (Vector *)((uint8_t *)gameRulesProxy + offset);
+
+		vProxy->x = newValue.X;
+		vProxy->y = newValue.Y;
+		vProxy->z = newValue.Z;
+
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
+void sdktools__set_game_rules_string(int offset, std::string newValue, int maxLength, bool changeState = false) {
+	if(!g_pSM->IsMapRunning()) {
+		throw MapMustBeRunningExceptionType();
+	}
+
+	void *gameRules = g_Interfaces.SDKToolsInstance->GetGameRules();
+
+	if(NULL == gameRules) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRules");
+	}
+
+	if (offset <= 0 || offset > 32768) {
+		throw EntityOffsetOutOfRangeExceptionType(offset);
+	}
+
+	CBaseEntity *gameRulesProxy = NULL;
+	if (changeState && ((gameRulesProxy = GetGameRulesProxyEnt()) == NULL)) {
+		throw SDKToolsModSupportNotAvailableExceptionType("GameRulesProxy");
+	}
+	
+	char *str = (char *)((uint8_t *)gameRules + offset);
+
+	UTIL_Format(str, maxLength, "%s", newValue.c_str());
+
+	if (changeState) {
+		str = (char *)((uint8_t *)gameRulesProxy + offset);
+
+		UTIL_Format(str, maxLength, "%s", newValue.c_str());
+
+		gamehelpers->SetEdictStateChanged(gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(gameRulesProxy)), offset);
+	}
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
@@ -2156,6 +2723,27 @@ BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("TEWriteVector", &sdktools__te_write_vector, (py::arg("prop"), py::arg("vec")));
 	py::def("TEReadVector", &sdktools__te_read_vector, (py::arg("prop")));
 	py::def("TESend", &sdktools__te_send, (py::arg("clients"), py::arg("delay") = 0.0f));
+	py::def("GetGameRulesInt", &sdktools__get_game_rules_int, (py::arg("offset")));
+	py::def("GetGameRulesUnsignedInt", &sdktools__get_game_rules_unsigned_int, (py::arg("offset")));
+	py::def("GetGameRulesShort", &sdktools__get_game_rules_short, (py::arg("offset")));
+	py::def("GetGameRulesUnsignedShort", &sdktools__get_game_rules_unsigned_short, (py::arg("offset")));
+	py::def("GetGameRulesChar", &sdktools__get_game_rules_char, (py::arg("offset")));
+	py::def("GetGameRulesUnsignedChar", &sdktools__get_game_rules_unsigned_char, (py::arg("offset")));
+	py::def("GetGameRulesFloat", &sdktools__get_game_rules_float, (py::arg("offset")));
+	py::def("GetGameRulesEntity", &sdktools__get_game_rules_entity, (py::arg("offset")));
+	py::def("GetGameRulesVector", &sdktools__get_game_rules_vector, (py::arg("offset")));
+	py::def("GetGameRulesString", &sdktools__get_game_rules_string, (py::arg("offset")));
+	py::def("SetGameRulesInt", &sdktools__set_game_rules_int, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesUnsignedInt", &sdktools__set_game_rules_unsigned_int, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesShort", &sdktools__set_game_rules_short, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesUnsignedShort", &sdktools__set_game_rules_unsigned_short, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesChar", &sdktools__set_game_rules_char, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesUnsignedChar", &sdktools__set_game_rules_unsigned_char, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesFloat", &sdktools__set_game_rules_float, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesEntity", &sdktools__set_game_rules_entity, (py::arg("offset"), py::arg("entity_index"), py::arg("change_state") = false));
+	py::def("SetGameRulesVector", &sdktools__set_game_rules_vector, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
+	py::def("SetGameRulesString", &sdktools__set_game_rules_string, (py::arg("offset"), py::arg("new_value"), py::arg("max_length"), py::arg("change_state") = false));
+
 
 	/**
 AddTempEntHook
@@ -2173,17 +2761,6 @@ SetTeamScore
 GetTeamClientCount
 GetServerNetStats
 SetClientInfo
-GameRules_GetProp
-GameRules_SetProp
-GameRules_GetPropFloat
-GameRules_SetPropFloat
-GameRules_GetPropEnt
-GameRules_SetPropEnt
-GameRules_GetPropVector
-GameRules_SetPropVector
-GameRules_GetPropString
-GameRules_SetPropString
-GameRules_GetRoundState
 PrefetchSound
 EmitAmbientSound
 FadeClientVolume
@@ -2234,6 +2811,8 @@ RemoveNormalSoundHook
 
 	memset(sdktools__VoiceMap, 0, sizeof(sdktools__VoiceMap));
 	memset(sdktools__ClientMutes, 0, sizeof(sdktools__ClientMutes));
+
+	sdktools__GameRulesProxyClassName = std::string(g_Interfaces.GameConfigInstance->GetKeyValue("GameRulesProxy"));
 
 	playerhelpers->AddClientListener(&sdktools__ClientListener);
 }
