@@ -84,7 +84,9 @@ bool events__OnFireEvent(IGameEvent *gameEvent, bool dontBroadcast) {
 	// Make a copy of the current event for any post hooks.
 	events__EventCopies[gameEvent] = g_Interfaces.GameEventManagerInstance->DuplicateEvent(gameEvent);
 
-	for(std::list<EventHook>::iterator it = events__Hooks.begin(); it != events__Hooks.end(); it++) {
+	std::list<EventHook> hooksCopy = events__Hooks;
+
+	for(std::list<EventHook>::iterator it = hooksCopy.begin(); it != hooksCopy.end(); it++) {
 		EventHook eventHook = *it;
 
 		if(eventHook.HookMode != EventHookMode_Pre) {
@@ -152,7 +154,9 @@ bool events__OnFireEventPost(IGameEvent *gameEvent, bool dontBroadcast) {
 
 	std::string eventName(gameEventCopy->GetName());
 
-	for(std::list<EventHook>::iterator it = events__Hooks.begin(); it != events__Hooks.end(); it++) {
+	std::list<EventHook> hooksCopy = events__Hooks;
+
+	for(std::list<EventHook>::iterator it = hooksCopy.begin(); it != hooksCopy.end(); it++) {
 		EventHook eventHook = *it;
 
 		if(eventHook.HookMode != EventHookMode_Post) {

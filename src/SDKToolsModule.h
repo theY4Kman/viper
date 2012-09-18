@@ -4,6 +4,7 @@
 #include "Macros.h"
 #include "BoostPythonSM.h"
 #include "IBinTools.h"
+#include "TempEntHook.h"
 #include "HL2SDK.h"
 
 #define SIZEOF_VARIANT_T		20
@@ -61,6 +62,8 @@ extern size_t sdktools__VoiceHookCount;
 extern ListenOverride sdktools__VoiceMap[65][65];
 extern bool sdktools__ClientMutes[65][65];
 
+extern std::list<TempEntHook> sdktools__TEHooks;
+
 extern void *sdktools__TECurrentEffect;
 
 extern bool sdktools__OnSetClientListening(int iReceiver, int iSender, bool bListen);
@@ -70,6 +73,7 @@ extern bool sdktools__VoiceDecHookCount();
 extern void sdktools__VoiceIncHookCount();
 
 extern void sdktools__LoadTempEnts();
+extern void sdktools__OnFireOutput(void *pOutput, CBaseEntity *pActivator, CBaseEntity *pCaller, float fDelay);
 
 DEFINE_CUSTOM_EXCEPTION_DECL(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(LightStyleOutOfRangeExceptionType, SDKTools)
@@ -80,5 +84,7 @@ DEFINE_CUSTOM_EXCEPTION_DECL(InvalidStringTableStringIndexExceptionType, SDKTool
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidTempEntExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(NoTempEntCallInProgressExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_DECL(InvalidTempEntPropertyExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(TempEntHookDoesNotExistExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_DECL(EntityOutputClassNameHookDoesNotExistExceptionType, SDKTools)
 
 #endif

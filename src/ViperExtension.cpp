@@ -41,6 +41,7 @@
 #include "UserMessagesModule.h"
 #include "ConsoleModule.h"
 #include "SDKToolsModule.h"
+#include "CDetour\detours.h"
 #include "InterfaceContainer.h"
 
 namespace py = boost::python;
@@ -170,6 +171,8 @@ void ViperExtension::SDK_OnAllLoaded() {
 		g_SMAPI->ConPrintf("%s", "Unable to load signatures and offsets file for SDKTools (sdktools.games)");
 		return;
 	}
+
+	CDetourManager::Init(g_pSM->GetScriptingEngine(), g_Interfaces.GameConfigInstance);
 
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, g_Interfaces.ServerGameClientsInstance, this, &ViperExtension::OnClientCommand, false);

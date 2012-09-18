@@ -40,6 +40,12 @@
     <Filter Include="SDKTools">
       <UniqueIdentifier>{f3b0ba36-1647-451b-8f2a-404fe863faf0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CDetour">
+      <UniqueIdentifier>{13fd7066-5826-4825-99bb-329969ec48b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asm">
+      <UniqueIdentifier>{dd79723d-27b1-40c9-b12a-0010f8181293}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -275,6 +281,24 @@
       <Filter>SDKTools</Filter>
     </ClCompile>
     <ClCompile Include="..\InvalidTempEntPropertyExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TempEntHook.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TempEntHookDoesNotExistExceptionType.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CDetour\detours.cpp">
+      <Filter>CDetour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\asm\asm.c">
+      <Filter>asm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityOutputClassNameHook.cpp">
+      <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EntityOutputClassNameHookDoesNotExistExceptionType.cpp">
       <Filter>SDKTools</Filter>
     </ClCompile>
   </ItemGroup>
@@ -535,6 +559,27 @@
       <Filter>SDKTools</Filter>
     </ClInclude>
     <ClInclude Include="..\InvalidTempEntPropertyExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TempEntHook.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TempEntHookDoesNotExistExceptionType.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CDetour\detourhelpers.h">
+      <Filter>CDetour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CDetour\detours.h">
+      <Filter>CDetour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\asm\asm.h">
+      <Filter>asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityOutputClassNameHook.h">
+      <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EntityOutputClassNameHookDoesNotExistExceptionType.h">
       <Filter>SDKTools</Filter>
     </ClInclude>
   </ItemGroup>

@@ -159,8 +159,10 @@ bool console__CommandHandler(int clientIndex, const CCommand &command) {
 
 	// then go through the server hooks if index is 0
 	if(0 == clientIndex) {
-		for(std::list<ConsoleCommandHookInfo>::iterator it = console__ServerCommandHooks.begin();
-			it != console__ServerCommandHooks.end(); it++) {
+		std::list<ConsoleCommandHookInfo> serverCommandHooksCopy = console__ServerCommandHooks;
+
+		for(std::list<ConsoleCommandHookInfo>::iterator it = serverCommandHooksCopy.begin();
+			it != serverCommandHooksCopy.end(); it++) {
 			ConsoleCommandHookInfo commandHookInfo = *it;
 
 			if(commandHookInfo.Name != baseCommand) {
@@ -193,8 +195,10 @@ bool console__CommandHandler(int clientIndex, const CCommand &command) {
 		}
 	}
 
-	for(std::list<ConsoleCommandHookInfo>::iterator it = console__ConsoleCommandHooks.begin();
-		it != console__ConsoleCommandHooks.end(); it++) {
+	std::list<ConsoleCommandHookInfo> consoleCommandHooksCopy = console__ConsoleCommandHooks;
+
+	for(std::list<ConsoleCommandHookInfo>::iterator it = consoleCommandHooksCopy.begin();
+		it != consoleCommandHooksCopy.end(); it++) {
 		ConsoleCommandHookInfo commandHookInfo = *it;
 
 		if(commandHookInfo.Name != baseCommand) {
@@ -293,8 +297,10 @@ void console__OnConVarChanged(ConVar *conVar, const char *oldValue) {
 
 	ConsoleVariableType consoleVariable = console__get_console_variable_by_name(name);
 
-	for(std::list<ConsoleVariableChangedHookInfo>::iterator it = console__VariableChangedHooks.begin();
-		it != console__VariableChangedHooks.end(); it++) {
+	std::list<ConsoleVariableChangedHookInfo> variableChangedHooksCopy = console__VariableChangedHooks;
+
+	for(std::list<ConsoleVariableChangedHookInfo>::iterator it = variableChangedHooksCopy.begin();
+		it != variableChangedHooksCopy.end(); it++) {
 		ConsoleVariableChangedHookInfo variableChangedHookInfo = *it;
 
 		if(variableChangedHookInfo.Name != name) {

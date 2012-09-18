@@ -21,7 +21,10 @@
 #include "InvalidSendPropertyExceptionType.h"
 #include "NullReferenceExceptionType.h"
 #include "EntityOffsetOutOfRangeExceptionType.h"
+#include "TempEntHookDoesNotExistExceptionType.h"
+#include "EntityOutputClassNameHook.h"
 #include "EntityDataMapInfoType.h"
+#include "EntityOutputClassNameHookDoesNotExistExceptionType.h"
 #include "ColorType.h"
 #include "VectorType.h"
 #include "EntityPropertyFieldTypes.h"
@@ -37,6 +40,7 @@
 #include "server_class.h"
 #include "dt_common.h"
 #include "Util.h"
+#include "CDetour\detours.h"
 
 namespace py = boost::python;
 
@@ -76,14 +80,14 @@ void *sdktools__TECurrentEffect = NULL;
 ServerClass *sdktools__TECurrentServerClass = NULL;
 
 SourceMod::ICallWrapper *sdktools__TEGetServerClassCallWrapper = NULL;
-
+std::list<TempEntHook> sdktools__TEHooks;
+std::list<EntityOutputClassNameHook> sdktools__EntityOutputClassNameHooks;
 bool sdktools__TELoaded = false;
 
 SH_DECL_HOOK3(IVoiceServer, SetClientListening, SH_NOATTRIB, 0, bool, int, int, bool);
+SH_DECL_HOOK5_void(IVEngineServer, PlaybackTempEntity, SH_NOATTRIB, 0, IRecipientFilter &, float, const void *, const SendTable *, int);
 
 unsigned char sdktools__VariantTInstance[SIZEOF_VARIANT_T] = {0};
-
-std::string sdktools__GameRulesProxyClassName;
 
 void sdktools__init_variant_t() {
 	unsigned char *vptr = sdktools__VariantTInstance;
@@ -94,6 +98,22 @@ void sdktools__init_variant_t() {
 	vptr += sizeof(unsigned long);
 	*(fieldtype_t *)vptr = FIELD_VOID;
 }
+
+std::string sdktools__GameRulesProxyClassName;
+
+#ifdef PLATFORM_WINDOWS
+DETOUR_DECL_MEMBER8(FireOutput, void, int, what, int, the, int, hell, int, msvc, void *, variant_t, CBaseEntity *, pActivator, CBaseEntity *, pCaller, float, fDelay)
+{
+	sdktools__OnFireOutput((void *)this, pActivator, pCaller, fDelay);
+	DETOUR_MEMBER_CALL(FireOutput)(what, the, hell, msvc, variant_t, pActivator, pCaller, fDelay);
+}
+#else
+DETOUR_DECL_MEMBER4(FireOutput, void, void *, variant_t, CBaseEntity *, pActivator, CBaseEntity *, pCaller, float, fDelay)
+{
+	sdktools__OnFireOutput((void *)this, pActivator, pCaller, fDelay);
+	DETOUR_MEMBER_CALL(FireOutput)(variant_t, pActivator, pCaller, fDelay);
+}
+#endif
 
 void sdktools__inactive_client(int clientIndex) {
 	SourceMod::IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
@@ -2631,6 +2651,400 @@ void sdktools__set_game_rules_string(int offset, std::string newValue, int maxLe
 	}
 }
 
+std::string sdktools__TEGetNameFromThisPtr(void *thisPtr) {
+	return std::string(*(const char **)((unsigned char *)thisPtr + sdktools__TENameOffs));
+}
+
+void sdktools__OnPlaybackTempEntity(IRecipientFilter &filter, float delay, const void *pSender, const SendTable *pST, int classID) {
+	std::string name = sdktools__TEGetNameFromThisPtr(const_cast<void *>(pSender));
+
+	py::list clientsList;
+
+	int clientCount = filter.GetRecipientCount();
+
+	for(int c = 0; c < clientCount; c++) {
+		clientsList.append<int>(filter.GetRecipientIndex(c));
+	}
+
+	std::list<TempEntHook> teHooksCopy = sdktools__TEHooks;
+
+	for(std::list<TempEntHook>::iterator it = teHooksCopy.begin(); it != teHooksCopy.end(); it++) {
+		TempEntHook hookInfo = *it;
+
+		if(hookInfo.EffectName != name) {
+			continue;
+		}
+
+		PyThreadState *currentThreadState = PyThreadState_Get();
+
+		PyThreadState_Swap(hookInfo.ThreadState);
+
+		SourceMod::ResultType resultType = SourceMod::Pl_Continue;
+
+		void *oldEffect = sdktools__TECurrentEffect;
+
+		sdktools__TECurrentEffect = const_cast<void *>(pSender);
+
+		try {
+			py::extract<SourceMod::ResultType>(hookInfo.PythonCallback(name, clientsList, delay));
+		}
+		catch(const py::error_already_set &) {
+			PyErr_Print();
+		}
+
+		PyThreadState_Swap(currentThreadState);
+
+		sdktools__TECurrentEffect = oldEffect;
+
+		if(resultType != SourceMod::Pl_Continue) {
+			RETURN_META(MRES_SUPERCEDE);
+		}
+	}
+
+	RETURN_META(MRES_IGNORED);
+}
+
+void sdktools__add_temp_ent_hook(std::string effectName, py::object pythonCallback) {
+	PyThreadState *threadState = PyThreadState_Get();
+
+	if(sdktools__FindTempEntByName(effectName) == NULL) {
+		throw InvalidTempEntExceptionType(effectName);
+	}
+
+	for(std::list<TempEntHook>::iterator it = sdktools__TEHooks.begin(); it != sdktools__TEHooks.end(); it++) {
+		TempEntHook hookInfo = *it;
+
+		if(hookInfo.EffectName != effectName || hookInfo.PythonCallback != pythonCallback) {
+			continue;
+		}
+
+		return;
+	}
+
+	// otherwise make a new one
+	sdktools__TEHooks.push_back(TempEntHook(effectName, pythonCallback, threadState));
+}
+
+void sdktools__remove_temp_ent_hook(std::string effectName, py::object pythonCallback) {
+	PyThreadState *threadState = PyThreadState_Get();
+
+	if(sdktools__FindTempEntByName(effectName) == NULL) {
+		throw InvalidTempEntExceptionType(effectName);
+	}
+
+
+	for(std::list<TempEntHook>::iterator it = sdktools__TEHooks.begin(); it != sdktools__TEHooks.end(); it++) {
+		TempEntHook hookInfo = *it;
+
+		if(hookInfo.EffectName != effectName || hookInfo.PythonCallback != pythonCallback) {
+			continue;
+		}
+
+		sdktools__TEHooks.erase(it);
+		return;
+	}
+
+	throw TempEntHookDoesNotExistExceptionType(effectName);
+}
+
+void sdktools__hook_entity_output(std::string className, std::string output, py::object pythonCallback) {
+	PyThreadState *threadState = PyThreadState_Get();
+
+	for(std::list<EntityOutputClassNameHook>::iterator it = sdktools__EntityOutputClassNameHooks.begin(); it != sdktools__EntityOutputClassNameHooks.end(); it++) {
+		EntityOutputClassNameHook hookInfo = *it;
+
+		if(hookInfo.ClassName != className || hookInfo.Output != output || hookInfo.CallbackFunction != pythonCallback) {
+			continue;
+		}
+
+		return;
+	}
+
+	sdktools__EntityOutputClassNameHooks.push_back(EntityOutputClassNameHook(className, output, threadState, pythonCallback));
+}
+
+void sdktools__unhook_entity_output(std::string className, std::string output, py::object pythonCallback) {
+	PyThreadState *threadState = PyThreadState_Get();
+
+	for(std::list<EntityOutputClassNameHook>::iterator it = sdktools__EntityOutputClassNameHooks.begin(); it != sdktools__EntityOutputClassNameHooks.end(); it++) {
+		EntityOutputClassNameHook hookInfo = *it;
+
+		if(hookInfo.ClassName != className || hookInfo.Output != output || hookInfo.CallbackFunction != pythonCallback) {
+			continue;
+		}
+
+		sdktools__EntityOutputClassNameHooks.erase(it);
+		return;
+	}
+
+	throw EntityOutputClassNameHookDoesNotExistExceptionType(className, output);
+}
+
+static const char *GetEntityClassname(CBaseEntity *pEntity)
+{
+	static int offset = -1;
+	if (offset == -1)
+	{
+		datamap_t *pMap = gamehelpers->GetDataMap(pEntity);
+		typedescription_t *pDesc = gamehelpers->FindInDataMap(pMap, "m_iClassname");
+		offset = GetTypeDescOffs(pDesc);
+	}
+
+	return *(const char **)(((unsigned char *)pEntity) + offset);
+}
+
+static const char *FindOutputName(void *pOutput, CBaseEntity *pCaller)
+{
+	datamap_t *pMap = gamehelpers->GetDataMap(pCaller);
+
+	while (pMap)
+	{
+		for (int i=0; i<pMap->dataNumFields; i++)
+		{
+			if (pMap->dataDesc[i].flags & FTYPEDESC_OUTPUT)
+			{
+				if ((char *)pCaller + GetTypeDescOffs(&pMap->dataDesc[i]) == pOutput)
+				{
+					return pMap->dataDesc[i].externalName;
+				}
+			}
+		}
+		pMap = pMap->baseMap;
+	}
+
+	return NULL;
+}
+
+void sdktools__OnFireOutput(void *pOutput, CBaseEntity *pActivator, CBaseEntity *pCaller, float fDelay) {
+	if(sdktools__EntityOutputClassNameHooks.empty() || !pCaller) {
+		return;
+	}
+
+	const char *classNameStr = GetEntityClassname(pCaller);
+	const char *outputName = FindOutputName(pOutput, pCaller);
+
+	edict_t *callerEdict = g_Interfaces.ServerGameEntsInstance->BaseEntityToEdict(pCaller);
+
+	if(!callerEdict && callerEdict->IsFree()) {
+		return;
+	}
+
+	int callerIndex = IndexOfEdict(callerEdict);
+
+	int activatorIndex = -1;
+
+	if(pActivator) {
+		edict_t *activatorEdict = g_Interfaces.ServerGameEntsInstance->BaseEntityToEdict(pActivator);
+
+		if(activatorEdict && !activatorEdict->IsFree()) {
+			activatorIndex = IndexOfEdict(activatorEdict);
+		}
+	}
+
+	if(!classNameStr || !outputName) {
+		return;
+	}
+
+	std::string className = std::string(classNameStr);
+	std::string output = std::string(outputName);
+
+	std::list<EntityOutputClassNameHook> hooksCopy = sdktools__EntityOutputClassNameHooks;
+
+	for(std::list<EntityOutputClassNameHook>::iterator it = hooksCopy.begin(); it != hooksCopy.end(); it++) {
+		EntityOutputClassNameHook hookInfo = *it;
+
+		if(hookInfo.ClassName != className || hookInfo.Output != output) {
+			continue;
+		}
+
+		PyThreadState *currentThreadState = PyThreadState_Get();
+
+		PyThreadState_Swap(hookInfo.ThreadState);
+
+		try {
+			py::extract<SourceMod::ResultType>(hookInfo.CallbackFunction(output, activatorIndex, callerIndex, fDelay));
+		}
+		catch(const py::error_already_set &) {
+			PyErr_Print();
+		}
+
+		PyThreadState_Swap(currentThreadState);
+	}
+}
+
+void sdktools__prefetch_sound(std::string name) {
+	g_Interfaces.EngineSoundInstance->PrefetchSound(name.c_str());
+}
+
+float sdktools__get_sound_duration(std::string name) {
+	return g_Interfaces.EngineSoundInstance->GetSoundDuration(name.c_str());
+}
+
+void sdktools__emit_ambient_sound(std::string name, VectorType position, int entityIndex = 0, int level = 75, int flags = 0, float volume = 1.0f, int pitch = 100, float delay = 0.0f) {
+	engine->EmitAmbientSound(entityIndex, Vector(position.X, position.Y, position.Z), name.c_str(), volume, (soundlevel_t)level, flags, pitch, delay);
+}
+
+void sdktools__fade_client_volume(int clientIndex, float percent, float outTime, float holdTime, float inTime)
+{
+	IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+	
+	if (!player->IsConnected()) {
+		throw ClientNotConnectedExceptionType(clientIndex);
+	}
+
+	if (!player->IsInGame()) {
+		throw ClientNotInGameExceptionType(clientIndex);
+	}
+
+	engine->FadeClientVolume(player->GetEdict(), percent, outTime, holdTime, inTime);
+}
+
+void sdktools__stop_sound(int entityIndex, int channel, std::string name) {
+	g_Interfaces.EngineSoundInstance->StopSound(entityIndex, channel, name.c_str());
+}
+
+void sdktools__emit_sound(py::list clientsList, std::string sample, int entityIndex = 0, int channel = 0, int level = 75, int flags = 0, float volume = 1.0f, int pitch = 100, int speakerEntityIndex = -1, py::object origin = BOOST_PY_NONE, py::object direction = BOOST_PY_NONE, bool updatePosition = true, float soundTime = 0.0f, py::list additionalOrigins = py::list()) {
+	int clientCount = py::len(clientsList);
+
+	std::vector<int> clientsVec;
+
+	for (int i = 0; i < clientCount; i++) {
+		int clientIndex = py::extract<int>(clientsList[i]);
+
+		IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+
+		if (!player->IsConnected()) {
+			throw ClientNotConnectedExceptionType(clientIndex);
+		}
+		
+		if(!player->IsInGame()) {
+			throw ClientNotInGameExceptionType(clientIndex);
+		}
+
+		clientsVec.push_back(clientIndex);
+	}
+
+	ViperRecipientFilter recipientFilter(clientsVec, false, false);
+	
+	Vector *pOrigin = NULL;
+
+	if(!origin.is_none()) {
+		VectorType originVT = py::extract<VectorType>(origin);
+
+		pOrigin = new Vector(originVT.X, originVT.Y, originVT.Z);
+	}
+
+	Vector *pDir = NULL;
+
+	if(!direction.is_none()) {
+		VectorType directionVT = py::extract<VectorType>(direction);
+
+		pDir = new Vector(directionVT.X, directionVT.Y, directionVT.Z);
+	}
+
+	CUtlVector<Vector> *pOrigVec = NULL;
+
+	int aoCount = py::len(additionalOrigins);
+
+	if (aoCount > 0) {
+		pOrigVec = new CUtlVector<Vector>;
+
+		for (int i = 0; i < aoCount; i++) {
+			VectorType vt = py::extract<VectorType>(additionalOrigins[i]);
+			
+			Vector vec(vt.X, vt.Y, vt.Z);
+
+			pOrigVec->AddToTail(vec);
+		}
+	}
+
+#if SOURCE_ENGINE == SE_ORANGEBOXVALVE
+	g_Interfaces.EngineSoundInstance->EmitSound(recipientFilter, entityIndex, channel, sample.c_str(), volume, (soundlevel_t)level, flags, pitch, 0, pOrigin, pDir, pOrigVec, updatePosition, soundTime, speakerEntityIndex);
+#else
+	g_Interfaces.EngineSoundInstance->EmitSound(recipientFilter, entityIndex, channel, sample.c_str(), volume, (soundlevel_t)level, flags, pitch, pOrigin, pDir, pOrigVec, updatePosition, soundTime, speakerEntityIndex);
+#endif
+
+	if(pOrigin)
+		delete pOrigin;
+	if(pDir)
+		delete pDir;
+	if(pOrigVec)
+		delete pOrigVec;
+}
+
+void sdktools__emit_sentence(py::list clientsList, int sentence, int entityIndex, int channel = 0, int level = 75, int flags = 0, float volume = 1.0f, int pitch = 100, int speakerEntityIndex = -1, py::object origin = BOOST_PY_NONE, py::object direction = BOOST_PY_NONE, bool updatePosition = true, float soundTime = 0.0f, py::list additionalOrigins = py::list()) {
+	int clientCount = py::len(clientsList);
+
+	std::vector<int> clientsVec;
+
+	for (int i = 0; i < clientCount; i++) {
+		int clientIndex = py::extract<int>(clientsList[i]);
+
+		IGamePlayer *player = playerhelpers->GetGamePlayer(clientIndex);
+
+		if (!player->IsConnected()) {
+			throw ClientNotConnectedExceptionType(clientIndex);
+		}
+		
+		if(!player->IsInGame()) {
+			throw ClientNotInGameExceptionType(clientIndex);
+		}
+
+		clientsVec.push_back(clientIndex);
+	}
+
+	ViperRecipientFilter recipientFilter(clientsVec, false, false);
+	
+	Vector *pOrigin = NULL;
+
+	if(!origin.is_none()) {
+		VectorType originVT = py::extract<VectorType>(origin);
+
+		pOrigin = new Vector(originVT.X, originVT.Y, originVT.Z);
+	}
+
+	Vector *pDir = NULL;
+
+	if(!direction.is_none()) {
+		VectorType directionVT = py::extract<VectorType>(direction);
+
+		pDir = new Vector(directionVT.X, directionVT.Y, directionVT.Z);
+	}
+
+	CUtlVector<Vector> *pOrigVec = NULL;
+
+	int aoCount = py::len(additionalOrigins);
+
+	if (aoCount > 0) {
+		pOrigVec = new CUtlVector<Vector>;
+
+		for (int i = 0; i < aoCount; i++) {
+			VectorType vt = py::extract<VectorType>(additionalOrigins[i]);
+			
+			Vector vec(vt.X, vt.Y, vt.Z);
+
+			pOrigVec->AddToTail(vec);
+		}
+	}
+
+	g_Interfaces.EngineSoundInstance->EmitSentenceByIndex(recipientFilter, entityIndex, channel, sentence, volume, (soundlevel_t)level, flags, pitch, 
+#if SOURCE_ENGINE == SE_ORANGEBOXVALVE
+		0, 
+#endif
+		pOrigin, pDir, pOrigVec, updatePosition, soundTime, speakerEntityIndex);
+
+	if(pOrigin)
+		delete pOrigin;
+	if(pDir)
+		delete pDir;
+	if(pOrigVec)
+		delete pOrigVec;
+}
+
+float sdktools__get_dist_gain_from_sound_level(int decibel, float distance) {
+	return g_Interfaces.EngineSoundInstance->GetDistGainFromSoundLevel((soundlevel_t)decibel, distance);
+}
+
 DEFINE_CUSTOM_EXCEPTION_INIT(IServerNotFoundExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(LightStyleOutOfRangeExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(SDKToolsModSupportNotAvailableExceptionType, SDKTools)
@@ -2640,6 +3054,10 @@ DEFINE_CUSTOM_EXCEPTION_INIT(InvalidStringTableStringIndexExceptionType, SDKTool
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidTempEntExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(NoTempEntCallInProgressExceptionType, SDKTools)
 DEFINE_CUSTOM_EXCEPTION_INIT(InvalidTempEntPropertyExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(TempEntHookDoesNotExistExceptionType, SDKTools)
+DEFINE_CUSTOM_EXCEPTION_INIT(EntityOutputClassNameHookDoesNotExistExceptionType, SDKTools)
+
+CDetour *sdktools__FireOutputDetour = NULL;
 
 BOOST_PYTHON_MODULE(SDKTools) {
 	py::enum_<ListenOverride>("ListenOverride")
@@ -2743,15 +3161,19 @@ BOOST_PYTHON_MODULE(SDKTools) {
 	py::def("SetGameRulesEntity", &sdktools__set_game_rules_entity, (py::arg("offset"), py::arg("entity_index"), py::arg("change_state") = false));
 	py::def("SetGameRulesVector", &sdktools__set_game_rules_vector, (py::arg("offset"), py::arg("new_value"), py::arg("change_state") = false));
 	py::def("SetGameRulesString", &sdktools__set_game_rules_string, (py::arg("offset"), py::arg("new_value"), py::arg("max_length"), py::arg("change_state") = false));
-
+	py::def("AddTempEntHook", &sdktools__add_temp_ent_hook, (py::arg("effect_name"), py::arg("callback")));
+	py::def("RemoveTempEntHook", &sdktools__remove_temp_ent_hook, (py::arg("effect_name"), py::arg("callback")));
+	py::def("HookEntityOutput", &sdktools__hook_entity_output, (py::arg("class_name"), py::arg("output"), py::arg("callback")));
+	py::def("UnhookEntityOutput", &sdktools__unhook_entity_output, (py::arg("class_name"), py::arg("output"), py::arg("callback")));
+	py::def("PrefetchSound", &sdktools__prefetch_sound, (py::arg("name")));
+	py::def("EmitAmbientSound", &sdktools__emit_ambient_sound, (py::arg("name"), py::arg("position"), py::arg("entity_index") = 0, py::arg("level") = 75, py::arg("flags") = 0, py::arg("volume") = 1.0f, py::arg("pitch") = 100, py::arg("delay") = 0.0f));
+	py::def("FadeClientVolume", &sdktools__fade_client_volume, (py::arg("client_index"), py::arg("percent"), py::arg("out_time"), py::arg("hold_time"), py::arg("in_time")));
+	py::def("StopSound", &sdktools__stop_sound, (py::arg("entity_index"), py::arg("channel"), py::arg("name")));
+	py::def("EmitSound", &sdktools__emit_sound, (py::arg("clients"), py::arg("sample"), py::arg("entity_index") = 0, py::arg("channel") = 0, py::arg("level") = 75, py::arg("flags") = 0, py::arg("volume") = 1.0f, py::arg("pitch") = 100, py::arg("speakerEntityIndex") = -1, py::arg("origin") = BOOST_PY_NONE, py::arg("direction") = BOOST_PY_NONE, py::arg("update_position") = true, py::arg("sound_time") = 0.0f, py::arg("additional_origins") = py::list()));
+	py::def("EmitSentence", &sdktools__emit_sentence, (py::arg("clients"), py::arg("sentence"), py::arg("entity_index"), py::arg("channel") = 0, py::arg("level") = 75, py::arg("flags") = 0, py::arg("volume") = 1.0f, py::arg("pitch") = 100, py::arg("speakerEntityIndex") = -1, py::arg("origin") = BOOST_PY_NONE, py::arg("direction") = BOOST_PY_NONE, py::arg("update_position") = true, py::arg("sound_time") = 0.0f, py::arg("additional_origins") = py::list()));
+	py::def("GetDistGainFromSoundLevel", &sdktools__get_dist_gain_from_sound_level, (py::arg("level"), py::arg("distance")));
 
 	/**
-AddTempEntHook
-RemoveTempEntHook
-HookEntityOutput
-UnhookEntityOutput
-HookSingleEntityOutput
-UnhookSingleEntityOutput
 FindEntityByClassname
 GetClientEyeAngles
 GetTeamCount
@@ -2761,17 +3183,6 @@ SetTeamScore
 GetTeamClientCount
 GetServerNetStats
 SetClientInfo
-PrefetchSound
-EmitAmbientSound
-FadeClientVolume
-StopSound
-EmitSound
-EmitSentence
-GetDistGainFromSoundLevel
-AddAmbientSoundHook
-AddNormalSoundHook
-RemoveAmbientSoundHook
-RemoveNormalSoundHook
 	*/
 	DEFINE_CUSTOM_EXCEPTION(IServerNotFoundExceptionType, SDKTools,
 		PyExc_Exception, "SDKTools.IServerNotFoundException",
@@ -2809,17 +3220,84 @@ RemoveNormalSoundHook
 		PyExc_Exception, "SDKTools.InvalidTempEntPropertyException",
 		"InvalidTempEntPropertyException")
 
+	DEFINE_CUSTOM_EXCEPTION(TempEntHookDoesNotExistExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.TempEntHookDoesNotExistException",
+		"TempEntHookDoesNotExistException")
+
+	DEFINE_CUSTOM_EXCEPTION(EntityOutputClassNameHookDoesNotExistExceptionType, SDKTools,
+		PyExc_Exception, "SDKTools.EntityOutputClassNameHookDoesNotExistException",
+		"EntityOutputClassNameHookDoesNotExistException")
+
 	memset(sdktools__VoiceMap, 0, sizeof(sdktools__VoiceMap));
 	memset(sdktools__ClientMutes, 0, sizeof(sdktools__ClientMutes));
 
 	sdktools__GameRulesProxyClassName = std::string(g_Interfaces.GameConfigInstance->GetKeyValue("GameRulesProxy"));
 
 	playerhelpers->AddClientListener(&sdktools__ClientListener);
+
+	SH_ADD_HOOK(IVEngineServer, PlaybackTempEntity, engine, SH_STATIC(&sdktools__OnPlaybackTempEntity), false);
+
+	sdktools__FireOutputDetour = DETOUR_CREATE_MEMBER(FireOutput, "FireOutput");
+	sdktools__FireOutputDetour->EnableDetour();
 }
 
 void destroySDKTools() {
 	playerhelpers->RemoveClientListener(&sdktools__ClientListener);
+
+	SH_REMOVE_HOOK(IVEngineServer, PlaybackTempEntity, engine, SH_STATIC(&sdktools__OnPlaybackTempEntity), false);
+
+	sdktools__FireOutputDetour->Destroy();
+}
+
+bool RemoveFirstTempEntHookByThreadState(PyThreadState *threadState) {
+	for(std::list<TempEntHook>::iterator it = sdktools__TEHooks.begin();
+		it != sdktools__TEHooks.end(); it++) {
+		TempEntHook hookInfo = *it;
+
+		if(hookInfo.ThreadState != threadState) {
+			continue;
+		}
+
+		sdktools__TEHooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllTempEntHooksByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstTempEntHookByThreadState(threadState);
+	}
+}
+
+bool RemoveFirstEntityOutputClassNameHookByThreadState(PyThreadState *threadState) {
+	for(std::list<EntityOutputClassNameHook>::iterator it = sdktools__EntityOutputClassNameHooks.begin();
+		it != sdktools__EntityOutputClassNameHooks.end(); it++) {
+		EntityOutputClassNameHook hookInfo = *it;
+
+		if(hookInfo.ThreadState != threadState) {
+			continue;
+		}
+
+		sdktools__EntityOutputClassNameHooks.erase(it);
+		return true;
+	}
+
+	return false;
+}
+
+void RemoveAllEntityOutputClassNameHooksByThreadState(PyThreadState *threadState) {
+	bool keepSearching = true;
+
+	while(keepSearching) {
+		keepSearching = RemoveFirstEntityOutputClassNameHookByThreadState(threadState);
+	}
 }
 
 void unloadThreadStateSDKTools(PyThreadState *threadState) {
+	RemoveAllTempEntHooksByThreadState(threadState);
+	RemoveAllEntityOutputClassNameHooksByThreadState(threadState);
 }

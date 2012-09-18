@@ -699,9 +699,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\asm\asm.c" />
     <ClCompile Include="..\BitBufModule.cpp" />
     <ClCompile Include="..\BfReadType.cpp" />
     <ClCompile Include="..\BfWriteType.cpp" />
+    <ClCompile Include="..\CDetour\detours.cpp" />
     <ClCompile Include="..\ClientIsFakeExceptionType.cpp" />
     <ClCompile Include="..\ClientNotAuthorizedExceptionType.cpp" />
     <ClCompile Include="..\ClientNotConnectedExceptionType.cpp" />
@@ -727,6 +729,8 @@
     <ClCompile Include="..\EntityModule.cpp" />
     <ClCompile Include="..\EntityNotNetworkableExceptionType.cpp" />
     <ClCompile Include="..\EntityOffsetOutOfRangeExceptionType.cpp" />
+    <ClCompile Include="..\EntityOutputClassNameHook.cpp" />
+    <ClCompile Include="..\EntityOutputClassNameHookDoesNotExistExceptionType.cpp" />
     <ClCompile Include="..\EntitySendPropertyInfoType.cpp" />
     <ClCompile Include="..\EventFieldType.cpp" />
     <ClCompile Include="..\EventFieldTypes.cpp" />
@@ -769,6 +773,8 @@
     <ClCompile Include="..\SourcemodModule.cpp" />
     <ClCompile Include="..\StdIoRedirect.cpp" />
     <ClCompile Include="..\SysHooks.cpp" />
+    <ClCompile Include="..\TempEntHook.cpp" />
+    <ClCompile Include="..\TempEntHookDoesNotExistExceptionType.cpp" />
     <ClCompile Include="..\TraceResultsType.cpp" />
     <ClCompile Include="..\UserMessageAlreadyStartedExceptionType.cpp" />
     <ClCompile Include="..\UserMessageIDDoesNotExistExceptionType.cpp" />
@@ -786,10 +792,13 @@
     <ClCompile Include="..\ViperTraceFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\asm\asm.h" />
     <ClInclude Include="..\BitBufModule.h" />
     <ClInclude Include="..\BfReadType.h" />
     <ClInclude Include="..\BfWriteType.h" />
     <ClInclude Include="..\BoostPythonSM.h" />
+    <ClInclude Include="..\CDetour\detourhelpers.h" />
+    <ClInclude Include="..\CDetour\detours.h" />
     <ClInclude Include="..\ClientIsFakeExceptionType.h" />
     <ClInclude Include="..\ClientNotAuthorizedExceptionType.h" />
     <ClInclude Include="..\ClientNotConnectedExceptionType.h" />
@@ -815,6 +824,8 @@
     <ClInclude Include="..\EntityModule.h" />
     <ClInclude Include="..\EntityNotNetworkableExceptionType.h" />
     <ClInclude Include="..\EntityOffsetOutOfRangeExceptionType.h" />
+    <ClInclude Include="..\EntityOutputClassNameHook.h" />
+    <ClInclude Include="..\EntityOutputClassNameHookDoesNotExistExceptionType.h" />
     <ClInclude Include="..\EntityPropertyFieldTypes.h" />
     <ClInclude Include="..\EntitySendPropertyInfoType.h" />
     <ClInclude Include="..\EventFieldType.h" />
@@ -867,6 +878,8 @@
     <ClInclude Include="..\sdk\smsdk_config.h" />
     <ClInclude Include="..\sdk\smsdk_ext.h" />
     <ClInclude Include="..\SysHooks.h" />
+    <ClInclude Include="..\TempEntHook.h" />
+    <ClInclude Include="..\TempEntHookDoesNotExistExceptionType.h" />
     <ClInclude Include="..\TraceResultsType.h" />
     <ClInclude Include="..\UserMessageAlreadyStartedExceptionType.h" />
     <ClInclude Include="..\UserMessageIDDoesNotExistExceptionType.h" />
