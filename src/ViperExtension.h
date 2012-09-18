@@ -48,6 +48,7 @@ public:
 
 public:
 	void OnGameFrame(bool simulating);
+	void OnLevelShutdown();
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	void OnClientCommand(edict_t *edict, const CCommand &command);

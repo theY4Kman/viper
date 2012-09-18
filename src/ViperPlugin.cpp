@@ -15,6 +15,7 @@
 #include "UserMessagesModule.h"
 #include "ConsoleModule.h"
 #include "SDKToolsModule.h"
+#include "TimersModule.h"
 
 namespace py = boost::python;
 
@@ -110,6 +111,7 @@ void ViperPlugin::Run() {
 		py::import("UserMessages");
 		py::import("Console");
 		py::import("SDKTools");
+		py::import("Timers");
 
 		py::exec_file(InitPluginPath.c_str(), mainDict, mainDict);
 
@@ -176,6 +178,7 @@ void ViperPlugin::Unload() {
 	unloadThreadStateUserMessages(ThreadState);
 	unloadThreadStateConsole(ThreadState);
 	unloadThreadStateSDKTools(ThreadState);
+	unloadThreadStateTimers(ThreadState);
 
 	PyThreadState_Delete(ThreadState);
 	ThreadState = NULL;

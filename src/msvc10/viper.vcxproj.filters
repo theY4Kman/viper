@@ -46,6 +46,9 @@
     <Filter Include="asm">
       <UniqueIdentifier>{dd79723d-27b1-40c9-b12a-0010f8181293}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Timers">
+      <UniqueIdentifier>{38892492-41fd-4ab9-8666-f901244d7b79}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sdk\smsdk_ext.cpp">
@@ -306,6 +309,27 @@
     </ClCompile>
     <ClCompile Include="..\NetStatsType.cpp">
       <Filter>SDKTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TimersModule.cpp">
+      <Filter>Timers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TimeoutType.cpp">
+      <Filter>Timers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IntervalType.cpp">
+      <Filter>Timers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidTimeoutExceptionType.cpp">
+      <Filter>Timers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InvalidIntervalExceptionType.cpp">
+      <Filter>Timers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TimeoutInfo.cpp">
+      <Filter>Timers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IntervalInfo.cpp">
+      <Filter>Timers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -593,6 +617,27 @@
     </ClInclude>
     <ClInclude Include="..\NetStatsType.h">
       <Filter>SDKTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TimersModule.h">
+      <Filter>Timers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TimeoutType.h">
+      <Filter>Timers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IntervalType.h">
+      <Filter>Timers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidTimeoutExceptionType.h">
+      <Filter>Timers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InvalidIntervalExceptionType.h">
+      <Filter>Timers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IntervalInfo.h">
+      <Filter>Timers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TimeoutInfo.h">
+      <Filter>Timers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

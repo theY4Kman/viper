@@ -41,6 +41,7 @@
 #include "UserMessagesModule.h"
 #include "ConsoleModule.h"
 #include "SDKToolsModule.h"
+#include "TimersModule.h"
 #include "CDetour\detours.h"
 #include "InterfaceContainer.h"
 
@@ -50,6 +51,7 @@ ViperExtension g_ViperExtension;
 SMEXT_LINK(&g_ViperExtension);
 
 SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, false, bool);
+SH_DECL_HOOK0_void(IServerGameDLL, LevelShutdown, SH_NOATTRIB, false);
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
@@ -85,6 +87,7 @@ void ViperExtension::InitializePython() {
 	PyImport_AppendInittab("UserMessages", initUserMessages);
 	PyImport_AppendInittab("Console", initConsole);
 	PyImport_AppendInittab("SDKTools", initSDKTools);
+	PyImport_AppendInittab("Timers", initTimers);
 
 	Py_Initialize();
 
@@ -143,12 +146,18 @@ void ViperExtension::SDK_OnUnload() {
 	destroyUserMessages();
 	destroyConsole();
 	destroySDKTools();
+	destroyTimers();
 }
 
 void ViperExtension::OnGameFrame(bool simulating) {
 	console__GameFrame(simulating);
 	forwards__GameFrame(simulating);
 	clients__GameFrame(simulating);
+	timers__GameFrame(simulating);
+}
+
+void ViperExtension::OnLevelShutdown() {
+	timers__LevelShutdown();
 }
 
 #if SOURCE_ENGINE >= SE_ORANGEBOX
@@ -178,6 +187,7 @@ void ViperExtension::SDK_OnAllLoaded() {
 	CDetourManager::Init(g_pSM->GetScriptingEngine(), g_Interfaces.GameConfigInstance);
 
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, gamedll, this, &ViperExtension::OnGameFrame, false);
+	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, LevelShutdown, gamedll, this, &ViperExtension::OnLevelShutdown, false);
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, g_Interfaces.ServerGameClientsInstance, this, &ViperExtension::OnClientCommand, false);
 
 	g_Interfaces.ServerPluginCallbacksInstance = g_SMAPI->GetVSPInfo(NULL);
